@@ -101,13 +101,13 @@
                 <span class="absolute left-full ml-4 px-3 py-1 bg-background border border-outline-variant font-label-caps text-[9px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 uppercase tracking-widest">CARTA</span>
             </li>
 
-            <li *ngIf="hasRole('ADMIN')" class="w-full flex justify-center group relative">
-                <a [routerLink]="['/dashboard/evolution']" routerLinkActive="!text-on-secondary !bg-secondary scale-110 shadow-brutal-gold"
-                   class="flex flex-col items-center text-on-surface-variant hover:text-on-surface transition-all duration-300 p-3 no-underline">
-                    <span class="material-symbols-outlined text-2xl">smart_toy</span>
-                </a>
-                <span class="absolute left-full ml-4 px-3 py-1 bg-background border border-outline-variant font-label-caps text-[9px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 uppercase tracking-widest">BOT</span>
-            </li>
+            <li class="w-full flex justify-center group relative">
+    <a [routerLink]="['/dashboard/evolution']" routerLinkActive="!text-on-secondary !bg-secondary scale-110 shadow-brutal-gold"
+       class="flex flex-col items-center text-on-surface-variant hover:text-on-surface transition-all duration-300 p-3 no-underline">
+        <span class="material-symbols-outlined text-2xl">smart_toy</span>
+    </a>
+    <span class="absolute left-full ml-4 px-3 py-1 bg-background border border-outline-variant font-label-caps text-[9px] text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 uppercase tracking-widest">BOT</span>
+</li>
         </ul>
 
         <!-- User Badge & Logout -->
