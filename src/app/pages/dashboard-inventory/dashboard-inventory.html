@@ -1,0 +1,189 @@
+<div class="relative flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end border-b-2 border-outline-variant pb-12 gap-8 relative z-10">
+        <div>
+            <div class="flex items-center gap-4 mb-4">
+                <span class="font-anton text-secondary text-2xl">005</span>
+                <div class="h-px w-20 bg-outline-variant"></div>
+            </div>
+            <h1 class="font-anton text-7xl md:text-9xl text-white uppercase leading-none tracking-tighter">INVENTARIO</h1>
+            <p class="font-label-caps text-[12px] text-secondary mt-6 tracking-brutal uppercase">SUMINISTROS Y MATERIA PRIMA</p>
+        </div>
+        <button (click)="addIngredient()" class="bg-white text-black px-10 py-6 font-anton text-2xl uppercase tracking-widest hover:bg-secondary transition-all shadow-brutal-gold">+ NUEVO INSUMO</button>
+    </header>
+
+    <!-- KPI Row -->
+    <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="border border-outline-variant bg-surface-container-low p-10 flex items-center gap-8 relative overflow-hidden">
+            <div class="w-16 h-16 border border-outline-variant flex items-center justify-center bg-background">
+                <span class="material-symbols-outlined text-secondary text-4xl">inventory_2</span>
+            </div>
+            <div>
+                <span class="font-label-caps text-[10px] text-stark-gray opacity-40 tracking-widest uppercase">INSUMOS REGISTRADOS</span>
+                <div class="font-anton text-5xl text-white mt-1">{{data.ingredients().length}}</div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 font-anton text-stark-gray opacity-5 text-7xl select-none">STOCK</div>
+        </div>
+        <div class="border bg-surface-container-low p-10 flex items-center gap-8 relative overflow-hidden"
+             [ngClass]="lowStockCount > 0 ? 'border-tomato' : 'border-outline-variant'">
+            <div class="w-16 h-16 flex items-center justify-center" 
+                 [ngClass]="lowStockCount > 0 ? 'border border-tomato bg-tomato/5' : 'border border-outline-variant bg-background'">
+                <span class="material-symbols-outlined text-4xl" [ngClass]="lowStockCount > 0 ? 'text-tomato animate-pulse' : 'text-stark-gray'">warning</span>
+            </div>
+            <div>
+                <span class="font-label-caps text-[10px] tracking-widest uppercase" [ngClass]="lowStockCount > 0 ? 'text-tomato' : 'text-stark-gray opacity-40'">ALERTA DE STOCK BAJO</span>
+                <div class="font-anton text-5xl mt-1" [ngClass]="lowStockCount > 0 ? 'text-tomato' : 'text-white'">{{lowStockCount}}</div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 font-anton opacity-5 text-7xl select-none" [ngClass]="lowStockCount > 0 ? 'text-tomato' : 'text-stark-gray'">ALERT</div>
+        </div>
+        <div class="border border-outline-variant bg-surface-container-low p-10 flex items-center gap-8 relative overflow-hidden">
+            <div class="w-16 h-16 border border-secondary flex items-center justify-center bg-secondary/5">
+                <span class="material-symbols-outlined text-secondary text-4xl">payments</span>
+            </div>
+            <div>
+                <span class="font-label-caps text-[10px] text-stark-gray opacity-40 tracking-widest uppercase">VALOR DEL INVENTARIO</span>
+                <div class="font-anton text-5xl text-white mt-1">${{totalValue.toLocaleString('es-CO')}}</div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 font-anton text-stark-gray opacity-5 text-7xl select-none">VALUE</div>
+        </div>
+    </div>
+
+    <!-- Main Inventory Grid -->
+    <div class="relative z-10 border border-outline-variant bg-surface-container-lowest p-12">
+        <div class="flex justify-between items-center mb-12">
+             <div class="relative w-full max-w-md group">
+                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-stark-gray group-focus-within:text-secondary transition-colors">search</span>
+                <input type="text" placeholder="Buscar insumos..." [(ngModel)]="searchTerm"
+                       class="w-full bg-background border border-outline-variant py-5 pl-16 pr-8 text-white font-hanken text-sm outline-none focus:border-secondary transition-all">
+             </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="data.ingredients().length === 0" class="flex flex-col items-center justify-center py-20 border border-outline-variant border-dashed">
+            <span class="material-symbols-outlined text-stark-gray opacity-10 text-8xl mb-6">inventory_2</span>
+            <h3 class="font-anton text-3xl text-stark-gray opacity-40 uppercase mb-4">SIN INSUMOS</h3>
+            <p class="font-label-caps text-[10px] text-stark-gray opacity-30 uppercase tracking-widest mb-8">Registra tu primer ingrediente</p>
+            <button (click)="addIngredient()" class="bg-secondary text-on-secondary px-8 py-4 font-anton text-lg uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-brutal-gold">+ PRIMER INSUMO</button>
+        </div>
+
+        <div class="overflow-x-auto" *ngIf="data.ingredients().length > 0">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="text-left border-b border-outline-variant">
+                        <th class="pb-8 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal">Insumo</th>
+                        <th class="pb-8 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal text-center">Stock Actual</th>
+                        <th class="pb-8 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal text-center">Nivel Crítico</th>
+                        <th class="pb-8 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal text-center">Costo/Und</th>
+                        <th class="pb-8 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal text-center">Ajustar</th>
+                        <th class="pb-8 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of filteredIngredients" class="border-b border-outline-variant/30 hover:bg-white/[0.02] group transition-colors">
+                        <td class="py-10">
+                            <div class="flex flex-col">
+                                <span class="font-anton text-2xl text-white uppercase group-hover:text-secondary transition-colors tracking-tighter">{{item.name}}</span>
+                                <span class="font-label-caps text-[9px] text-stark-gray opacity-40 uppercase tracking-widest mt-1">{{item.category}} / {{item.unit}}</span>
+                            </div>
+                        </td>
+                        <td class="py-10 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <span class="font-anton text-4xl" [ngClass]="item.stock <= item.min ? 'text-tomato' : 'text-white'">
+                                    {{item.stock.toLocaleString('es-CO')}}
+                                </span>
+                                <span class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase">{{item.unit}}</span>
+                            </div>
+                            <!-- Stock bar -->
+                            <div class="h-1 w-24 mx-auto mt-2 bg-background border border-outline-variant/30 relative">
+                                <div class="absolute h-full transition-all duration-500"
+                                     [style.width.%]="item.min > 0 ? Math.min((item.stock / (item.min * 3)) * 100, 100) : 100"
+                                     [ngClass]="item.stock <= item.min ? 'bg-tomato' : 'bg-emerald'"></div>
+                            </div>
+                        </td>
+                        <td class="py-10 text-center">
+                            <span class="font-label-caps text-[12px] text-stark-gray tracking-widest uppercase">
+                                {{item.min.toLocaleString('es-CO')}} {{item.unit}}
+                            </span>
+                        </td>
+                        <td class="py-10 text-center">
+                            <span class="font-label-caps text-[12px] text-white tracking-widest">
+                                ${{item.costPerUnit.toLocaleString('es-CO')}}
+                            </span>
+                        </td>
+                        <td class="py-10 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button (click)="adjustStock(item, -1)" class="w-10 h-10 border border-outline-variant flex items-center justify-center hover:border-tomato hover:text-tomato text-stark-gray transition-all font-anton text-xl">−</button>
+                                <button (click)="adjustStock(item, -5)" class="w-10 h-10 border border-outline-variant flex items-center justify-center hover:border-tomato hover:text-tomato text-stark-gray transition-all font-label-caps text-[9px]">-5</button>
+                                <button (click)="adjustStock(item, 5)" class="w-10 h-10 border border-outline-variant flex items-center justify-center hover:border-emerald hover:text-emerald text-stark-gray transition-all font-label-caps text-[9px]">+5</button>
+                                <button (click)="adjustStock(item, 1)" class="w-10 h-10 border border-outline-variant flex items-center justify-center hover:border-emerald hover:text-emerald text-stark-gray transition-all font-anton text-xl">+</button>
+                            </div>
+                        </td>
+                        <td class="py-10 text-right">
+                            <div class="flex justify-end gap-2">
+                                <button (click)="editIngredient(item)" class="w-12 h-12 border border-outline-variant flex items-center justify-center hover:border-secondary hover:text-secondary transition-all">
+                                    <span class="material-symbols-outlined text-xl">edit</span>
+                                </button>
+                                <button (click)="deleteIngredient(item)" class="w-12 h-12 border border-outline-variant flex items-center justify-center hover:border-tomato hover:text-tomato transition-all">
+                                    <span class="material-symbols-outlined text-xl">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add Ingredient Modal -->
+    <div *ngIf="showAddModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-background/90 backdrop-blur-md" (click)="closeModal()"></div>
+        
+        <div class="relative w-full max-w-xl bg-surface-container-low border-2 border-outline-variant p-12 shadow-brutal animate-in fade-in zoom-in duration-300">
+            <header class="flex justify-between items-center mb-10 pb-6 border-b border-outline-variant">
+                <h2 class="font-anton text-4xl text-white uppercase tracking-tighter">{{isEditing ? 'EDITAR INSUMO' : 'NUEVO INSUMO'}}</h2>
+                <button (click)="closeModal()" class="material-symbols-outlined text-stark-gray hover:text-white transition-colors">close</button>
+            </header>
+
+            <form (ngSubmit)="saveIngredient()" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Nombre del Insumo</label>
+                        <input type="text" name="name" [(ngModel)]="newIngredient.name" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border" placeholder="Ej: Queso Mozzarella">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Categoría</label>
+                        <select name="category" [(ngModel)]="newIngredient.category" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary transition-colors border appearance-none outline-none">
+                            <option *ngFor="let cat of categories" [value]="cat">{{cat}}</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Unidad</label>
+                        <input type="text" name="unit" [(ngModel)]="newIngredient.unit" placeholder="kg, latas, g, und..." class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Stock Inicial</label>
+                        <input type="number" name="stock" [(ngModel)]="newIngredient.stock" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Alerta Mínima</label>
+                        <input type="number" name="min" [(ngModel)]="newIngredient.min" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border">
+                    </div>
+
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Costo por Unidad ($)</label>
+                        <input type="number" name="costPerUnit" [(ngModel)]="newIngredient.costPerUnit" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="pt-8 flex gap-4">
+                    <button type="button" (click)="closeModal()" class="flex-1 py-5 border border-outline-variant text-stark-gray font-anton text-lg tracking-widest uppercase hover:bg-white/[0.05] transition-all">CANCELAR</button>
+                    <button type="submit" class="flex-1 py-5 bg-secondary text-on-secondary font-anton text-lg tracking-widest uppercase hover:bg-white hover:text-black transition-all shadow-brutal-gold">GUARDAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Panel de Cocina - ECLISSE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Hanken+Grotesk:wght@400;600&amp;family=Space+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-tint": "#c6c6c6",
+                      "surface-variant": "#353535",
+                      "on-tertiary": "#2f3131",
+                      "outline": "#988e90",
+                      "on-secondary-fixed-variant": "#574500",
+                      "on-surface": "#e5e2e1",
+                      "surface-container-low": "#1c1b1b",
+                      "on-tertiary-container": "#747576",
+                      "outline-variant": "#4c4546",
+                      "secondary-fixed": "#ffe088",
+                      "inverse-primary": "#5e5e5e",
+                      "on-background": "#e5e2e1",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary": "#3c2f00",
+                      "background": "#000000", // Forced to absolute black for radical dark mode
+                      "tertiary": "#c6c6c7",
+                      "secondary": "#e9c349",
+                      "inverse-surface": "#e5e2e1",
+                      "on-secondary-fixed": "#241a00",
+                      "tertiary-fixed": "#e2e2e2",
+                      "on-error": "#690005",
+                      "on-secondary-container": "#342800",
+                      "surface-dim": "#131313",
+                      "surface-container-high": "#2a2a2a",
+                      "surface-bright": "#393939",
+                      "on-primary": "#303030",
+                      "secondary-container": "#af8d11",
+                      "tomato": "#CD212A",
+                      "surface-container-highest": "#353535",
+                      "surface": "#131313",
+                      "primary-container": "#000000",
+                      "primary": "#c6c6c6",
+                      "tertiary-fixed-dim": "#c6c6c7",
+                      "secondary-fixed-dim": "#e9c349",
+                      "stark-gray": "#D4D4D4",
+                      "on-surface-variant": "#cfc4c5",
+                      "on-primary-container": "#757575",
+                      "error-container": "#93000a",
+                      "inverse-on-surface": "#313030",
+                      "on-primary-fixed-variant": "#474747",
+                      "on-primary-fixed": "#1b1b1b",
+                      "on-tertiary-fixed": "#1a1c1c",
+                      "error": "#ffb4ab",
+                      "on-tertiary-fixed-variant": "#454747",
+                      "emerald": "#008C45",
+                      "tertiary-container": "#000000",
+                      "surface-container-lowest": "#0e0e0e",
+                      "surface-container": "#20201f",
+                      "primary-fixed": "#e2e2e2",
+                      "primary-fixed-dim": "#c6c6c6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "margin-desktop": "80px",
+                      "gutter": "24px",
+                      "unit": "4px",
+                      "overlap-lg": "-120px",
+                      "margin-mobile": "20px",
+                      "overlap-sm": "-40px"
+              },
+              "fontFamily": {
+                      "nav-link": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Anton"
+                      ],
+                      "headline-lg": [
+                              "Anton"
+                      ],
+                      "body-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-caps": [
+                              "Space Mono"
+                      ],
+                      "display-xl": [
+                              "Anton"
+                      ],
+                      "display-lg": [
+                              "Anton"
+                      ]
+              },
+              "fontSize": {
+                      "nav-link": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "40px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "48px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-xl": [
+                              "120px",
+                              {
+                                      "lineHeight": "100px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-lg": [
+                              "80px",
+                              {
+                                      "lineHeight": "72px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            color: theme('colors.primary');
+        }
+        /* Custom scrollbar for brutalist look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000; 
+            border-left: 1px solid theme('colors.outline-variant');
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.stark-gray'); 
+        }
+        
+        .brutalist-border {
+            border: 1px solid theme('colors.stark-gray');
+        }
+        .brutalist-btn {
+            border: 1px solid theme('colors.secondary');
+            background: transparent;
+            color: theme('colors.secondary');
+            transition: all 0.2s ease;
+        }
+        .brutalist-btn:hover {
+            background: theme('colors.secondary');
+            color: theme('colors.background');
+        }
+        .urgent-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased selection:bg-secondary selection:text-background font-body-md">
+<!-- SideNavBar (Shared Component) -->
+<nav class="docked left-0 h-screen w-80 border-r border-outline-variant flat no shadows flex flex-col p-8 gap-6 bg-background dark:bg-background shrink-0">
+<div class="flex flex-col gap-2 mb-8">
+<h1 class="font-display-xl text-primary leading-none text-display-xl">KITCHEN ATELIER</h1>
+<p class="font-label-caps text-label-caps text-stark-gray uppercase tracking-widest mt-4">SECTOR 01</p>
+</div>
+<div class="flex flex-col gap-4 flex-grow">
+<!-- Active Tab -->
+<a class="bg-secondary text-on-secondary font-bold px-4 py-3 border border-secondary flex items-center gap-4 hover:bg-secondary hover:text-on-secondary transition-all duration-200 Active: translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="font-nav-link text-nav-link uppercase">COMANDAS</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="text-primary border border-outline px-4 py-3 mb-4 flex items-center gap-4 hover:bg-secondary hover:text-on-secondary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">restaurant_menu</span>
+<span class="font-nav-link text-nav-link uppercase">GESTIÓN DE ESTACIONES</span>
+</a>
+<a class="text-primary border border-outline px-4 py-3 mb-4 flex items-center gap-4 hover:bg-secondary hover:text-on-secondary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-nav-link text-nav-link uppercase">LOG DE MESEROS</span>
+</a>
+<a class="text-primary border border-outline px-4 py-3 mb-4 flex items-center gap-4 hover:bg-secondary hover:text-on-secondary transition-all duration-200" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-nav-link text-nav-link uppercase">SISTEMA</span>
+</a>
+</div>
+<button class="mt-auto brutalist-btn font-label-caps text-label-caps px-4 py-4 w-full uppercase">
+            NEW ORDER
+        </button>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col h-full bg-[#000000] relative overflow-hidden">
+<!-- Header Section -->
+<header class="w-full px-12 py-8 flex justify-between items-end border-b border-outline-variant z-10">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-stark-gray uppercase tracking-tight">CENTRO DE PRODUCCIÓN</h2>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-3 h-3 rounded-full bg-emerald urgent-pulse"></div>
+<span class="font-label-caps text-label-caps text-emerald tracking-widest uppercase">SISTEMA ONLINE</span>
+</div>
+</header>
+<!-- Kitchen Display Layout -->
+<div class="flex-1 flex overflow-hidden p-12 gap-12">
+<!-- Orders Grid -->
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8 overflow-y-auto pr-4 content-start pb-20">
+<!-- Order Card: Urgent (Red) -->
+<article class="brutalist-border p-6 bg-surface-container-low flex flex-col gap-6 relative">
+<div class="absolute top-0 right-0 w-2 h-full bg-tomato"></div>
+<header class="flex justify-between items-start border-b border-outline-variant pb-4">
+<div>
+<span class="font-label-caps text-label-caps text-stark-gray block mb-1">COMANDA</span>
+<span class="font-headline-lg text-headline-lg-mobile text-tomato block leading-none">#4092</span>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-stark-gray block mb-1">MESA</span>
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray block leading-none">T-04</span>
+</div>
+</header>
+<div class="flex justify-between items-center bg-[#1A1A1A] p-3 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-tomato flex items-center gap-2 urgent-pulse">
+<span class="material-symbols-outlined text-[16px]">schedule</span> 15:42
+                        </span>
+<span class="font-label-caps text-label-caps text-stark-gray">MESERO: L. ROSSI</span>
+</div>
+<ul class="flex-1 flex flex-col gap-4 py-2">
+<li class="flex items-start gap-4">
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray">2x</span>
+<div>
+<span class="font-nav-link text-nav-link text-stark-gray block">MARGHERITA ESTREMA</span>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray">1x</span>
+<div>
+<span class="font-nav-link text-nav-link text-stark-gray block">TRUFFLE BRUTALISM</span>
+<span class="font-label-caps text-label-caps text-tomato mt-1 block px-2 py-1 border border-tomato inline-block">(SIN CEBOLLA)</span>
+</div>
+</li>
+</ul>
+<div class="flex gap-4 mt-auto pt-4 border-t border-outline-variant">
+<button class="flex-1 brutalist-btn font-label-caps text-label-caps py-3 uppercase">
+                            EN HORNO
+                        </button>
+<button class="flex-1 border border-stark-gray text-stark-gray font-label-caps text-label-caps py-3 uppercase hover:bg-stark-gray hover:text-background transition-colors">
+                            LISTO PARA RECOGER
+                        </button>
+</div>
+</article>
+<!-- Order Card: Recent (Yellow) -->
+<article class="brutalist-border p-6 bg-surface-container-low flex flex-col gap-6 relative">
+<div class="absolute top-0 right-0 w-2 h-full bg-secondary"></div>
+<header class="flex justify-between items-start border-b border-outline-variant pb-4">
+<div>
+<span class="font-label-caps text-label-caps text-stark-gray block mb-1">COMANDA</span>
+<span class="font-headline-lg text-headline-lg-mobile text-secondary block leading-none">#4093</span>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-stark-gray block mb-1">MESA</span>
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray block leading-none">B-12</span>
+</div>
+</header>
+<div class="flex justify-between items-center bg-[#1A1A1A] p-3 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-secondary flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">schedule</span> 08:45
+                        </span>
+<span class="font-label-caps text-label-caps text-stark-gray">MESERO: M. BIANCHI</span>
+</div>
+<ul class="flex-1 flex flex-col gap-4 py-2">
+<li class="flex items-start gap-4">
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray">1x</span>
+<div>
+<span class="font-nav-link text-nav-link text-stark-gray block">CARBONARA DECONSTRUCTED</span>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray">3x</span>
+<div>
+<span class="font-nav-link text-nav-link text-stark-gray block">ESPRESSO MARTINI</span>
+</div>
+</li>
+</ul>
+<div class="flex gap-4 mt-auto pt-4 border-t border-outline-variant">
+<button class="flex-1 brutalist-btn font-label-caps text-label-caps py-3 uppercase">
+                            EN HORNO
+                        </button>
+<button class="flex-1 border border-stark-gray text-stark-gray font-label-caps text-label-caps py-3 uppercase hover:bg-stark-gray hover:text-background transition-colors">
+                            LISTO PARA RECOGER
+                        </button>
+</div>
+</article>
+<!-- Order Card: New (White) -->
+<article class="brutalist-border p-6 bg-surface-container-low flex flex-col gap-6 relative">
+<div class="absolute top-0 right-0 w-2 h-full bg-stark-gray"></div>
+<header class="flex justify-between items-start border-b border-outline-variant pb-4">
+<div>
+<span class="font-label-caps text-label-caps text-stark-gray block mb-1">COMANDA</span>
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray block leading-none">#4094</span>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-stark-gray block mb-1">MESA</span>
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray block leading-none">T-01</span>
+</div>
+</header>
+<div class="flex justify-between items-center bg-[#1A1A1A] p-3 border border-outline-variant">
+<span class="font-label-caps text-label-caps text-stark-gray flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">schedule</span> 01:12
+                        </span>
+<span class="font-label-caps text-label-caps text-stark-gray">MESERO: C. CONTI</span>
+</div>
+<ul class="flex-1 flex flex-col gap-4 py-2">
+<li class="flex items-start gap-4">
+<span class="font-headline-lg text-headline-lg-mobile text-stark-gray">4x</span>
+<div>
+<span class="font-nav-link text-nav-link text-stark-gray block">NEGRONI SBAGLIATO</span>
+</div>
+</li>
+</ul>
+<div class="flex gap-4 mt-auto pt-4 border-t border-outline-variant">
+<button class="flex-1 brutalist-btn font-label-caps text-label-caps py-3 uppercase">
+                            EN HORNO
+                        </button>
+<button class="flex-1 border border-stark-gray text-stark-gray font-label-caps text-label-caps py-3 uppercase hover:bg-stark-gray hover:text-background transition-colors">
+                            LISTO PARA RECOGER
+                        </button>
+</div>
+</article>
+</div>
+<!-- Right Sidebar: Technical Stats -->
+<aside class="w-80 flex flex-col gap-8 shrink-0 border-l border-outline-variant pl-12 h-full overflow-y-auto pb-20">
+<!-- Section 1 -->
+<div>
+<h3 class="font-label-caps text-label-caps text-stark-gray uppercase border-b border-outline-variant pb-2 mb-4 tracking-widest">COMANDAS URGENTES</h3>
+<div class="brutalist-border p-4 bg-[#1A1A1A] mb-4 relative">
+<div class="absolute top-0 right-0 w-1 h-full bg-tomato"></div>
+<div class="flex justify-between items-center mb-2">
+<span class="font-nav-link text-nav-link text-primary">MESA T-04</span>
+<span class="font-label-caps text-label-caps text-tomato urgent-pulse">15:42</span>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label-caps text-label-caps text-stark-gray">COMANDA #4092</span>
+</div>
+</div>
+<div class="brutalist-border p-4 bg-[#1A1A1A] relative">
+<div class="absolute top-0 right-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-center mb-2">
+<span class="font-nav-link text-nav-link text-primary">MESA B-12</span>
+<span class="font-label-caps text-label-caps text-secondary">08:45</span>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-label-caps text-label-caps text-stark-gray">COMANDA #4093</span>
+</div>
+</div>
+</div>
+<!-- Section 2 -->
+<div>
+<h3 class="font-label-caps text-label-caps text-stark-gray uppercase border-b border-outline-variant pb-2 mb-4 tracking-widest">NOTAS DEL CHEF</h3>
+<div class="brutalist-border p-4 bg-[#1A1A1A]">
+<p class="font-body-md text-body-md text-primary font-mono text-sm leading-relaxed">
+                            &gt; HORNO 1 CALIBRADO A 450C<br/>
+                            &gt; ALBAHACA FRESCA EN SECCIÓN 3<br/>
+                            &gt; ATENCIÓN MESA T-04 (VIP)<br/>
+                            &gt; STOCK TRUFA: CRÍTICO
+                        </p>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</body></html>

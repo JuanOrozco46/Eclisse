@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Eclisse - Pizza Napoletana</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Manrope:wght@200..800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffb59e",
+                        "outline-variant": "#5c4037",
+                        "on-secondary-fixed": "#241a00",
+                        "tertiary-fixed-dim": "#c8c6c5",
+                        "secondary-fixed-dim": "#e9c349",
+                        "surface-variant": "#333533",
+                        "inverse-on-surface": "#2f312e",
+                        "surface-container": "#1e201e",
+                        "primary-fixed-dim": "#ffb59e",
+                        "error-container": "#93000a",
+                        "tertiary": "#c8c6c5",
+                        "on-error": "#690005",
+                        "on-secondary": "#3c2f00",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed-variant": "#574500",
+                        "surface-container-lowest": "#0d0f0d",
+                        "on-tertiary-fixed-variant": "#474646",
+                        "on-tertiary": "#313030",
+                        "surface-container-high": "#282a28",
+                        "background": "#121412",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#e2e3df",
+                        "on-primary-fixed-variant": "#852400",
+                        "surface-dim": "#121412",
+                        "surface-tint": "#ffb59e",
+                        "on-primary-fixed": "#3a0b00",
+                        "secondary-fixed": "#ffe088",
+                        "secondary-container": "#af8d11",
+                        "on-surface": "#e2e3df",
+                        "on-primary": "#5e1700",
+                        "primary-container": "#ff571a",
+                        "on-tertiary-container": "#2a2a29",
+                        "tertiary-fixed": "#e5e2e1",
+                        "primary-fixed": "#ffdbd0",
+                        "inverse-primary": "#ae3200",
+                        "on-surface-variant": "#e6beb2",
+                        "secondary": "#e9c349",
+                        "on-secondary-container": "#342800",
+                        "on-tertiary-fixed": "#1c1b1b",
+                        "surface-container-highest": "#333533",
+                        "surface": "#121412",
+                        "on-primary-container": "#521300",
+                        "surface-container-low": "#1a1c1a",
+                        "surface-bright": "#383a37",
+                        "inverse-surface": "#e2e3df",
+                        "outline": "#ad897e",
+                        "tertiary-container": "#929090"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "64px",
+                        "gutter": "24px",
+                        "section-gap": "120px",
+                        "margin-mobile": "20px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Anton"],
+                        "headline-xl": ["Anton"],
+                        "body-md": ["Bodoni Moda"],
+                        "headline-lg": ["Bodoni Moda"],
+                        "body-lg": ["Bodoni Moda"],
+                        "display-lg": ["Anton"],
+                        "headline-xl-mobile": ["Anton"],
+                        "label-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["48px", { "lineHeight": "1.0", "fontWeight": "400" }],
+                        "headline-xl": ["48px", { "lineHeight": "1.1", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg": ["84px", { "lineHeight": "1.0", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+                        "headline-xl-mobile": ["36px", { "lineHeight": "1.1", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "1.2", "letterSpacing": "0.1em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .texture-overlay {
+            background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E');
+            pointer-events: none;
+        }
+
+        .ember-glow {
+            background: radial-gradient(circle at center, rgba(255, 77, 0, 0.15) 0%, transparent 70%);
+        }
+
+        .tricolore-stripe {
+            background: linear-gradient(to right, #008c45 33.3%, #f4f5f0 33.3%, #f4f5f0 66.6%, #cd212a 66.6%);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-on-background antialiased relative min-h-screen selection:bg-primary-container selection:text-on-primary-container">
+    <!-- Texture Overlay -->
+    <div class="fixed inset-0 texture-overlay z-0"></div>
+    <!-- Top Navigation -->
+    <nav
+        class="fixed top-0 left-0 w-full z-50 bg-gradient-to-b from-background/80 to-transparent flex justify-between items-center px-margin-mobile md:px-margin-desktop py-6 transition-all duration-500 ease-in-out backdrop-blur-[2px]">
+        <div
+            class="font-display-lg text-headline-lg-mobile md:text-headline-lg tracking-tighter text-primary scale-105 transition-transform hover:brightness-125">
+            ECLISSE
+        </div>
+        <div class="hidden md:flex gap-gutter items-center">
+            <a class="font-label-sm text-label-sm tracking-widest uppercase text-secondary dark:text-secondary-fixed hover:text-primary transition-all duration-500 ease-in-out"
+                href="#">The Secret</a>
+            <a class="font-label-sm text-label-sm tracking-widest uppercase text-primary border-b-2 border-primary pb-1 hover:text-primary transition-all duration-500 ease-in-out"
+                href="#">Menu</a>
+            <a class="font-label-sm text-label-sm tracking-widest uppercase text-secondary dark:text-secondary-fixed hover:text-primary transition-all duration-500 ease-in-out"
+                href="#">Events</a>
+            <a class="font-label-sm text-label-sm tracking-widest uppercase text-secondary dark:text-secondary-fixed hover:text-primary transition-all duration-500 ease-in-out"
+                href="#">Location</a>
+        </div>
+        <button
+            class="bg-primary-container text-background font-label-sm text-label-sm uppercase px-6 py-3 rounded hover:bg-primary transition-colors border border-primary-container hover:border-primary shadow-[0_0_15px_rgba(255,87,26,0.3)]">
+            ORDER NOW
+        </button>
+    </nav>
+    <!-- Main Content Canvas -->
+    <main class="relative z-10 flex flex-col pt-32 pb-section-gap">
+        <!-- Hero Section -->
+        <section
+            class="w-full min-h-[90vh] flex flex-col items-center justify-center relative px-margin-mobile md:px-margin-desktop">
+            <div class="absolute inset-0 z-0">
+                <img alt='Extreme close-up professional food photography of a gourmet Neapolitan pizza on a dark, charred wood surface. In the background, soft, cinematic orange fire flames and subtle smoke swirls create a dramatic "chiaroscuro" atmosphere. The lighting is moody, highlighting the texture of the leopard-spotted crust and melted mozzarella. Luxury restaurant aesthetic, dark, elegant, and intense. High contrast, warm amber glows.'
+                    class="w-full h-full object-cover opacity-80 mix-blend-luminosity brightness-75"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNH9T3yoq9KKJVSbOd0SJE2Ed2mFBA-SCM9-jMIAcUvmnR0zke-Ysh4C7_BF0Pw754bpK73eMPRn4yeCMAGzNwhhOnm6RMypmzRr6HJHJMq3Hbt5QJNPvr4U3ZmxWY18JqysX-8lbLHhiQLxMjwWxGBxC9mTZAiwhCq8cQGHW19LEBi0Rm3-QSBhFIA78Z5oIDF1FcY20ck5oCHDjklqRPO0cYLqd9FtsLz45n2uIAila3tnSIIXVENHslvP0rff2SL20dynzk2r3a" />
+                <div class="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent"></div>
+                <div class="absolute inset-0 ember-glow"></div>
+            </div>
+            <div class="relative z-10 text-center flex flex-col items-center gap-8 max-w-4xl mx-auto mt-24">
+                <h1
+                    class="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-primary uppercase tracking-tighter drop-shadow-[0_4px_24px_rgba(255,77,0,0.6)]">
+                    SOMOS FUEGO.<br />SOMOS ECLISSE.
+                </h1>
+                <p class="font-body-md text-body-lg text-secondary-fixed max-w-2xl text-center italic">
+                    El equilibrio perfecto entre lo dulce, lo picante y lo irresistible. Sobre nuestra masa napolitana,
+                    con salsa de la casa.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 mt-8">
+                    <button
+                        class="bg-transparent border border-secondary text-secondary font-label-sm text-label-sm uppercase px-8 py-4 rounded hover:bg-secondary/10 transition-colors tracking-widest backdrop-blur-sm">
+                        RESERVA AHORA
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Menu Section (LA CARTA) -->
+        <section class="w-full px-margin-mobile md:px-margin-desktop mt-section-gap relative">
+            <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] ember-glow rounded-full mix-blend-screen opacity-50 z-0 pointer-events-none">
+            </div>
+            <div class="relative z-10 flex flex-col items-center mb-16">
+                <span class="font-label-sm text-label-sm text-secondary uppercase tracking-[0.2em] mb-4">Cocina
+                    Oculta</span>
+                <h2
+                    class="font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl text-on-surface uppercase tracking-tight text-center font-display-lg-mobile md:font-display-lg text-primary drop-shadow-[0_4px_12px_rgba(255,77,0,0.4)]">
+                    LA CARTA</h2>
+                <div class="w-12 h-[1px] bg-primary mt-6"></div>
+                <p class="font-label-sm text-label-sm text-primary-container uppercase tracking-widest mt-6">TODAS
+                    NUESTRAS PIZZAS A: $25.000 PESOS</p>
+            </div>
+            <!-- Bento Grid Layout for Menu -->
+            <div class="max-w-7xl mx-auto flex flex-col gap-24 relative z-10">
+                <!-- Signature: Dolce Fiamma -->
+                <div class="flex flex-col md:flex-row items-center gap-12 group">
+                    <div
+                        class="w-full md:w-3/5 aspect-[4/3] bg-surface-container-highest relative rounded-xl overflow-hidden border border-primary/20 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-background via-transparent to-primary/5">
+                        </div>
+                        <div class="absolute inset-0 ember-glow opacity-30"></div>
+                        <div
+                            class="absolute top-6 left-6 z-20 flex items-center gap-2 bg-background/80 backdrop-blur-md px-3 py-1 rounded-full border border-primary/30">
+                            <div class="w-2 h-4 tricolore-stripe rounded-sm"></div>
+                            <span class="font-label-sm text-[10px] text-primary tracking-widest uppercase">Qualità
+                                Superiore</span>
+                        </div>
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-6xl text-surface-bright/20">local_pizza</span>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-2/5 flex flex-col items-start">
+                        <span class="font-label-sm text-secondary tracking-[0.3em] uppercase mb-2">The Signature</span>
+                        <h3 class="font-display-lg-mobile text-headline-xl text-primary uppercase mb-4">DOLCE FIAMMA</h3>
+                        <p class="font-body-lg text-on-surface-variant mb-8 italic">Pepperoni, cebolla morada y el toque
+                            secreto de nuestra miel picante artesanal.</p>
+                        <div class="flex items-center gap-4">
+                            <span class="font-display-lg-mobile text-2xl text-secondary">$25.000</span>
+                            <div class="h-px w-12 bg-outline-variant"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Boutique Row 1: Bianca & Lumina -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+                    <div class="flex flex-col gap-6 group">
+                        <div
+                            class="aspect-video bg-surface-container-low relative rounded-xl overflow-hidden border border-surface-bright/10">
+                            <div class="absolute inset-0 ember-glow opacity-10"></div>
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-surface-bright/20">restaurant</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-display-lg-mobile text-3xl text-on-surface uppercase mb-2">BIANCA</h3>
+                            <p class="font-body-md text-on-surface-variant mb-4">Salsa blanca, mozzarella premium, bacon
+                                crujiente y queso costeño.</p>
+                            <span class="font-label-sm text-secondary tracking-widest">$25.000</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-6 group md:mt-12">
+                        <div
+                            class="aspect-video bg-surface-container-low relative rounded-xl overflow-hidden border border-surface-bright/10">
+                            <div class="absolute inset-0 ember-glow opacity-10"></div>
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-surface-bright/20">restaurant</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-display-lg-mobile text-3xl text-on-surface uppercase mb-2">LUMINA</h3>
+                            <p class="font-body-md text-on-surface-variant mb-4">Burrata fresca, tomates cherry
+                                seleccionados y nuestro pesto de la casa.</p>
+                            <span class="font-label-sm text-secondary tracking-widest">$25.000</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Boutique Row 2: Hawainna & Amalgama -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                    <div class="flex flex-col gap-6 group order-2 md:order-1">
+                        <div>
+                            <span class="font-label-sm text-tertiary-fixed-dim italic text-[10px] uppercase mb-1 block">Eclisse Style</span>
+                            <h3 class="font-display-lg-mobile text-3xl text-on-surface uppercase mb-2">HAWAINNA</h3>
+                            <p class="font-body-md text-on-surface-variant mb-4">Jamón seleccionado, piña caramelizada y
+                                un toque fresco de cilantro.</p>
+                            <span class="font-label-sm text-secondary tracking-widest">$25.000</span>
+                        </div>
+                        <div
+                            class="aspect-video bg-surface-container-low relative rounded-xl overflow-hidden border border-surface-bright/10">
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-surface-bright/20">restaurant</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-6 group order-1 md:order-2">
+                        <div
+                            class="aspect-video bg-surface-container-low relative rounded-xl overflow-hidden border border-surface-bright/10">
+                            <div class="w-full h-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-4xl text-surface-bright/20">restaurant</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-display-lg-mobile text-3xl text-on-surface uppercase mb-2">AMALGAMA</h3>
+                            <p class="font-body-md text-on-surface-variant mb-4">Pollo desmechado, pimentones asados y
+                                cebolla morada.</p>
+                            <span class="font-label-sm text-secondary tracking-widest">$25.000</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Featured Item: Dorato -->
+                <div
+                    class="w-full bg-surface-container-low rounded-xl p-12 border border-primary/10 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <span class="material-symbols-outlined text-[120px] text-primary">local_pizza</span>
+                    </div>
+                    <div class="relative z-10 max-w-xl">
+                        <h3 class="font-display-lg-mobile text-4xl text-primary uppercase mb-4">DORATO</h3>
+                        <p class="font-body-lg text-on-surface-variant mb-8">Una explosión de sabor con chorizo
+                            artesanal, maíz tierno y el carácter del queso costeño.</p>
+                        <div class="flex items-center gap-8">
+                            <span class="font-display-lg-mobile text-3xl text-secondary">$25.000</span>
+                            <button
+                                class="flex items-center gap-2 text-primary font-label-sm uppercase tracking-widest group">
+                                Pedir ahora
+                                <span
+                                    class="material-symbols-outlined group-hover:translate-x-2 transition-transform">arrow_right_alt</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer Component from JSON -->
+    <footer
+        class="relative w-full overflow-hidden bg-surface-container-lowest dark:bg-surface-container-lowest border-t border-outline-variant/30 shadow-[0_-10px_50px_rgba(255,87,26,0.05)] flex flex-col items-center gap-12 pt-24 pb-8 px-margin-mobile md:px-margin-desktop mx-auto z-20">
+        <!-- Tricolore Stripe Accent via pseudo-element simulation -->
+        <div class="absolute bottom-0 left-0 w-full h-[3px] tricolore-stripe"></div>
+        <div class="font-display-lg text-display-lg-mobile md:text-display-lg text-primary text-center">
+            ECLISSE
+        </div>
+        <nav class="flex flex-wrap justify-center gap-8">
+            <a class="font-label-sm text-label-sm tracking-widest uppercase text-on-surface-variant hover:text-secondary hover:translate-y-[-2px] transition-all duration-300"
+                href="#">Instagram</a>
+            <a class="font-label-sm text-label-sm tracking-widest uppercase text-on-surface-variant hover:text-secondary hover:translate-y-[-2px] transition-all duration-300"
+                href="#">Facebook</a>
+            <a class="font-label-sm text-label-sm tracking-widest uppercase text-primary font-bold hover:text-secondary hover:translate-y-[-2px] transition-all duration-300 relative group"
+                href="#">
+                Reservations
+                <span
+                    class="absolute -bottom-2 left-1/2 w-1 h-1 bg-primary rounded-full -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity shadow-[0_0_8px_rgba(255,87,26,0.8)]"></span>
+            </a>
+            <a class="font-label-sm text-label-sm tracking-widest uppercase text-on-surface-variant hover:text-secondary hover:translate-y-[-2px] transition-all duration-300"
+                href="#">Press</a>
+        </nav>
+        <div
+            class="font-label-sm text-label-sm uppercase tracking-widest text-tertiary dark:text-tertiary-fixed text-center max-w-lg mt-8 opacity-60">
+            © 2024 ECLISSE PIZZA NAPOLETANA. SOMOS FUEGO, SOMOS ECLISSE.
+        </div>
+    </footer>
+</body>
+
+</html>

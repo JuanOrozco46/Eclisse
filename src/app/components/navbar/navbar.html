@@ -1,0 +1,56 @@
+<nav class="fixed top-0 left-0 w-full h-[80px] bg-background border-b border-outline-variant z-50 px-8 md:px-16 flex items-center justify-between overflow-hidden">
+    <!-- Texture overlay for premium feel -->
+    <div class="absolute inset-0 texture-overlay opacity-10 pointer-events-none"></div>
+
+    <!-- Left: Logo -->
+    <div class="flex items-center gap-12 h-full">
+        <a class="font-anton text-4xl md:text-5xl text-white no-underline tracking-tighter hover:text-secondary transition-colors" routerLink="/">ECLISSE</a>
+        
+        <!-- Desktop Navigation Links (Center-aligned in mobile but hidden, left-ish in desktop) -->
+        <div class="hidden lg:flex items-center gap-8 h-full">
+            <a class="font-label-caps text-[10px] tracking-widest text-stark-gray hover:text-secondary uppercase transition-all flex items-center gap-2" 
+               routerLink="/" routerLinkActive="text-secondary font-bold">
+               <span class="w-1 h-1 bg-secondary rounded-full opacity-0 router-link-active:opacity-100"></span> INICIO
+            </a>
+            <a class="font-label-caps text-[10px] tracking-widest text-stark-gray hover:text-secondary uppercase transition-all flex items-center gap-2" 
+               routerLink="/menu" routerLinkActive="text-secondary font-bold">
+               <span class="w-1 h-1 bg-secondary rounded-full opacity-0 router-link-active:opacity-100"></span> CARTA
+            </a>
+            <a class="font-label-caps text-[10px] tracking-widest text-stark-gray hover:text-secondary uppercase transition-all flex items-center gap-2" 
+               routerLink="/el-secreto" routerLinkActive="text-secondary font-bold">
+               <span class="w-1 h-1 bg-secondary rounded-full opacity-0 router-link-active:opacity-100"></span> FILOSOFÍA
+            </a>
+            <a class="font-label-caps text-[10px] tracking-widest text-stark-gray hover:text-secondary uppercase transition-all flex items-center gap-2" 
+               routerLink="/eventos" routerLinkActive="text-secondary font-bold">
+               <span class="w-1 h-1 bg-secondary rounded-full opacity-0 router-link-active:opacity-100"></span> UBICACIÓN
+            </a>
+        </div>
+    </div>
+
+    <!-- Right: Actions & Mobile Toggle -->
+    <div class="flex items-center gap-6 md:gap-8">
+        <!-- Staff Access (Desktop) -->
+        <a class="hidden md:flex items-center gap-3 font-label-caps text-[9px] text-secondary border border-secondary/30 px-6 py-2 hover:bg-secondary hover:text-black transition-all no-underline" 
+           routerLink="/login">
+            <span class="material-symbols-outlined text-sm">person</span>
+            EQUIPO
+        </a>
+
+        <!-- Mobile Controls -->
+        <div class="flex items-center gap-4 lg:hidden">
+            <button class="material-symbols-outlined text-stark-gray hover:text-secondary transition-colors" (click)="toggleMenu()">
+                {{ isMenuOpen ? 'close' : 'menu' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div *ngIf="isMenuOpen" 
+         class="fixed inset-0 bg-background z-40 flex flex-col items-center justify-center space-y-10 animate-in fade-in slide-in-from-top-10 duration-300 lg:hidden">
+        <a (click)="toggleMenu()" class="font-anton text-6xl text-white hover:text-secondary transition-colors uppercase tracking-widest" routerLink="/">INICIO</a>
+        <a (click)="toggleMenu()" class="font-anton text-6xl text-white hover:text-secondary transition-colors uppercase tracking-widest" routerLink="/menu">CARTA</a>
+        <a (click)="toggleMenu()" class="font-anton text-6xl text-white hover:text-secondary transition-colors uppercase tracking-widest" routerLink="/el-secreto">FILOSOFÍA</a>
+        <a (click)="toggleMenu()" class="font-anton text-6xl text-white hover:text-secondary transition-colors uppercase tracking-widest" routerLink="/eventos">UBICACIÓN</a>
+        <a (click)="toggleMenu()" class="font-anton text-2xl text-secondary border-t border-outline-variant pt-8 mt-10 uppercase tracking-[0.5em]" routerLink="/login">STAFF ACCESS</a>
+    </div>
+</nav>

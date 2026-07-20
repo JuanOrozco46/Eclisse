@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es" style=""><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ubicación - Eclisse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Hanken+Grotesk:wght@400;600&amp;family=Space+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#e2e2e2",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "on-error": "#690005",
+                        "on-secondary-container": "#342800",
+                        "on-surface-variant": "#cfc4c5",
+                        "tertiary": "#c6c6c7",
+                        "secondary": "#e9c349",
+                        "on-tertiary-container": "#747576",
+                        "surface-container-high": "#131313",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "surface-dim": "#000000",
+                        "background": "#000000",
+                        "error-container": "#93000a",
+                        "surface-container-lowest": "#000000",
+                        "outline": "#4c4546",
+                        "on-tertiary": "#2f3131",
+                        "tertiary-fixed": "#e2e2e2",
+                        "inverse-surface": "#e5e2e1",
+                        "on-secondary-fixed-variant": "#574500",
+                        "secondary-fixed": "#ffe088",
+                        "inverse-primary": "#5e5e5e",
+                        "on-primary-fixed": "#1b1b1b",
+                        "secondary-container": "#af8d11",
+                        "on-primary": "#303030",
+                        "surface-bright": "#131313",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "surface-container": "#000000",
+                        "surface": "#000000",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "stark-gray": "#D4D4D4",
+                        "primary-container": "#000000",
+                        "inverse-on-surface": "#313030",
+                        "emerald": "#008C45",
+                        "on-primary-container": "#757575",
+                        "surface-tint": "#c6c6c6",
+                        "tomato": "#CD212A",
+                        "surface-variant": "#131313",
+                        "on-primary-fixed-variant": "#474747",
+                        "secondary-fixed-dim": "#e9c349",
+                        "on-secondary": "#3c2f00",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        "on-background": "#e5e2e1",
+                        "on-secondary-fixed": "#241a00",
+                        "primary": "#c6c6c6",
+                        "outline-variant": "#353535",
+                        "surface-container-low": "#000000",
+                        "surface-container-highest": "#131313",
+                        "tertiary-container": "#000000",
+                        "on-surface": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "unit": "4px",
+                        "overlap-sm": "-40px",
+                        "gutter": "24px",
+                        "overlap-lg": "-120px",
+                        "margin-desktop": "80px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Anton"],
+                        "display-xl": ["Anton"],
+                        "headline-lg": ["Anton"],
+                        "headline-lg-mobile": ["Anton"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "label-caps": ["Space Mono"],
+                        "nav-link": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["80px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+                        "display-xl": ["120px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "400" }],
+                        "headline-lg": ["48px", { "lineHeight": "48px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["40px", { "lineHeight": "40px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "nav-link": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        /* Custom map overlay to fit the brutalist theme */
+        .map-overlay {
+            mix-blend-mode: luminosity;
+            opacity: 0.7;
+            filter: grayscale(100%) contrast(1.2);
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden min-h-screen flex flex-col md:flex-row bg-background">
+<!-- SideNavBar (Desktop) -->
+<nav class="bg-background text-on-surface font-label-caps text-label-caps fixed left-0 top-0 h-full w-[80px] border-r border-outline hidden lg:flex flex-col items-center py-margin-desktop space-y-12 z-50">
+<div class="font-display-lg text-display-lg text-on-surface -rotate-90 origin-left mt-32 whitespace-nowrap">
+            ECLISSE
+        </div>
+<div class="flex-grow flex flex-col items-center justify-center space-y-12 w-full mt-auto mb-auto">
+<a aria-label="INICIO" class="text-stark-gray hover:text-white hover:bg-surface-variant p-4 rounded transition-all duration-300 hover:scale-110 flex flex-col items-center" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+</a>
+<a aria-label="CARTA" class="text-stark-gray hover:text-white hover:bg-surface-variant p-4 rounded transition-all duration-300 hover:scale-110 flex flex-col items-center" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+</a>
+<a aria-label="FILOSOFÍA" class="text-stark-gray hover:text-white hover:bg-surface-variant p-4 rounded transition-all duration-300 hover:scale-110 flex flex-col items-center" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+</a>
+<a aria-label="CONTACTO" class="bg-secondary text-background font-bold p-4 rounded transition-all duration-300 hover:scale-110 flex flex-col items-center" href="#">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+</a>
+</div>
+<button class="font-label-caps text-label-caps border border-secondary text-secondary px-2 py-8 -rotate-90 origin-center hover:bg-secondary hover:text-background transition-colors duration-300 whitespace-nowrap mt-auto">
+            RESERVAR
+        </button>
+</nav>
+<!-- TopNavBar (Mobile) -->
+<header class="bg-background text-on-background docked full-width top-0 border-b border-outline flex justify-between items-center w-full px-margin-mobile py-8 max-w-full lg:hidden z-50 fixed">
+<div class="font-display-xl text-display-xl tracking-tighter text-on-background text-[40px] leading-[40px]">
+            ECLISSE
+        </div>
+<nav class="hidden md:flex space-x-6">
+<a class="font-nav-link text-nav-link text-stark-gray hover:text-secondary transition-colors duration-300" href="#">CARTA</a>
+<a class="font-nav-link text-nav-link text-stark-gray hover:text-secondary transition-colors duration-300" href="#">NOSOTROS</a>
+<a class="font-nav-link text-nav-link text-secondary font-bold border-b border-secondary hover:text-secondary transition-transform duration-200 skew-x-12" href="#">UBICACIÓN</a>
+</nav>
+<button class="md:hidden text-stark-gray">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="hidden md:block">
+<button class="text-stark-gray hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow lg:ml-[80px] pt-[100px] lg:pt-0 flex flex-col relative w-full bg-background">
+<!-- Hero/Map Section - Broken Grid Concept -->
+<section class="relative w-full min-h-[614px] lg:min-h-screen flex flex-col lg:flex-row border-b border-outline bg-background">
+<!-- Map Area -->
+<div class="w-full lg:w-2/3 h-[512px] lg:h-screen relative overflow-hidden bg-background border-r border-outline">
+<img alt="Map" class="w-full h-full object-cover map-overlay absolute inset-0" data-alt="A highly stylized, stark monochromatic aerial map of a dense urban European city, heavily filtered with brutalist high-contrast greyscale tones. The map features sharp geometric lines representing streets, with deep pitch-black shadows and bright glaring white highlights. The aesthetic is cold, architectural, and nocturnal, aligning with a premium, exclusive brand identity." data-location="Milan, Italy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAy2MPIvJoWCV3NhqQO0ri_dLLI_y5j7X_XRl5kOMDI5C8KvVDYBz-Vx0MmW3GKwyHqVIfoHp3Il1ULGO2GAN7glwfhG1pEPQvz8IeJfZSloLyosUAG4d6Nb-xP045HyFjrDAfQ9Hp69g_SfSJHmqRXCeuFvyUMKzIdEDJ3vNuysApOJ0hnHFjKzbev3pQI6TAXIWQ_emw5vJSjdPmGjbk0yWwywGJDN7Z2YVn4wogmNoNYUDkdkS6iD8AHmtSkTyewmiuq3_Ve5d_X"/>
+<!-- Stylized Pin -->
+<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<div class="w-5 h-5 rounded-full flex overflow-hidden ring-2 ring-white/20"><div class="h-full w-1/3 bg-[#008C45]"></div><div class="h-full w-1/3 bg-white"></div><div class="h-full w-1/3 bg-[#CD212A]"></div></div>
+<div class="w-[2px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+</div>
+</div>
+<!-- Address & Title Area -->
+<div class="w-full lg:w-1/3 flex flex-col justify-center p-margin-mobile lg:p-margin-desktop relative z-10 bg-background lg:bg-background">
+<h1 class="font-display-xl text-display-xl text-white lg:-ml-overlap-lg lg:text-[140px] leading-none mb-12 mix-blend-difference hidden lg:block z-20 pointer-events-none">
+                    UBICACIÓN
+                </h1>
+<h1 class="font-display-lg text-headline-lg-mobile text-white mb-8 lg:hidden">
+                    UBICACIÓN
+                </h1>
+<div class="border border-outline p-8 relative bg-background mt-4 lg:mt-0 lg:shadow-none">
+<h2 class="font-label-caps text-label-caps text-secondary mb-4 tracking-[0.2em]">ATELIER PRINCIPAL</h2>
+<p class="font-headline-lg text-headline-lg-mobile lg:text-headline-lg text-white mb-6">
+                        VIA TORTONA 35,<br/>
+                        20144 MILANO MI,<br/>
+                        ITALY
+                    </p>
+<a class="inline-flex items-center space-x-2 font-label-caps text-label-caps text-stark-gray hover:text-secondary transition-colors border-b border-stark-gray hover:border-secondary pb-1 w-fit" href="#">
+<span class="">OBTENER DIRECCIONES</span>
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- Hours & Contact Section - Lookbook Style -->
+<section class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-b border-outline bg-background">
+<!-- Opening Hours -->
+<div class="p-margin-mobile lg:p-margin-desktop border-b md:border-b-0 md:border-r border-outline flex flex-col justify-center bg-background">
+<h3 class="font-label-caps text-label-caps text-secondary mb-12 tracking-widest border-b border-outline pb-4">HORARIO</h3>
+<ul class="space-y-6 font-body-lg text-body-lg text-stark-gray"><li class="flex justify-between items-end pb-2 relative">
+<span class="font-label-caps text-label-caps text-stark-gray">LUN - MIE</span>
+<span class="text-right text-white">18:00 — 00:00</span>
+<div class="absolute bottom-0 left-0 w-full h-[1px] flex">
+<div class="h-full w-1/3 bg-[#008C45]/30"></div>
+<div class="h-full w-1/3 bg-white/30"></div>
+<div class="h-full w-1/3 bg-[#CD212A]/30"></div>
+</div>
+</li>
+<li class="flex justify-between items-end pb-2 relative">
+<span class="font-label-caps text-label-caps text-stark-gray">JUE - SAB</span>
+<span class="text-right text-white">18:00 — 02:00</span>
+<div class="absolute bottom-0 left-0 w-full h-[1px] flex">
+<div class="h-full w-1/3 bg-[#008C45]/30"></div>
+<div class="h-full w-1/3 bg-white/30"></div>
+<div class="h-full w-1/3 bg-[#CD212A]/30"></div>
+</div>
+</li>
+<li class="flex justify-between items-end pb-2 opacity-50 relative">
+<span class="font-label-caps text-label-caps text-stark-gray">DOMINGO</span>
+<span class="text-right text-white">CERRADO</span>
+<div class="absolute bottom-0 left-0 w-full h-[1px] flex">
+<div class="h-full w-1/3 bg-[#008C45]/10"></div>
+<div class="h-full w-1/3 bg-white/10"></div>
+<div class="h-full w-1/3 bg-[#CD212A]/10"></div>
+</div>
+</li></ul>
+</div>
+<!-- Contact -->
+<div class="p-margin-mobile lg:p-margin-desktop border-b lg:border-b-0 lg:border-r border-outline flex flex-col justify-center bg-background">
+<h3 class="font-label-caps text-label-caps text-secondary mb-12 tracking-widest border-b border-outline pb-4">CONTACTO</h3>
+<div class="space-y-8 font-headline-lg text-[32px] leading-tight text-white">
+<div><div class="flex space-x-0.5 mb-2"><div class="w-2 h-[1px] bg-[#008C45]"></div><div class="w-2 h-[1px] bg-white"></div><div class="w-2 h-[1px] bg-[#CD212A]"></div></div><span class="block font-label-caps text-label-caps text-stark-gray mb-2">TELÉFONO</span><a class="hover:text-secondary transition-colors" href="tel:+39021234567">+39 02 123 4567</a></div>
+<div><div class="flex space-x-0.5 mb-2"><div class="w-2 h-[1px] bg-[#008C45]"></div><div class="w-2 h-[1px] bg-white"></div><div class="w-2 h-[1px] bg-[#CD212A]"></div></div><span class="block font-label-caps text-label-caps text-stark-gray mb-2">EMAIL</span><a class="hover:text-secondary transition-colors" href="mailto:ciao@eclisse.it">CIAO@ECLISSE.IT</a></div>
+</div>
+</div>
+<!-- CTA / Instagram -->
+<div class="p-margin-mobile lg:p-margin-desktop flex flex-col justify-between items-start bg-background relative overflow-hidden">
+<div class="absolute -bottom-20 -right-20 opacity-5 pointer-events-none">
+<span class="font-display-xl text-[300px] leading-none text-stark-gray">E</span>
+</div>
+<div class="w-full z-10">
+<h3 class="font-label-caps text-label-caps text-secondary mb-8 tracking-widest">SOCIÉTÉ</h3>
+<a class="font-headline-lg text-[40px] text-white hover:text-secondary transition-colors flex items-center justify-between border-b border-outline pb-4 w-full" href="#"><div class="flex items-center space-x-3"><span class="">@ECLISSE.ATELIER</span><div class="flex space-x-1"><div class="w-1.5 h-1.5 rounded-full bg-[#008C45]"></div><div class="w-1.5 h-1.5 rounded-full bg-white"></div><div class="w-1.5 h-1.5 rounded-full bg-[#CD212A]"></div></div></div>
+<span class="material-symbols-outlined text-[32px]">north_east</span></a>
+</div>
+<div class="w-full mt-16 z-10">
+<button class="w-full border border-secondary text-secondary font-label-caps text-label-caps py-6 px-8 hover:bg-secondary hover:text-background transition-all duration-300 tracking-[0.2em]">
+                        RESERVAR MESA
+                    </button>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-background text-stark-gray full-width p-margin-desktop border-t border-outline flex flex-col md:flex-row justify-between items-start md:items-end w-full space-y-8 mt-auto relative overflow-hidden">
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+<span class="font-display-lg text-[200px] md:text-[300px] text-white opacity-5 whitespace-nowrap overflow-hidden w-full text-center">ECLISSE</span>
+</div>
+<div class="font-label-caps text-label-caps z-10">
+                ©2024 ECLISSE PIZZERIA. ATELIER OF DOUGH.
+            </div>
+<div class="flex space-x-6 z-10">
+<a class="font-label-caps text-label-caps text-stark-gray hover:text-white transition-opacity" href="#">INSTAGRAM</a>
+<a class="font-label-caps text-label-caps text-stark-gray hover:text-white transition-opacity" href="#">PRIVACIDAD</a>
+<a class="font-label-caps text-label-caps text-stark-gray hover:text-white transition-opacity" href="#">COOKIES</a>
+</div>
+</footer>
+</main>
+</body></html>

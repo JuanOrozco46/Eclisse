@@ -1,0 +1,220 @@
+<div class="relative flex flex-col gap-8 animate-in fade-in slide-in-from-right-8 duration-700">
+  
+    <!-- HEADER & NOTIFICATIONS -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+            <h1 class="font-anton text-5xl text-white uppercase tracking-tighter">Terminal de Servicio</h1>
+            <p class="font-label-caps text-[10px] text-stark-gray tracking-[0.3em] uppercase">Gestión de Mesas y Comandas</p>
+        </div>
+
+        <!-- Kitchen Notification Alert -->
+        <div *ngIf="readyOrders()" class="bg-tomato/10 border border-tomato px-6 py-3 flex items-center gap-4 animate-pulse">
+            <span class="material-symbols-outlined text-tomato">notifications_active</span>
+            <div class="flex flex-col">
+                <span class="font-anton text-sm text-tomato">{{readyOrders()?.table}} {{readyOrders()?.msg}}</span>
+                <span class="font-hanken text-[10px] text-white opacity-60">RECOGER EN COCINA</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- VIEW 1: TABLE MAP -->
+    <div *ngIf="viewState() === 'MAP'" class="grid grid-cols-2 md:grid-cols-4 gap-6 animate-in zoom-in-95 duration-500">
+        <div *ngFor="let table of tables" 
+             (click)="selectTable(table)"
+             [ngClass]="{
+                 'border-secondary/30 bg-surface-container-low': getTableStatus(table) === 'Libre',
+                 'border-tomato bg-tomato/5': getTableStatus(table) === 'Ocupada'
+             }"
+             class="table-card border-2 p-8 flex flex-col items-center justify-center gap-6 cursor-pointer relative overflow-hidden group">
+            
+            <!-- Table Icon/Shape -->
+            <div [ngClass]="table.type === 'CIRC' ? 'rounded-full' : 'rounded-sm'"
+                 [class.bg-secondary]="getTableStatus(table) === 'Libre'"
+                 [class.bg-tomato]="getTableStatus(table) === 'Ocupada'"
+                 class="w-20 h-20 opacity-20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined text-white text-4xl">restaurant</span>
+            </div>
+
+            <div class="text-center relative z-10">
+                <h3 class="font-anton text-2xl text-white">{{table.id}}</h3>
+                <p class="font-label-caps text-[9px] text-stark-gray tracking-widest mt-1">{{table.paxs}}</p>
+            </div>
+
+            <!-- Status Badge -->
+            <div [ngClass]="getTableStatus(table) === 'Libre' ? 'bg-secondary text-on-secondary' : 'bg-tomato text-white'"
+                 class="absolute bottom-0 inset-x-0 py-1 text-center font-label-caps text-[8px] tracking-widest uppercase">
+                {{getTableStatus(table)}}
+            </div>
+
+            <!-- Glow effect for occupied -->
+            <div *ngIf="getTableStatus(table) === 'Ocupada'" class="absolute inset-0 bg-tomato/5 animate-pulse"></div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: ORDER & BILLING -->
+    <div *ngIf="viewState() === 'ORDER'" class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in slide-in-from-bottom-8 duration-500">
+        
+        <!-- LEFT: Header & Menu (8 cols) -->
+        <div class="lg:col-span-8 flex flex-col gap-8">
+            <!-- Back & Table Info -->
+            <div class="flex items-center justify-between bg-surface-container-low p-6 border-b border-outline-variant">
+                <div class="flex items-center gap-6">
+                    <button (click)="backToMap()" class="w-12 h-12 border border-outline-variant flex items-center justify-center hover:bg-white hover:text-black transition-colors">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <div>
+                        <h2 class="font-anton text-3xl text-white uppercase">{{selectedTable.id}}</h2>
+                        <span class="font-label-caps text-[9px] text-secondary tracking-widest">{{selectedTable.paxs}}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="font-label-caps text-[9px] text-stark-gray opacity-40 uppercase">Consu. Mesa:</span>
+                    <span class="font-anton text-3xl text-secondary">${{tableTotal().toLocaleString('es-CO')}}</span>
+                </div>
+            </div>
+
+            <!-- Categories Tabs -->
+            <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                <button (click)="selectedCategory.set('')" 
+                        [class.bg-secondary]="selectedCategory() === ''"
+                        [class.text-on-secondary]="selectedCategory() === ''"
+                        class="px-8 py-3 font-anton uppercase text-sm border-2 border-secondary transition-all whitespace-nowrap">TODO</button>
+                <button *ngFor="let cat of menuCategories()" 
+                        (click)="selectedCategory.set(cat)"
+                        [class.bg-secondary]="selectedCategory() === cat"
+                        [class.text-on-secondary]="selectedCategory() === cat"
+                        class="px-8 py-3 font-anton uppercase text-sm border-2 border-secondary text-secondary transition-all whitespace-nowrap">{{cat}}</button>
+            </div>
+
+            <!-- Menu Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div *ngFor="let item of filteredMenuItems()" 
+                     (click)="addToOrder(item)"
+                     class="bg-surface-container-lowest border border-outline-variant p-5 group hover:border-secondary transition-all cursor-pointer">
+                    <div class="flex justify-between items-start mb-4">
+                        <h4 class="font-anton text-xl text-white group-hover:text-secondary uppercase transition-colors">{{item.name}}</h4>
+                        <span class="font-anton text-secondary text-lg">${{item.price.toLocaleString('es-CO')}}</span>
+                    </div>
+                    <p class="font-hanken text-[11px] text-stark-gray opacity-50 mb-4 h-8 overflow-hidden">{{item.description}}</p>
+                    <div class="flex justify-center pt-2">
+                        <span class="material-symbols-outlined text-secondary opacity-0 group-hover:opacity-100 transition-opacity">add_circle</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Cart & Table Status (4 cols) -->
+        <div class="lg:col-span-4 flex flex-col gap-6">
+            
+            <!-- New Order Cart -->
+            <div class="bg-background border-2 border-outline-variant flex flex-col h-fit sticky top-8">
+                <div class="bg-outline-variant/10 p-5 border-b border-outline-variant">
+                    <h3 class="font-anton text-xl text-white uppercase tracking-wider flex items-center gap-3">
+                        <span class="material-symbols-outlined text-secondary">shopping_cart</span> NUEVA COMANDA
+                    </h3>
+                </div>
+
+                <!-- Items Loop -->
+                <div class="flex-1 overflow-y-auto max-h-[400px] p-5 space-y-4">
+                    <div *ngFor="let item of currentOrder; let i = index" class="flex flex-col gap-2 p-3 border border-outline-variant/50">
+                        <div class="flex justify-between items-start">
+                            <span class="font-anton text-sm text-white uppercase">{{item.name}}</span>
+                            <span class="font-anton text-secondary text-sm">${{(item.price * item.quantity).toLocaleString('es-CO')}}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <button (click)="decrementItem(i)" class="w-8 h-8 border border-outline-variant flex items-center justify-center text-stark-gray hover:text-white">-</button>
+                                <span class="font-anton text-white">{{item.quantity}}</span>
+                                <button (click)="incrementItem(i)" class="w-8 h-8 border border-outline-variant flex items-center justify-center text-stark-gray hover:text-white">+</button>
+                            </div>
+                            <input [(ngModel)]="item.note" placeholder="Nota..." class="bg-transparent border-b border-outline-variant p-1 text-[10px] text-stark-gray w-24 focus:border-secondary outline-none">
+                        </div>
+                    </div>
+
+                    <!-- Empty cart fallback -->
+                    <div *ngIf="currentOrder.length === 0" class="py-10 text-center opacity-20">
+                        <span class="material-symbols-outlined text-5xl block mb-2">ink_pen</span>
+                        <p class="font-label-caps text-[9px] uppercase tracking-widest">Sin items seleccionados</p>
+                    </div>
+                </div>
+
+                <!-- Footer Summary of current comanda -->
+                <div class="p-6 bg-surface-container-low border-t border-outline-variant">
+                    <div class="flex justify-between mb-6">
+                        <span class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">SUBTOTAL COMANDA</span>
+                        <span class="font-anton text-2xl text-white">${{getCurrentTotal().toLocaleString('es-CO')}}</span>
+                    </div>
+                    <button (click)="submitOrder()" 
+                            [disabled]="currentOrder.length === 0"
+                            class="w-full bg-secondary text-on-secondary font-anton py-4 text-xl uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none">
+                        ENVIAR A COCINA
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Orders List (for this table) -->
+            <div *ngIf="tableOrders().length > 0" class="flex flex-col gap-4">
+                <div class="flex items-center justify-between px-2">
+                    <h4 class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">ESTADO DE CUENTA</h4>
+                    <button (click)="showPaymentModal.set(true)" class="bg-white text-black font-anton px-4 py-1 text-[10px] uppercase tracking-widest">COBRAR TODO</button>
+                </div>
+                
+                    <div *ngFor="let order of tableOrders()" class="p-4 border border-outline-variant bg-surface-container-low/50 relative group/order overflow-hidden">
+                        <div class="flex justify-between mb-2">
+                            <span class="font-anton text-xs text-secondary">ORDEN #{{order.id.slice(-4)}}</span>
+                            <span [ngClass]="{
+                                'text-tomato': order.status === 'PENDING',
+                                'text-secondary': order.status === 'READY',
+                                'text-emerald': order.status === 'DELIVERED',
+                                'text-white opacity-40': order.status === 'PREPARING'
+                            }" class="font-label-caps text-[8px] uppercase tracking-widest">{{order.status}}</span>
+                        </div>
+                        <div class="space-y-1">
+                            <div *ngFor="let item of order.items" class="flex justify-between text-[11px]">
+                                <span class="text-stark-gray">{{item.quantity}}x {{item.name}}</span>
+                                <span class="text-white opacity-60">${{(item.price * item.quantity).toLocaleString('es-CO')}}</span>
+                            </div>
+                        </div>
+                        <!-- Rapid Actions -->
+                        <div class="mt-4 pt-4 border-t border-outline-variant/30 flex justify-between items-center">
+                            <button (click)="data.removeOrder(order.id)" class="text-stark-gray hover:text-tomato transition-colors">
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                            <button *ngIf="order.status === 'READY'" (click)="markDelivered(order)" class="bg-emerald text-white font-anton px-3 py-1 text-[9px] uppercase tracking-widest"> ENTREGADO </button>
+                        </div>
+                    </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div *ngIf="showPaymentModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+        <div class="bg-surface-container-low border-2 border-outline-variant w-full max-w-lg p-10 animate-in zoom-in-95 duration-300">
+            <h3 class="font-anton text-4xl text-white mb-8 uppercase tracking-tighter">FACTURACIÓN {{selectedTable?.id}}</h3>
+            
+            <div class="flex flex-col gap-8">
+                <div class="flex justify-between border-b-2 border-outline-variant pb-4">
+                    <span class="font-label-caps text-[12px] text-stark-gray uppercase tracking-widest">TOTAL A PAGAR</span>
+                    <span class="font-anton text-5xl text-secondary">${{tableTotal().toLocaleString('es-CO')}}</span>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="grid grid-cols-3 gap-4">
+                    <button *ngFor="let method of ['Efectivo', 'Transferencia', 'Datáfono']"
+                            (click)="paymentMethod = method"
+                            [ngClass]="paymentMethod === method ? 'bg-secondary text-on-secondary border-secondary' : 'bg-background text-stark-gray border-outline-variant'"
+                            class="py-6 border-2 font-anton text-sm uppercase tracking-widest transition-all">
+                        {{method}}
+                    </button>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button (click)="showPaymentModal.set(false)" class="flex-1 border-2 border-outline-variant text-stark-gray font-anton py-4 uppercase tracking-widest hover:bg-white hover:text-black transition-all">CANCELAR</button>
+                    <button (click)="processPayment()" class="flex-1 bg-secondary text-on-secondary font-anton py-4 uppercase tracking-widest shadow-brutal-gold">REGISTRAR PAGO</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

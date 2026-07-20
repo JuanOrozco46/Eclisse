@@ -1,0 +1,192 @@
+<div class="relative flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end border-b-2 border-outline-variant pb-12 gap-8 relative z-10">
+        <div>
+            <div class="flex items-center gap-4 mb-4">
+                <span class="font-anton text-secondary text-2xl">003</span>
+                <div class="h-px w-20 bg-outline-variant"></div>
+            </div>
+            <h1 class="font-anton text-7xl md:text-9xl text-white uppercase leading-none tracking-tighter">HISTORIAL<br/>DE CAJA</h1>
+            <p class="font-label-caps text-[12px] text-secondary mt-6 tracking-brutal uppercase">FLUJO OPERATIVO Y RENTABILIDAD</p>
+        </div>
+        <div class="flex gap-4">
+            <button (click)="exportPDF()" class="px-8 py-4 border border-outline-variant font-anton text-base text-stark-gray hover:text-white hover:border-white transition-all uppercase tracking-widest">EXPORTAR .CSV</button>
+        </div>
+    </header>
+
+    <!-- Summary KPIs -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
+        <div class="border border-outline-variant bg-surface-container-low p-6">
+            <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase block">INGRESOS HOY</span>
+            <span class="font-anton text-4xl text-emerald">${{todayIncome().toLocaleString('es-CO')}}</span>
+        </div>
+        <div class="border border-outline-variant bg-surface-container-low p-6">
+            <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase block">EGRESOS HOY</span>
+            <span class="font-anton text-4xl text-tomato">${{todayExpenses().toLocaleString('es-CO')}}</span>
+        </div>
+        <div class="border border-secondary bg-secondary/5 p-6">
+            <span class="font-label-caps text-[9px] text-secondary tracking-widest uppercase block">NETO HOY</span>
+            <span class="font-anton text-4xl" [ngClass]="todayNet() >= 0 ? 'text-white' : 'text-tomato'">
+                {{todayNet() >= 0 ? '' : '-'}}${{Math.abs(todayNet()).toLocaleString('es-CO')}}
+            </span>
+        </div>
+        <div class="border border-outline-variant bg-surface-container-low p-6">
+            <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase block">MOVIMIENTOS HOY</span>
+            <span class="font-anton text-4xl text-white">{{transactionCount()}}</span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
+        <!-- New Entry Form -->
+        <div class="lg:col-span-4">
+            <div class="border border-outline-variant bg-surface-container-low p-10 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 font-anton text-stark-gray opacity-5 text-4xl">ENTRY_v3</div>
+                <h2 class="font-anton text-4xl text-white uppercase mb-10 tracking-tighter">NUEVO REGISTRO</h2>
+                
+                <form (ngSubmit)="addTransaction()" class="space-y-8">
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Tipo de Movimiento</label>
+                        <select [(ngModel)]="newTransaction.type" name="type" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border appearance-none">
+                            <option value="Venta">Venta (Ingreso)</option>
+                            <option value="Gasto">Gasto (Egreso)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Categoría</label>
+                        <select [(ngModel)]="newTransaction.category" name="category" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border appearance-none">
+                            <option *ngFor="let cat of categories" [value]="cat">{{cat}}</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Valor ($)</label>
+                        <input type="number" [(ngModel)]="newTransaction.amount" name="amount" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Método de Pago</label>
+                        <select [(ngModel)]="newTransaction.method" name="method" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border appearance-none">
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Transferencia">Transferencia (Nequi/Daviplata)</option>
+                            <option value="Datáfono">Datáfono / Card</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Descripción</label>
+                        <input type="text" [(ngModel)]="newTransaction.description" name="description" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border" placeholder="Ej: Venta Mesa 04">
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="submit" 
+                                class="w-full py-6 font-anton text-2xl tracking-brutal uppercase transition-all shadow-brutal-gold active:translate-y-1"
+                                [ngClass]="newTransaction.type === 'Venta' ? 'bg-secondary text-on-secondary hover:bg-white hover:text-black' : 'bg-tomato text-white hover:bg-white hover:text-black'"
+                                [disabled]="!newTransaction.description || newTransaction.amount <= 0"
+                                [class.opacity-30]="!newTransaction.description || newTransaction.amount <= 0"
+                                [class.cursor-not-allowed]="!newTransaction.description || newTransaction.amount <= 0">
+                            {{newTransaction.type === 'Venta' ? 'REGISTRAR INGRESO' : 'REGISTRAR GASTO'}}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ledger Table -->
+        <div class="lg:col-span-8 flex flex-col gap-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-outline-variant pb-4 gap-4">
+                <h2 class="font-anton text-4xl text-white uppercase tracking-tighter">MOVIMIENTOS</h2>
+                <div class="flex gap-4 items-center">
+                    <select [(ngModel)]="filterType" class="bg-background border border-outline-variant text-white py-2 px-4 font-label-caps text-[10px] uppercase tracking-widest appearance-none outline-none focus:border-secondary transition-colors">
+                        <option value="">TODOS</option>
+                        <option value="Venta">INGRESOS</option>
+                        <option value="Gasto">EGRESOS</option>
+                    </select>
+                    <div class="relative w-full max-w-xs">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stark-gray text-sm opacity-30">search</span>
+                        <input type="text" [(ngModel)]="searchTerm" placeholder="FILTRAR..." class="w-full bg-background border border-outline-variant py-2 pl-10 pr-4 text-white font-hanken text-[11px] outline-none focus:border-secondary transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="data.transactions().length === 0" class="flex flex-col items-center justify-center py-20 border border-outline-variant border-dashed">
+                <span class="material-symbols-outlined text-stark-gray opacity-10 text-8xl mb-6">payments</span>
+                <p class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest">SIN MOVIMIENTOS REGISTRADOS</p>
+            </div>
+
+            <div class="overflow-x-auto" *ngIf="data.transactions().length > 0">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="text-left border-b border-outline-variant">
+                            <th class="pb-6 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal">Fecha</th>
+                            <th class="pb-6 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal">Tipo</th>
+                            <th class="pb-6 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal">Descripción</th>
+                            <th class="pb-6 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal text-right">Valor</th>
+                            <th class="pb-6 font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-brutal text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let t of filteredTransactions" class="border-b border-outline-variant/30 hover:bg-white/[0.02] group transition-colors">
+                            <td class="py-6 font-mono text-[10px] text-stark-gray uppercase">
+                                <span *ngIf="editingId !== t.id">{{t.date}}</span>
+                                <input *ngIf="editingId === t.id" type="date" [(ngModel)]="editData.date" class="bg-background border border-outline-variant text-white p-1 text-[10px] outline-none">
+                            </td>
+                            <td class="py-6">
+                                <span *ngIf="editingId !== t.id" class="px-3 py-1 font-anton text-[11px] uppercase tracking-widest border-2"
+                                      [ngClass]="t.type === 'Venta' ? 'border-emerald/40 text-emerald' : 'border-tomato/20 text-tomato'">
+                                    {{t.type === 'Venta' ? 'IN' : 'OUT'}}
+                                </span>
+                                <select *ngIf="editingId === t.id" [(ngModel)]="editData.type" class="bg-background border border-outline-variant text-white p-1 text-[10px] outline-none">
+                                    <option value="Venta">Venta</option>
+                                    <option value="Gasto">Gasto</option>
+                                </select>
+                            </td>
+                            <td class="py-6">
+                                <div class="flex flex-col" *ngIf="editingId !== t.id">
+                                    <span class="font-anton text-xl text-white uppercase group-hover:text-secondary transition-colors">{{t.description}}</span>
+                                    <span class="font-label-caps text-[9px] text-stark-gray opacity-40 uppercase tracking-widest">{{t.category}} // {{t.method}}</span>
+                                </div>
+                                <div class="flex flex-col gap-1" *ngIf="editingId === t.id">
+                                    <input type="text" [(ngModel)]="editData.description" class="bg-background border border-outline-variant text-white p-1 text-sm outline-none">
+                                    <div class="flex gap-2">
+                                        <select [(ngModel)]="editData.category" class="bg-background border border-outline-variant text-white p-1 text-[9px] outline-none">
+                                            <option *ngFor="let cat of categories" [value]="cat">{{cat}}</option>
+                                        </select>
+                                        <select [(ngModel)]="editData.method" class="bg-background border border-outline-variant text-white p-1 text-[9px] outline-none">
+                                            <option value="Efectivo">Efectivo</option>
+                                            <option value="Transferencia">Transferencia</option>
+                                            <option value="Datáfono">Datáfono</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-6 font-anton text-2xl text-right" [ngClass]="t.type === 'Venta' ? 'text-white' : 'text-tomato'">
+                                <span *ngIf="editingId !== t.id">{{t.type === 'Gasto' ? '-' : ''}}${{t.amount.toLocaleString('es-CO')}}</span>
+                                <input *ngIf="editingId === t.id" type="number" [(ngModel)]="editData.amount" class="bg-background border border-outline-variant text-white p-1 text-right w-24 outline-none">
+                            </td>
+                            <td class="py-6 text-right">
+                                <div class="flex justify-end gap-2" *ngIf="editingId !== t.id">
+                                    <button (click)="startEdit(t)" class="text-stark-gray hover:text-secondary transition-colors">
+                                        <span class="material-symbols-outlined text-lg">edit</span>
+                                    </button>
+                                    <button (click)="deleteTransaction(t.id)" class="text-stark-gray hover:text-tomato transition-colors">
+                                        <span class="material-symbols-outlined text-lg">delete</span>
+                                    </button>
+                                </div>
+                                <div class="flex justify-end gap-2" *ngIf="editingId === t.id">
+                                    <button (click)="saveEdit()" class="text-emerald hover:scale-110 transition-transform">
+                                        <span class="material-symbols-outlined">check_circle</span>
+                                    </button>
+                                    <button (click)="cancelEdit()" class="text-tomato hover:scale-110 transition-transform">
+                                        <span class="material-symbols-outlined">cancel</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Eclisse - Staff Access</title>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Hanken+Grotesk:wght@400;600&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-lowest": "#0e0e0e",
+                    "outline": "#988e90",
+                    "error-container": "#93000a",
+                    "on-tertiary": "#2f3131",
+                    "tertiary-fixed": "#e2e2e2",
+                    "inverse-surface": "#e5e2e1",
+                    "on-tertiary-fixed-variant": "#454747",
+                    "surface-container-high": "#2a2a2a",
+                    "background": "#131313",
+                    "surface-dim": "#131313",
+                    "secondary": "#e9c349",
+                    "on-tertiary-container": "#747576",
+                    "tertiary": "#c6c6c7",
+                    "primary-fixed-dim": "#c6c6c6",
+                    "on-error": "#690005",
+                    "primary-fixed": "#e2e2e2",
+                    "on-surface-variant": "#cfc4c5",
+                    "on-secondary-container": "#342800",
+                    "primary": "#c6c6c6",
+                    "on-background": "#e5e2e1",
+                    "on-secondary-fixed": "#241a00",
+                    "surface-container-low": "#1c1b1b",
+                    "outline-variant": "#4c4546",
+                    "surface-container-highest": "#353535",
+                    "tertiary-container": "#000000",
+                    "on-surface": "#e5e2e1",
+                    "tomato": "#CD212A",
+                    "surface-variant": "#353535",
+                    "surface-tint": "#c6c6c6",
+                    "on-secondary": "#3c2f00",
+                    "tertiary-fixed-dim": "#c6c6c7",
+                    "on-primary-fixed-variant": "#474747",
+                    "secondary-fixed-dim": "#e9c349",
+                    "error": "#ffb4ab",
+                    "stark-gray": "#D4D4D4",
+                    "surface-container": "#20201f",
+                    "surface": "#131313",
+                    "on-error-container": "#ffdad6",
+                    "inverse-on-surface": "#313030",
+                    "emerald": "#008C45",
+                    "on-primary-container": "#757575",
+                    "primary-container": "#000000",
+                    "secondary-fixed": "#ffe088",
+                    "inverse-primary": "#5e5e5e",
+                    "on-secondary-fixed-variant": "#574500",
+                    "secondary-container": "#af8d11",
+                    "on-primary": "#303030",
+                    "surface-bright": "#393939",
+                    "on-tertiary-fixed": "#1a1c1c",
+                    "on-primary-fixed": "#1b1b1b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "80px",
+                    "unit": "4px",
+                    "margin-mobile": "20px",
+                    "overlap-sm": "-40px",
+                    "overlap-lg": "-120px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "nav-link": ["Hanken Grotesk"],
+                    "label-caps": ["Space Mono"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-lg": ["Anton"],
+                    "headline-lg-mobile": ["Anton"],
+                    "display-lg": ["Anton"],
+                    "display-xl": ["Anton"]
+            },
+            "fontSize": {
+                    "nav-link": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                    "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                    "headline-lg": ["48px", { "lineHeight": "48px", "fontWeight": "400" }],
+                    "headline-lg-mobile": ["40px", { "lineHeight": "40px", "fontWeight": "400" }],
+                    "display-lg": ["80px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+                    "display-xl": ["120px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "400" }]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active{
+            -webkit-box-shadow: 0 0 0 30px #0e0e0e inset !important;
+            -webkit-text-fill-color: #e5e2e1 !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-on-surface antialiased min-h-screen selection:bg-secondary selection:text-on-secondary overflow-hidden">
+<div class="flex flex-col md:flex-row h-screen w-full relative">
+<!-- Background Ambient Texture (Brutalist Grain/Smoke) -->
+<div class="absolute inset-0 z-0 pointer-events-none opacity-20 mix-blend-screen">
+<img alt="Atmospheric Texture" class="w-full h-full object-cover grayscale contrast-200" data-alt="A macro, extremely high-contrast black and white photograph of abstract, brutalist concrete textures and dark shadows. The lighting is harsh and dramatic, creating deep structural lines. The aesthetic is nocturnal, raw, and minimalist, serving as an architectural backdrop for a premium dark-mode interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy6nGhFrjGtMiIF2LBglLOEBSU6cX7p2moi2JzNCMUOeWU3oXDnJ48_3FpCBvEoCfamu67zj_huRUI9N9aMyP5ySVt9eFVZR5bEybzdsBQDdy2fsRQxldMFhhJjyoE8kwxJRSn140eeQYSJivkPLjFmXRUzsudDXzEF-_gcQRPBUSmuM5YJYETv20zJj421GeCpqgn4BhD228R6vOKxgR3FHA50htxWKDNqWs4RDBtVDRZvLo3sa3uOA598R-j03KnSgPDz8XIoDp1"/>
+</div>
+<!-- Left Column: Typographic Anchor -->
+<div class="hidden md:flex flex-col justify-between w-[400px] border-r border-outline-variant p-margin-desktop relative z-10 bg-surface-container-lowest/80 backdrop-blur-sm">
+<div class="space-y-4">
+<span class="material-symbols-outlined text-secondary text-4xl block">admin_panel_settings</span>
+<p class="font-label-caps text-label-caps text-on-surface-variant max-w-[200px]">RESTRICTED SECTOR. AUTHORIZED PERSONNEL ONLY.</p>
+</div>
+<!-- Tricolore Divider Vertical -->
+<div class="absolute right-0 top-1/2 transform -translate-y-1/2 flex flex-col w-[2px] h-[120px]">
+<div class="flex-1 bg-emerald"></div>
+<div class="flex-1 bg-stark-gray"></div>
+<div class="flex-1 bg-tomato"></div>
+</div>
+<div class="relative">
+<h1 class="font-display-lg text-display-lg text-on-surface leading-none -ml-2 tracking-tighter">
+                    STAFF<br/>
+<span class="text-secondary">ACCESS</span>
+</h1>
+<!-- Vertical Eclisse Brand -->
+<div class="absolute -right-margin-desktop top-0 h-full flex items-center justify-center opacity-10 translate-x-full">
+<h2 class="font-display-xl text-display-xl text-on-surface transform -rotate-90 whitespace-nowrap tracking-tighter">ECLISSE</h2>
+</div>
+</div>
+</div>
+<!-- Right Column: Interactive Form Canvas -->
+<div class="flex-1 flex flex-col justify-center items-center p-margin-mobile md:p-margin-desktop relative z-10">
+<div class="w-full max-w-[420px] bg-surface-container-lowest border border-outline-variant p-8 md:p-12 relative">
+<!-- Corner Accents -->
+<div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-secondary -translate-x-[1px] -translate-y-[1px]"></div>
+<div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-secondary translate-x-[1px] translate-y-[1px]"></div>
+<!-- Mobile Header (Hidden on Desktop) -->
+<div class="md:hidden mb-12">
+<span class="material-symbols-outlined text-secondary mb-4 block">admin_panel_settings</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface leading-none tracking-tighter">
+                        STAFF<br/><span class="text-secondary">ACCESS</span>
+</h1>
+<!-- Mobile Tricolore Divider -->
+<div class="flex w-full h-[2px] mt-6">
+<div class="flex-1 bg-emerald"></div>
+<div class="flex-1 bg-stark-gray"></div>
+<div class="flex-1 bg-tomato"></div>
+</div>
+</div>
+<form class="space-y-10" id="loginForm">
+<!-- Username Input -->
+<div class="relative group">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2 group-focus-within:text-secondary transition-colors" for="username">USERNAME / ID</label>
+<div class="relative">
+<input autocomplete="off" autofocus="" class="w-full bg-transparent border-0 border-b border-outline text-on-surface font-label-caps text-label-caps px-0 py-3 focus:ring-0 focus:border-secondary transition-colors rounded-none placeholder:text-surface-variant" id="username" name="username" placeholder="ECL-XXXX" required="" type="text"/>
+</div>
+</div>
+<!-- Password Input -->
+<div class="relative group">
+<label class="block font-label-caps text-label-caps text-on-surface-variant mb-2 group-focus-within:text-secondary transition-colors" for="password">PASSWORD</label>
+<div class="relative">
+<input class="w-full bg-transparent border-0 border-b border-outline text-on-surface font-label-caps text-label-caps px-0 py-3 focus:ring-0 focus:border-secondary transition-colors rounded-none placeholder:text-surface-variant tracking-widest" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+</div>
+</div>
+<!-- Actions -->
+<div class="pt-8">
+<button class="w-full py-4 border border-secondary text-secondary font-label-caps text-label-caps tracking-[0.2em] uppercase hover:bg-secondary hover:text-on-secondary transition-all duration-300 rounded-none relative overflow-hidden group" type="button">
+<span class="relative z-10 flex items-center justify-center gap-2">
+                                ENTRAR
+                                <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</span>
+</button>
+</div>
+</form>
+<!-- Footer Status -->
+<div class="mt-12 flex justify-between items-center pt-6 border-t border-outline-variant/50">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-50 flex items-center gap-2">
+<span class="w-2 h-2 bg-emerald rounded-full animate-pulse"></span>
+                        NODE ONLINE
+                    </span>
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-50">v4.2.0</span>
+</div>
+</div>
+<!-- Floating Decoration -->
+<div class="absolute bottom-margin-desktop right-margin-desktop hidden lg:block opacity-20 pointer-events-none">
+<span class="font-label-caps text-label-caps text-on-surface whitespace-nowrap transform rotate-90 origin-bottom-right block">SYS_AUTH_REQ_10293</span>
+</div>
+</div>
+</div>
+<script>
+        // Simple script to auto-focus the first input on load for immediate typing
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstInput = document.getElementById('username');
+            if(firstInput) {
+                setTimeout(() => firstInput.focus(), 100);
+            }
+        });
+    </script>
+</body></html>

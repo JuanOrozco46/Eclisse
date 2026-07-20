@@ -1,0 +1,21 @@
+<!-- Texture Overlay -->
+<!-- <div *ngIf="!isSpecialRoute()" class="fixed inset-0 texture-overlay z-[5] pointer-events-none opacity-20"></div> -->
+
+
+<!-- Navigation -->
+<app-navbar *ngIf="!isSpecialRoute()"></app-navbar>
+
+<main [ngClass]="{
+    'relative flex flex-col min-h-screen': !isSpecialRoute(),
+    'main-content-shift': !isSpecialRoute()
+}">
+    <router-outlet></router-outlet>
+</main>
+
+
+
+<!-- Footer -->
+<app-footer *ngIf="!isSpecialRoute()"></app-footer>
+
+<!-- Floating Assistant -->
+<app-floating-wa *ngIf="!isSpecialRoute()"></app-floating-wa>

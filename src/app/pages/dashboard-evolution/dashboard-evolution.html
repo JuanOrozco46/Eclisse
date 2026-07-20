@@ -1,0 +1,379 @@
+<div class="relative flex flex-col gap-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end border-b-2 border-outline-variant pb-12 gap-8 relative z-10">
+        <div>
+            <div class="flex items-center gap-4 mb-4">
+                <span class="font-anton text-secondary text-2xl">007</span>
+                <div class="h-px w-20 bg-outline-variant"></div>
+            </div>
+            <h1 class="font-anton text-7xl md:text-9xl text-white uppercase leading-none tracking-tighter">EVOLUTION<br/>ENGINE</h1>
+            <p class="font-label-caps text-[12px] text-secondary mt-6 tracking-brutal uppercase">INTEGRACIÓN Y AUTOMATIZACIÓN WHATSAPP</p>
+        </div>
+        <div class="flex flex-col items-end">
+             <span class="font-label-caps text-[10px] text-stark-gray opacity-40 mb-2 uppercase tracking-widest">ESTADO DEL MOTOR</span>
+             <span [class.border-emerald]="instance()?.status === 'connected'"
+                   [class.border-tomato]="instance()?.status === 'disconnected' || instance()?.status === 'close'"
+                   [class.border-secondary]="instance()?.status === 'connecting' || loading()"
+                   class="px-6 py-2 border-2 bg-background font-anton text-xl uppercase tracking-widest"
+                   [class.animate-pulse]="loading() || instance()?.status === 'connecting'">
+                {{ loading() ? 'CONSULTANDO...' : (instance()?.status || 'OFFLINE') }}
+             </span>
+        </div>
+    </header>
+
+    <div *ngIf="error()" class="bg-tomato/10 border border-tomato/20 p-6 text-tomato font-label-caps text-xs tracking-widest uppercase">
+        ERROR: {{error()}}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 relative z-10">
+        <!-- Instance Stats -->
+        <div class="lg:col-span-4 flex flex-col gap-10">
+            <div class="border border-outline-variant bg-surface-container-low p-10 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 font-anton text-stark-gray opacity-5 text-4xl">INFO_v1</div>
+                <h2 class="font-anton text-4xl text-white uppercase mb-10 tracking-tighter">INSTANCIA</h2>
+                
+                <div class="space-y-8">
+                    <div class="flex flex-col border-b border-outline-variant pb-4">
+                        <span class="font-label-caps text-[10px] text-stark-gray opacity-40 tracking-widest uppercase">NOMBRE DEL NODO</span>
+                        <span class="font-anton text-2xl text-white mt-1 uppercase">{{instance()?.instanceName || '---'}}</span>
+                    </div>
+                    <div class="flex flex-col border-b border-outline-variant pb-4">
+                        <span class="font-label-caps text-[10px] text-stark-gray opacity-40 tracking-widest uppercase">TELÉFONO VINCULADO</span>
+                        <span class="font-anton text-2xl text-white mt-1">{{instance()?.number || 'NO REGISTRADO'}}</span>
+                    </div>
+                </div>
+
+                <!-- QR CODE Section -->
+                <div *ngIf="instance()?.status !== 'connected' && instance()?.qrcode" class="mt-10 bg-white p-4 flex flex-col items-center gap-4">
+                    <img [src]="instance()?.qrcode" alt="QR Code" class="w-full aspect-square grayscale contrast-150">
+                    <span class="font-label-caps text-[10px] text-black tracking-widest uppercase text-center">ESCANEA PARA VINCULAR WHATSAPP</span>
+                </div>
+
+                <div class="mt-12 flex flex-col gap-4">
+                    <button *ngIf="instance()?.status !== 'connected'" (click)="reconnect()" [disabled]="loading()"
+                            class="w-full py-6 border-2 border-secondary text-secondary font-anton text-xl tracking-brutal uppercase hover:bg-secondary hover:text-on-secondary transition-all shadow-brutal-gold disabled:opacity-50">
+                        {{ instance()?.qrcode ? 'REGENERAR QR' : 'VINCULAR WHATSAPP' }}
+                    </button>
+                    <button *ngIf="instance()?.status === 'connected'" (click)="logout()" [disabled]="loading()"
+                            class="w-full py-6 border-2 border-tomato text-tomato font-anton text-xl tracking-brutal uppercase hover:bg-tomato hover:text-on-secondary transition-all disabled:opacity-50">
+                        CERRAR SESIÓN
+                    </button>
+                </div>
+            </div>
+
+            <!-- Server Info -->
+            <div class="border border-outline-variant bg-surface-container-lowest p-10 flex flex-col gap-8">
+                <h3 class="font-anton text-2xl text-white uppercase tracking-tighter">EVOLUTION SERVER</h3>
+                <div class="bg-background border border-outline-variant p-5 overflow-hidden">
+                    <code class="font-mono text-[10px] text-secondary break-all">https://elhornobotprueba1.onrender.com</code>
+                </div>
+                <p class="font-label-caps text-[9px] text-stark-gray opacity-30 tracking-widest uppercase text-center">API AUTHENTICATION ACTIVE</p>
+            </div>
+        </div>
+
+        <!-- Activity Logs & Rules -->
+        <div class="lg:col-span-8 flex flex-col gap-10">
+            <div class="flex justify-between items-end border-b border-outline-variant pb-4">
+                <h2 class="font-anton text-4xl text-white uppercase tracking-tighter">ESTADO DEL SISTEMA</h2>
+                <span class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest">REAL-TIME BOT MONITOR</span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6">
+                <!-- AI Personality Control -->
+                <div class="border border-secondary/30 bg-secondary/[0.03] p-10 relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 font-anton text-secondary opacity-5 text-[10rem] select-none rotate-12">ZEN</div>
+                    <div class="relative z-10 flex flex-col gap-8">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div class="h-px w-10 bg-secondary"></div>
+                                <h3 class="font-anton text-3xl text-white uppercase tracking-tighter">PERSONALIDAD DE LA IA</h3>
+                            </div>
+                            <span class="font-label-caps text-[9px] text-secondary border border-secondary/30 px-3 py-1">LUISA_AI ENGINE v2.0</span>
+                        </div>
+                        
+                        <div class="flex flex-col gap-4">
+                            <label class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest">SYSTEM PROMPT (MODO MAESTRO)</label>
+                            <textarea #promptText 
+                                      class="w-full h-48 bg-background/50 border border-outline-variant p-6 font-hanken text-stark-gray text-base leading-relaxed focus:border-secondary transition-all outline-none resize-none"
+                                      [value]="aiConfig().systemPrompt"></textarea>
+                        </div>
+
+                        <div class="flex flex-wrap gap-4">
+                            <button (click)="saveAiPrompt(promptText.value)" class="px-8 py-4 border-2 border-secondary font-anton text-sm text-secondary hover:bg-secondary hover:text-on-secondary transition-all uppercase tracking-widest shadow-brutal-gold">
+                                ACTUALIZAR PERSONALIDAD
+                            </button>
+                            <button (click)="showAiSettings = !showAiSettings" class="px-8 py-4 border border-outline-variant font-anton text-sm text-white hover:border-secondary hover:text-secondary transition-all uppercase tracking-widest">
+                                CONFIGURACIÓN PERSISTENCIA
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fallback Logic Config (Overlay/Section) -->
+                <div *ngIf="showAiSettings" class="border border-outline-variant bg-surface-container-low p-10 flex flex-col gap-10 animate-in fade-in zoom-in-95">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-anton text-2xl text-white uppercase tracking-tighter">CADENA DE PERSISTENCIA (FALLBACK)</h3>
+                        <button (click)="showAiSettings = false" class="material-symbols-outlined text-stark-gray hover:text-white">close</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="flex flex-col gap-3">
+                            <label class="font-label-caps text-[10px] text-secondary tracking-widest">MODELO PRIMARIO</label>
+                            <input #pModel type="text" [value]="aiConfig().primaryModel" class="bg-background border border-outline-variant p-4 font-mono text-xs text-white outline-none focus:border-secondary">
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <label class="font-label-caps text-[10px] text-secondary tracking-widest">RESPALDO 1</label>
+                            <input #sModel type="text" [value]="aiConfig().secondaryModel" class="bg-background border border-outline-variant p-4 font-mono text-xs text-white outline-none focus:border-secondary">
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <label class="font-label-caps text-[10px] text-secondary tracking-widest">RESPALDO 2 (CRÍTICO)</label>
+                            <input #tModel type="text" [value]="aiConfig().tertiaryModel" class="bg-background border border-outline-variant p-4 font-mono text-xs text-white outline-none focus:border-secondary">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3 border-t border-outline-variant pt-8">
+                        <label class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">GEMINI API KEY (SECRETO)</label>
+                        <div class="relative">
+                            <input #gKey type="password" [value]="aiConfig().geminiApiKey" 
+                                   class="w-full bg-background border border-outline-variant p-4 font-mono text-xs text-white outline-none focus:border-secondary tracking-widest"
+                                   placeholder="COLOCA TU API KEY AQUÍ...">
+                            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-stark-gray opacity-30 text-sm">key</span>
+                        </div>
+                        <p class="font-label-caps text-[8px] text-stark-gray opacity-30 tracking-widest">ESTA CLAVE SE GUARDA LOCALMENTE Y NO SE COMPARTE.</p>
+                    </div>
+
+                    <button (click)="updateFallbackWithKey(pModel.value, sModel.value, tModel.value, gKey.value)" 
+                            class="w-full py-5 border-2 border-secondary text-secondary font-anton text-lg tracking-widest uppercase hover:bg-secondary hover:text-black transition-all">
+                        GUARDAR CONFIGURACIÓN MAESTRA
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div class="border border-outline-variant p-8 flex flex-col gap-4">
+                        <span class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">MENSAJES GESTIONADOS</span>
+                        <span class="font-anton text-6xl text-white">1,248</span>
+                     </div>
+                     <div class="border border-outline-variant p-8 flex flex-col gap-4">
+                        <span class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">LATENCIA IA (AVG)</span>
+                        <span class="font-anton text-6xl text-white">1.2s</span>
+                     </div>
+                </div>
+
+                <!-- ══ RAPPI INTEGRATION BLOCK ══ -->
+                <div class="border border-[#FF6900]/30 bg-[#FF6900]/[0.03] p-10 relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 font-anton text-[#FF6900] opacity-5 text-[10rem] select-none rotate-12">RAPPI</div>
+                    <div class="relative z-10 flex flex-col gap-8">
+
+                        <!-- Header -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div class="h-px w-10 bg-[#FF6900]"></div>
+                                <h3 class="font-anton text-3xl text-white uppercase tracking-tighter">RAPPI INTEGRATION</h3>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span *ngIf="rappiConfig().connected"
+                                      class="flex items-center gap-2 font-label-caps text-[9px] text-emerald border border-emerald/30 px-3 py-1">
+                                    <span class="w-2 h-2 bg-emerald rounded-full animate-pulse"></span>
+                                    CONECTADO
+                                </span>
+                                <span *ngIf="!rappiConfig().connected"
+                                      class="font-label-caps text-[9px] text-stark-gray border border-outline-variant px-3 py-1">
+                                    DESCONECTADO
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Connected State -->
+                        <div *ngIf="rappiConfig().connected" class="flex flex-col gap-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-background border border-outline-variant p-6 flex flex-col gap-2">
+                                    <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase">STORE ID</span>
+                                    <span class="font-anton text-xl text-white">{{rappiConfig().storeId}}</span>
+                                </div>
+                                <div class="bg-background border border-outline-variant p-6 flex flex-col gap-2">
+                                    <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase">CONECTADO DESDE</span>
+                                    <span class="font-mono text-sm text-emerald">{{rappiConfig().connectedAt | date:'dd/MM/yyyy HH:mm'}}</span>
+                                </div>
+                            </div>
+                            <div class="bg-background border border-[#FF6900]/20 p-6 flex flex-col gap-3">
+                                <span class="font-label-caps text-[9px] text-[#FF6900] tracking-widest uppercase">WEBHOOK URL (dar a Rappi)</span>
+                                <code class="font-mono text-[11px] text-white break-all bg-black/30 p-3">https://tu-api.vercel.app/api/rappi-webhook</code>
+                                <p class="font-label-caps text-[8px] text-stark-gray opacity-30 tracking-widest">CONFIGURAR ESTE ENDPOINT EN EL PARTNER HUB DE RAPPI</p>
+                            </div>
+                            <button (click)="disconnectRappi()" 
+                                    class="w-full py-4 border border-tomato/40 text-tomato font-anton text-base tracking-widest uppercase hover:bg-tomato hover:text-white transition-all">
+                                DESCONECTAR RAPPI
+                            </button>
+                        </div>
+
+                        <!-- Disconnected State -->
+                        <div *ngIf="!rappiConfig().connected" class="flex flex-col gap-6">
+                            <p class="font-hanken text-stark-gray opacity-60 leading-relaxed max-w-xl">
+                                Conecta tu cuenta de Rappi Partner para recibir pedidos directamente en el panel de cocina. Los pedidos llegarán con domiciliario pre-asignado.
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-background border border-outline-variant p-6 flex flex-col gap-3 text-center">
+                                    <span class="font-anton text-3xl text-[#FF6900]">01</span>
+                                    <span class="font-label-caps text-[9px] text-stark-gray tracking-widest uppercase">Ingresa credenciales del Partner Hub</span>
+                                </div>
+                                <div class="bg-background border border-outline-variant p-6 flex flex-col gap-3 text-center">
+                                    <span class="font-anton text-3xl text-[#FF6900]">02</span>
+                                    <span class="font-label-caps text-[9px] text-stark-gray tracking-widest uppercase">Configura el webhook en Rappi</span>
+                                </div>
+                                <div class="bg-background border border-outline-variant p-6 flex flex-col gap-3 text-center">
+                                    <span class="font-anton text-3xl text-[#FF6900]">03</span>
+                                    <span class="font-label-caps text-[9px] text-stark-gray tracking-widest uppercase">¡Listo! Pedidos en tiempo real</span>
+                                </div>
+                            </div>
+                            <button (click)="openRappiWizard()" 
+                                    class="w-full py-5 border-2 border-[#FF6900] text-[#FF6900] font-anton text-xl tracking-brutal uppercase hover:bg-[#FF6900] hover:text-white transition-all flex items-center justify-center gap-3">
+                                <span class="material-symbols-outlined">link</span>
+                                VINCULAR CON RAPPI
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══ RAPPI WIZARD MODAL ══ -->
+<div *ngIf="showRappiWizard" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="w-full max-w-2xl bg-surface-container-lowest border border-[#FF6900]/30 relative overflow-hidden mx-4">
+        
+        <!-- Modal Header -->
+        <div class="flex justify-between items-center p-8 border-b border-outline-variant bg-[#FF6900]/5">
+            <div class="flex items-center gap-4">
+                <span class="font-anton text-3xl text-[#FF6900]">RAPPI</span>
+                <div class="h-6 w-px bg-outline-variant"></div>
+                <span class="font-label-caps text-[10px] text-stark-gray tracking-widest uppercase">ASISTENTE DE CONEXIÓN</span>
+            </div>
+            <button (click)="showRappiWizard = false" class="material-symbols-outlined text-stark-gray hover:text-white transition-colors">close</button>
+        </div>
+
+        <!-- Step Indicator -->
+        <div class="flex border-b border-outline-variant">
+            <div class="flex-1 py-4 text-center border-r border-outline-variant"
+                 [ngClass]="rappiWizardStep() >= 1 ? 'bg-[#FF6900]/10' : ''">
+                <span class="font-label-caps text-[9px] tracking-widest uppercase"
+                      [ngClass]="rappiWizardStep() >= 1 ? 'text-[#FF6900]' : 'text-stark-gray opacity-30'">01 CREDENCIALES</span>
+            </div>
+            <div class="flex-1 py-4 text-center border-r border-outline-variant"
+                 [ngClass]="rappiWizardStep() >= 2 ? 'bg-[#FF6900]/10' : ''">
+                <span class="font-label-caps text-[9px] tracking-widest uppercase"
+                      [ngClass]="rappiWizardStep() >= 2 ? 'text-[#FF6900]' : 'text-stark-gray opacity-30'">02 WEBHOOK</span>
+            </div>
+            <div class="flex-1 py-4 text-center"
+                 [ngClass]="rappiWizardStep() >= 3 ? 'bg-emerald/10' : ''">
+                <span class="font-label-caps text-[9px] tracking-widest uppercase"
+                      [ngClass]="rappiWizardStep() >= 3 ? 'text-emerald' : 'text-stark-gray opacity-30'">03 LISTO</span>
+            </div>
+        </div>
+
+        <!-- STEP 1: Credentials -->
+        <div *ngIf="rappiWizardStep() === 1" class="p-10 flex flex-col gap-8 animate-in fade-in duration-300">
+            <div>
+                <h3 class="font-anton text-3xl text-white uppercase tracking-tighter mb-2">CREDENCIALES DEL PARTNER</h3>
+                <p class="font-hanken text-stark-gray opacity-60 text-sm leading-relaxed">
+                    Ingresa al <strong class="text-white">Rappi Partner Hub</strong> → Configuración → API Access y copia los datos aquí.
+                </p>
+            </div>
+            <div class="flex flex-col gap-6">
+                <div class="flex flex-col gap-2">
+                    <label class="font-label-caps text-[10px] text-[#FF6900] tracking-widest uppercase">STORE ID (ID DE TU TIENDA)</label>
+                    <input type="text" [(ngModel)]="rappiForm.storeId" 
+                           class="bg-background border border-outline-variant focus:border-[#FF6900] p-4 font-mono text-sm text-white outline-none transition-colors w-full"
+                           placeholder="ej: 900123456-7">
+                    <p class="font-label-caps text-[8px] text-stark-gray opacity-30 tracking-widest">ENCUÉNTRALO EN: PARTNER HUB → MI TIENDA → INFORMACIÓN GENERAL</p>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="font-label-caps text-[10px] text-[#FF6900] tracking-widest uppercase">API KEY (CLAVE SECRETA)</label>
+                    <div class="relative">
+                        <input type="password" [(ngModel)]="rappiForm.apiKey" 
+                               class="w-full bg-background border border-outline-variant focus:border-[#FF6900] p-4 font-mono text-sm text-white outline-none transition-colors"
+                               placeholder="rp_live_XXXXXXXXXXXXXXXXXXXX">
+                        <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-stark-gray opacity-30 text-sm">key</span>
+                    </div>
+                    <p class="font-label-caps text-[8px] text-stark-gray opacity-30 tracking-widest">PARTNER HUB → CONFIGURACIÓN → INTEGRACIONES → API KEY</p>
+                </div>
+            </div>
+            <button (click)="rappiNextStep()" 
+                    [disabled]="!rappiForm.storeId || !rappiForm.apiKey"
+                    class="w-full py-5 border-2 border-[#FF6900] text-[#FF6900] font-anton text-lg tracking-widest uppercase hover:bg-[#FF6900] hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                CONTINUAR
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+
+        <!-- STEP 2: Webhook config -->
+        <div *ngIf="rappiWizardStep() === 2" class="p-10 flex flex-col gap-8 animate-in fade-in duration-300">
+            <div>
+                <h3 class="font-anton text-3xl text-white uppercase tracking-tighter mb-2">CONFIGURAR WEBHOOK</h3>
+                <p class="font-hanken text-stark-gray opacity-60 text-sm leading-relaxed">
+                    Copia esta URL y pégala en el Partner Hub de Rappi para que los pedidos lleguen automáticamente.
+                </p>
+            </div>
+            <div class="flex flex-col gap-4">
+                <div class="bg-background border border-[#FF6900]/30 p-6 flex flex-col gap-3">
+                    <span class="font-label-caps text-[9px] text-[#FF6900] tracking-widest uppercase">1. COPIA ESTA URL DE WEBHOOK:</span>
+                    <code class="font-mono text-[12px] text-white break-all bg-black/30 p-4">https://tu-api.vercel.app/api/rappi-webhook</code>
+                </div>
+                <div class="bg-background border border-outline-variant p-6 flex flex-col gap-3">
+                    <span class="font-label-caps text-[9px] text-secondary tracking-widest uppercase">2. EN RAPPI PARTNER HUB:</span>
+                    <ol class="font-hanken text-sm text-stark-gray opacity-60 space-y-2 pl-4">
+                        <li>→ Ve a <strong class="text-white">Configuración → Integraciones → Webhooks</strong></li>
+                        <li>→ Haz clic en <strong class="text-white">"Nuevo webhook"</strong></li>
+                        <li>→ Pega la URL y selecciona el evento <strong class="text-white">"Nuevo pedido"</strong></li>
+                        <li>→ Copia el <strong class="text-white">Webhook Secret</strong> que te da Rappi</li>
+                    </ol>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">WEBHOOK SECRET (de Rappi)</label>
+                    <input type="text" [(ngModel)]="rappiForm.webhookSecret" 
+                           class="bg-background border border-outline-variant focus:border-secondary p-4 font-mono text-sm text-white outline-none transition-colors w-full"
+                           placeholder="whsec_XXXXXXXXXXXXXXXX">
+                    <p class="font-label-caps text-[8px] text-stark-gray opacity-30 tracking-widest">OPCIONAL PERO RECOMENDADO PARA SEGURIDAD</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button (click)="rappiPrevStep()" 
+                        class="flex-1 py-4 border border-outline-variant text-stark-gray font-anton text-base tracking-widest uppercase hover:border-white hover:text-white transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    VOLVER
+                </button>
+                <button (click)="connectRappi()" [disabled]="rappiSaving()"
+                        class="flex-1 py-4 border-2 border-[#FF6900] text-[#FF6900] font-anton text-base tracking-widest uppercase hover:bg-[#FF6900] hover:text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                    <span *ngIf="!rappiSaving()">CONECTAR</span>
+                    <span *ngIf="rappiSaving()" class="flex items-center gap-2">
+                        <span class="w-4 h-4 border-2 border-[#FF6900] border-t-transparent rounded-full animate-spin"></span>
+                        VERIFICANDO...
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Success -->
+        <div *ngIf="rappiWizardStep() === 3" class="p-10 flex flex-col items-center gap-8 text-center animate-in fade-in zoom-in-95 duration-300">
+            <div class="w-20 h-20 bg-emerald/20 border border-emerald/40 flex items-center justify-center">
+                <span class="material-symbols-outlined text-emerald text-5xl">check_circle</span>
+            </div>
+            <div>
+                <h3 class="font-anton text-4xl text-white uppercase tracking-tighter mb-3">¡RAPPI CONECTADO!</h3>
+                <p class="font-hanken text-stark-gray opacity-60 leading-relaxed max-w-md">
+                    Los nuevos pedidos de Rappi aparecerán automáticamente en el <strong class="text-white">Monitor de Cocina</strong> con el botón <strong class="text-[#FF6900]">"Aceptar Pedido Rappi"</strong> listo para usar.
+                </p>
+            </div>
+            <div class="w-full bg-background border border-outline-variant p-6 text-left flex flex-col gap-3">
+                <span class="font-label-caps text-[9px] text-secondary tracking-widest uppercase">STORE ID ACTIVO</span>
+                <span class="font-anton text-2xl text-white">{{rappiConfig().storeId}}</span>
+            </div>
+            <button (click)="showRappiWizard = false" 
+                    class="w-full py-5 bg-emerald text-black font-anton text-xl tracking-brutal uppercase hover:brightness-110 transition-all">
+                IR AL PANEL DE COCINA
+            </button>
+        </div>
+    </div>
+</div>

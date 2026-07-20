@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ECLISSE - Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Hanken+Grotesk:wght@400;600&amp;family=Space+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "secondary": "#e9c349",
+                "tertiary-fixed": "#e2e2e2",
+                "secondary-fixed": "#ffe088",
+                "on-surface-variant": "#cfc4c5",
+                "secondary-fixed-dim": "#e9c349",
+                "on-primary-container": "#757575",
+                "on-error": "#690005",
+                "on-background": "#e5e2e1",
+                "on-secondary-container": "#342800",
+                "on-secondary-fixed": "#241a00",
+                "primary-container": "#000000",
+                "inverse-surface": "#e5e2e1",
+                "error-container": "#93000a",
+                "on-primary-fixed-variant": "#474747",
+                "surface-container-low": "#1c1b1b",
+                "surface-container-highest": "#353535",
+                "on-tertiary-container": "#747576",
+                "on-secondary": "#3c2f00",
+                "on-error-container": "#ffdad6",
+                "stark-gray": "#D4D4D4",
+                "on-surface": "#e5e2e1",
+                "emerald": "#008C45",
+                "primary-fixed-dim": "#c6c6c6",
+                "tertiary": "#c6c6c7",
+                "surface-dim": "#131313",
+                "error": "#ffb4ab",
+                "outline": "#988e90",
+                "inverse-primary": "#5e5e5e",
+                "background": "#131313",
+                "on-secondary-fixed-variant": "#574500",
+                "on-tertiary": "#2f3131",
+                "surface-container": "#20201f",
+                "on-tertiary-fixed": "#1a1c1c",
+                "inverse-on-surface": "#313030",
+                "surface-container-lowest": "#0e0e0e",
+                "tertiary-fixed-dim": "#c6c6c7",
+                "tertiary-container": "#000000",
+                "surface": "#131313",
+                "on-tertiary-fixed-variant": "#454747",
+                "primary-fixed": "#e2e2e2",
+                "on-primary-fixed": "#1b1b1b",
+                "primary": "#c6c6c6",
+                "surface-tint": "#c6c6c6",
+                "secondary-container": "#af8d11",
+                "surface-variant": "#353535",
+                "outline-variant": "#4c4546",
+                "surface-bright": "#393939",
+                "surface-container-high": "#2a2a2a",
+                "tomato": "#CD212A",
+                "on-primary": "#303030"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "margin-mobile": "20px",
+                "gutter": "24px",
+                "unit": "4px",
+                "overlap-lg": "-120px",
+                "overlap-sm": "-40px",
+                "margin-desktop": "80px"
+        },
+        "fontFamily": {
+                "headline-lg-mobile": [
+                        "Anton"
+                ],
+                "display-xl": [
+                        "Anton"
+                ],
+                "label-caps": [
+                        "Space Mono"
+                ],
+                "nav-link": [
+                        "Hanken Grotesk"
+                ],
+                "headline-lg": [
+                        "Anton"
+                ],
+                "display-lg": [
+                        "Anton"
+                ],
+                "body-md": [
+                        "Hanken Grotesk"
+                ],
+                "body-lg": [
+                        "Hanken Grotesk"
+                ]
+        },
+        "fontSize": {
+                "headline-lg-mobile": [
+                        "40px",
+                        {
+                                "lineHeight": "40px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "display-xl": [
+                        "120px",
+                        {
+                                "lineHeight": "100px",
+                                "letterSpacing": "-0.04em",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.1em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "nav-link": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "headline-lg": [
+                        "48px",
+                        {
+                                "lineHeight": "48px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "display-lg": [
+                        "80px",
+                        {
+                                "lineHeight": "72px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+</head>
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col md:flex-row font-body-md text-body-md">
+<!-- TopNavBar for Mobile -->
+<nav class="md:hidden flex justify-between items-center w-full px-margin-mobile py-8 border-b border-outline dark:border-outline-variant bg-background dark:bg-background z-50">
+<a class="font-display-xl text-headline-lg-mobile tracking-tighter text-on-background dark:text-on-background" href="#">ECLISSE</a>
+<div class="flex space-x-4">
+<button class="text-on-background dark:text-on-background">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+</div>
+</nav>
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex flex-col items-center py-margin-desktop space-y-12 fixed left-0 top-0 h-full w-[80px] border-r border-outline dark:border-outline-variant bg-surface-container-lowest dark:bg-surface-container-lowest z-50">
+<!-- Logo -->
+<div class="mt-8 mb-auto">
+<a class="font-display-lg text-display-lg text-on-surface dark:text-on-surface -rotate-90 origin-left block transform -translate-x-4 uppercase" href="#">ECLISSE</a>
+</div>
+<!-- Navigation Links -->
+<ul class="flex flex-col space-y-8 mt-12 w-full items-center flex-grow justify-center">
+<li class="w-full flex justify-center group">
+<a class="flex flex-col items-center text-on-surface-variant hover:text-on-surface transition-all duration-300 hover:scale-110 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="font-label-caps text-label-caps sr-only">INICIO</span>
+</a>
+</li>
+<li class="w-full flex justify-center group">
+<a class="flex flex-col items-center text-on-surface-variant hover:text-on-surface transition-all duration-300 hover:scale-110 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu" style="font-variation-settings: 'FILL' 0;">restaurant_menu</span>
+<span class="font-label-caps text-label-caps sr-only">CARTA</span>
+</a>
+</li>
+<li class="w-full flex justify-center group relative">
+<!-- Active State (Admin Dashboard conceptually maps best to "Home/Inicio" but for demo purposes highlighting an icon) -->
+<a class="flex flex-col items-center bg-secondary text-on-secondary-fixed font-bold p-2 transition-all duration-300 scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-caps text-label-caps sr-only">DASHBOARD</span>
+</a>
+</li>
+<li class="w-full flex justify-center group">
+<a class="flex flex-col items-center text-on-surface-variant hover:text-on-surface transition-all duration-300 hover:scale-110 p-2" href="#">
+<span class="material-symbols-outlined" data-icon="location_on" style="font-variation-settings: 'FILL' 0;">location_on</span>
+<span class="font-label-caps text-label-caps sr-only">CONTACTO</span>
+</a>
+</li>
+</ul>
+<!-- Action / CTA -->
+<div class="mt-auto mb-8 writing-vertical text-center transform -rotate-180" style="writing-mode: vertical-rl;">
+<span class="font-label-caps text-label-caps text-stark-gray opacity-50 tracking-widest">ATELIER D'ADMIN</span>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-[80px] p-margin-mobile md:p-margin-desktop bg-background relative z-10 flex flex-col gap-16 min-h-screen">
+<!-- Header -->
+<header class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-outline-variant pb-8 gap-8">
+<div>
+<h1 class="font-display-xl text-display-xl text-stark-gray uppercase leading-none tracking-tighter">CENTRO DE<br/>MANDO</h1>
+<p class="font-label-caps text-label-caps text-secondary mt-4 tracking-widest">GESTIÓN OPERATIVA DEL ATELIER</p>
+</div>
+<div class="flex items-center space-x-2 bg-surface-container-low border border-outline-variant px-4 py-2">
+<div class="w-2 h-2 rounded-full bg-emerald animate-pulse"></div>
+<span class="font-label-caps text-label-caps text-stark-gray">SISTEMA ONLINE</span>
+</div>
+</header>
+<!-- Executive Summary KPIs -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- KPI 1: Ventas Totales -->
+<div class="border border-outline-variant bg-surface-container-lowest p-6 flex flex-col justify-between min-h-[160px] relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-stark-gray m-2 opacity-20"></div>
+<h3 class="font-label-caps text-label-caps text-stark-gray opacity-60">VENTAS TOTALES (MES)</h3>
+<div class="mt-auto flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-secondary">€42,900</span>
+<span class="font-label-caps text-label-caps text-emerald">+15%</span>
+</div>
+</div>
+<!-- KPI 2: Gastos Operativos -->
+<div class="border border-outline-variant bg-surface-container-lowest p-6 flex flex-col justify-between min-h-[160px] relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-stark-gray m-2 opacity-20"></div>
+<h3 class="font-label-caps text-label-caps text-stark-gray opacity-60">GASTOS OPERATIVOS</h3>
+<div class="mt-auto flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-stark-gray">€18,240</span>
+<span class="font-label-caps text-label-caps text-tomato">-2%</span>
+</div>
+</div>
+<!-- KPI 3: Margen de Beneficio -->
+<div class="border border-secondary bg-surface-container-lowest p-6 flex flex-col justify-between min-h-[160px] relative overflow-hidden group">
+<div class="absolute inset-0 bg-secondary opacity-5 group-hover:opacity-10 transition-opacity"></div>
+<h3 class="font-label-caps text-label-caps text-secondary opacity-80">MARGEN DE BENEFICIO</h3>
+<div class="mt-auto flex flex-col">
+<span class="font-headline-lg text-headline-lg text-stark-gray leading-none mb-1">57.4%</span>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-60">ÓPTIMO</span>
+</div>
+</div>
+<!-- KPI 4: Pedidos del Día -->
+<div class="border border-outline-variant bg-surface-container-lowest p-6 flex flex-col justify-between min-h-[160px] relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-stark-gray m-2 opacity-20"></div>
+<h3 class="font-label-caps text-label-caps text-stark-gray opacity-60">PEDIDOS DEL DÍA</h3>
+<div class="mt-auto flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-stark-gray">142</span>
+<span class="font-label-caps text-label-caps text-emerald">OBJETIVO: 150</span>
+</div>
+</div>
+</section>
+<!-- Sales Chart and Control de Gastos -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Sales Chart -->
+<div class="lg:col-span-8 flex flex-col space-y-6">
+<div class="flex justify-between items-end border-b border-outline-variant pb-2">
+<h2 class="font-headline-lg text-headline-lg text-stark-gray uppercase">RENDIMIENTO DE VENTAS</h2>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-50">ÚLTIMOS 7 DÍAS</span>
+</div>
+<div class="border border-outline-variant bg-surface-container-lowest p-6 h-64 flex items-end justify-between gap-2">
+<!-- Brutalist Bar Chart Mockup -->
+<div class="w-full bg-surface-variant hover:bg-secondary transition-colors h-[40%] relative group"><span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-label-caps text-label-caps text-stark-gray opacity-0 group-hover:opacity-100">LUN</span></div>
+<div class="w-full bg-surface-variant hover:bg-secondary transition-colors h-[60%] relative group"><span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-label-caps text-label-caps text-stark-gray opacity-0 group-hover:opacity-100">MAR</span></div>
+<div class="w-full bg-surface-variant hover:bg-secondary transition-colors h-[50%] relative group"><span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-label-caps text-label-caps text-stark-gray opacity-0 group-hover:opacity-100">MIE</span></div>
+<div class="w-full bg-surface-variant hover:bg-secondary transition-colors h-[80%] relative group"><span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-label-caps text-label-caps text-stark-gray opacity-0 group-hover:opacity-100">JUE</span></div>
+<div class="w-full bg-secondary h-[100%] relative group"><span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-label-caps text-label-caps text-secondary">VIE</span></div>
+<div class="w-full bg-surface-variant hover:bg-secondary transition-colors h-[90%] relative group"><span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-label-caps text-label-caps text-stark-gray opacity-0 group-hover:opacity-100">SAB</span></div>
+<div class="w-full bg-surface-variant hover:bg-secondary transition-colors h-[75%] relative group"><span class="absolute -top-6 left-1/2 transform -translate-x-1/2 font-label-caps text-label-caps text-stark-gray opacity-0 group-hover:opacity-100">DOM</span></div>
+</div>
+</div>
+<!-- Control de Gastos -->
+<div class="lg:col-span-4 flex flex-col space-y-6">
+<div class="border-b border-outline-variant pb-2">
+<h2 class="font-headline-lg text-headline-lg text-stark-gray uppercase">CONTROL DE GASTOS</h2>
+</div>
+<div class="border border-outline-variant bg-surface-container-lowest p-6 flex flex-col space-y-4">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-stark-gray">ALQUILER LOCAL</span>
+<span class="font-body-md text-stark-gray font-bold">€3,500</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-stark-gray">NÓMINAS (MES)</span>
+<span class="font-body-md text-stark-gray font-bold">€8,200</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-stark-gray">SUMINISTROS (LUZ/AGUA)</span>
+<span class="font-body-md text-stark-gray font-bold">€1,150</span>
+</div>
+<div class="flex justify-between items-center border-b border-outline-variant pb-2">
+<span class="font-label-caps text-label-caps text-stark-gray">INGREDIENTES (PROVEEDORES)</span>
+<span class="font-body-md text-stark-gray font-bold">€4,800</span>
+</div>
+<div class="flex justify-between items-center pt-2">
+<span class="font-label-caps text-label-caps text-secondary">TOTAL GASTOS</span>
+<span class="font-headline-lg text-headline-lg text-secondary text-2xl">€17,650</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Inventario Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<div class="lg:col-span-12 flex flex-col space-y-6">
+<div class="flex justify-between items-end border-b border-outline-variant pb-2">
+<h2 class="font-headline-lg text-headline-lg text-stark-gray uppercase">INVENTARIO MAESTRO</h2>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-50">ACTUALIZADO: HOY 08:00</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Inventory Item 1 -->
+<div class="border border-outline-variant bg-surface-container-lowest p-4 hover:border-stark-gray transition-colors">
+<div class="flex justify-between items-center mb-4">
+<span class="font-body-lg text-body-lg text-stark-gray uppercase font-bold">CAPUTO NUVOLA (HARINA)</span>
+<span class="inline-block px-2 py-1 border border-emerald text-emerald font-label-caps text-label-caps text-[10px] bg-emerald/10">OK</span>
+</div>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-stark-gray text-3xl">120 KG</span>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-60">MIN: 50 KG</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-4">
+<div class="bg-emerald h-1 w-[80%]"></div>
+</div>
+</div>
+<!-- Inventory Item 2 -->
+<div class="border border-outline-variant bg-surface-container-lowest p-4 hover:border-stark-gray transition-colors">
+<div class="flex justify-between items-center mb-4">
+<span class="font-body-lg text-body-lg text-stark-gray uppercase font-bold">SAN MARZANO (TOMATE)</span>
+<span class="inline-block px-2 py-1 border border-secondary text-secondary font-label-caps text-label-caps text-[10px] bg-secondary/10">REVISAR</span>
+</div>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-secondary text-3xl">45 LATAS</span>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-60">MIN: 40 LATAS</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-4">
+<div class="bg-secondary h-1 w-[35%]"></div>
+</div>
+</div>
+<!-- Inventory Item 3 -->
+<div class="border border-tomato bg-surface-container-lowest p-4 hover:border-stark-gray transition-colors relative overflow-hidden">
+<div class="absolute inset-0 bg-tomato opacity-5"></div>
+<div class="flex justify-between items-center mb-4 relative z-10">
+<span class="font-body-lg text-body-lg text-stark-gray uppercase font-bold">MOZZARELLA DI BUFALA</span>
+<span class="inline-block px-2 py-1 border border-tomato text-tomato font-label-caps text-label-caps text-[10px] bg-tomato/10 animate-pulse">CRÍTICO</span>
+</div>
+<div class="flex items-end justify-between relative z-10">
+<span class="font-headline-lg text-headline-lg text-tomato text-3xl">5 KG</span>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-60">MIN: 15 KG</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-4 relative z-10">
+<div class="bg-tomato h-1 w-[15%]"></div>
+</div>
+</div>
+<!-- Inventory Item 4 -->
+<div class="border border-outline-variant bg-surface-container-lowest p-4 hover:border-stark-gray transition-colors">
+<div class="flex justify-between items-center mb-4">
+<span class="font-body-lg text-body-lg text-stark-gray uppercase font-bold">ALBAHACA FRESCA</span>
+<span class="inline-block px-2 py-1 border border-emerald text-emerald font-label-caps text-label-caps text-[10px] bg-emerald/10">OK</span>
+</div>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-stark-gray text-3xl">3 MANOJOS</span>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-60">MIN: 2 MANOJOS</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-4">
+<div class="bg-emerald h-1 w-[60%]"></div>
+</div>
+</div>
+<!-- Inventory Item 5 -->
+<div class="border border-outline-variant bg-surface-container-lowest p-4 hover:border-stark-gray transition-colors">
+<div class="flex justify-between items-center mb-4">
+<span class="font-body-lg text-body-lg text-stark-gray uppercase font-bold">ACEITE OLIVA VIRGEN</span>
+<span class="inline-block px-2 py-1 border border-emerald text-emerald font-label-caps text-label-caps text-[10px] bg-emerald/10">OK</span>
+</div>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-stark-gray text-3xl">25 LITROS</span>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-60">MIN: 10 LITROS</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-4">
+<div class="bg-emerald h-1 w-[90%]"></div>
+</div>
+</div>
+<!-- Inventory Item 6 -->
+<div class="border border-outline-variant bg-surface-container-lowest p-4 hover:border-stark-gray transition-colors">
+<div class="flex justify-between items-center mb-4">
+<span class="font-body-lg text-body-lg text-stark-gray uppercase font-bold">LEVADURA FRESCA</span>
+<span class="inline-block px-2 py-1 border border-secondary text-secondary font-label-caps text-label-caps text-[10px] bg-secondary/10">REVISAR</span>
+</div>
+<div class="flex items-end justify-between">
+<span class="font-headline-lg text-headline-lg text-secondary text-3xl">1.5 KG</span>
+<span class="font-label-caps text-label-caps text-stark-gray opacity-60">MIN: 1 KG</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-4">
+<div class="bg-secondary h-1 w-[40%]"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

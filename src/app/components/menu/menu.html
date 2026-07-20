@@ -1,0 +1,139 @@
+<section id="menu" class="w-full px-margin-mobile md:px-margin-desktop py-24 bg-background relative overflow-hidden">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end border-b-2 border-outline-variant pb-12 mb-20 gap-8">
+        <div>
+            <div class="flex items-center gap-4 mb-6">
+                <span class="font-anton text-secondary text-xl">CARTA</span>
+                <div class="h-px w-24 bg-outline-variant"></div>
+            </div>
+            <h1 class="font-anton text-7xl md:text-[10rem] text-white uppercase leading-none tracking-tighter">LA CARTA</h1>
+            <p class="font-label-caps text-[12px] text-secondary mt-6 tracking-[0.4em] uppercase">COCINA OCULTA · HORNO OONI 12" · MASA 48H</p>
+        </div>
+        <div class="flex flex-col items-end gap-2">
+            <span class="font-label-caps text-[10px] text-stark-gray opacity-40 tracking-widest">CALIDAD PREMIUM · ARTESANAL</span>
+            <span class="font-anton text-3xl text-white opacity-40 uppercase tracking-widest">ECLISSE PIZZA</span>
+        </div>
+    </header>
+
+    <!-- Menu Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 relative z-10">
+        
+        <!-- Featured Pizza (Best Seller) -->
+        <article *ngIf="bestSeller()" class="md:col-span-8 border-2 border-outline-variant bg-surface-container-lowest p-8 md:p-16 relative overflow-hidden group hover:border-secondary transition-all duration-500">
+            <div class="absolute top-0 right-0 w-2 h-full flex flex-col">
+                <div class="flex-1 bg-emerald"></div>
+                <div class="flex-1 bg-white"></div>
+                <div class="flex-1 bg-tomato"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="relative bg-surface-container-low min-h-[300px] flex items-center justify-center border border-outline-variant">
+                    <img *ngIf="bestSeller()?.image" [src]="bestSeller()?.image" [alt]="bestSeller()?.name" class="w-full h-auto group-hover:scale-[1.02] transition-transform duration-700">
+                    <span *ngIf="!bestSeller()?.image" class="material-symbols-outlined text-stark-gray opacity-10 text-9xl">restaurant</span>
+                    <span class="absolute -top-4 -left-4 bg-secondary text-on-secondary px-4 py-2 font-label-caps text-[9px] tracking-widest shadow-brutal-gold">BEST SELLER 🔥</span>
+                </div>
+                <div class="flex flex-col">
+                    <h3 class="font-anton text-6xl text-white uppercase mb-6 tracking-tighter group-hover:text-secondary transition-all">{{bestSeller()?.name}}</h3>
+                    <p class="font-hanken text-lg text-stark-gray opacity-80 leading-relaxed mb-8">{{bestSeller()?.description}}</p>
+                    <div class="flex items-center gap-10 mb-8">
+                        <span class="font-anton text-5xl text-secondary">${{bestSeller()?.price?.toLocaleString('es-CO')}}</span>
+                    </div>
+                    <button (click)="bestSeller() && addToCart(bestSeller()!)" 
+                            class="w-fit border-2 border-secondary text-secondary font-anton px-10 py-5 text-base tracking-widest uppercase hover:bg-secondary hover:text-on-secondary transition-all shadow-brutal-gold hover:shadow-none no-underline flex items-center gap-4">
+                        <span class="material-symbols-outlined">add_shopping_cart</span> AÑADIR AL CARRITO
+                    </button>
+                </div>
+            </div>
+        </article>
+
+        <!-- Sidebar Info -->
+        <div class="md:col-span-4 flex flex-col gap-8">
+            <div class="border border-outline-variant p-8 bg-surface-container-low flex flex-col justify-center min-h-[300px] relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 font-anton text-stark-gray opacity-5 text-8xl select-none">FIRE</div>
+                <span class="material-symbols-outlined text-secondary text-5xl mb-6">local_fire_department</span>
+                <h4 class="font-anton text-3xl text-white uppercase mb-4 tracking-tighter">HORNO OONI 12"</h4>
+                <p class="font-hanken text-sm text-stark-gray opacity-60 leading-relaxed">500°C en 20 minutos. Cocción ultrarrápida para la corteza perfecta.</p>
+            </div>
+            <div class="border border-outline-variant p-8 bg-surface-container-low flex flex-col justify-center relative overflow-hidden group">
+                <div class="absolute -right-4 -bottom-4 font-anton text-stark-gray opacity-5 text-6xl select-none">48H</div>
+                <span class="material-symbols-outlined text-secondary text-4xl mb-4">hourglass_top</span>
+                <h4 class="font-anton text-2xl text-white uppercase mb-3 tracking-tighter">MASA LENTA</h4>
+                <p class="font-hanken text-sm text-stark-gray opacity-60 leading-relaxed">48 horas de fermentación fría. Sabor profundo y ligereza natural.</p>
+            </div>
+        </div>
+
+        <!-- Secondary Items Grid -->
+        <article *ngFor="let item of otherItems()" class="md:col-span-3 border border-outline-variant bg-surface-container-lowest p-6 group hover:border-secondary transition-colors duration-500">
+            <div class="aspect-square mb-8 overflow-hidden border border-outline-variant bg-surface-container-low flex items-center justify-center">
+                <img *ngIf="item.image" [src]="item.image" [alt]="item.name" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700">
+                <span *ngIf="!item.image" class="material-symbols-outlined text-stark-gray opacity-10 text-6xl">restaurant</span>
+            </div>
+            <h3 class="font-anton text-3xl text-white uppercase mb-4 tracking-tighter group-hover:text-secondary transition-colors">{{item.name}}</h3>
+            <p class="font-hanken text-[13px] text-stark-gray opacity-60 mb-8 leading-relaxed">{{item.description}}</p>
+            <div class="flex justify-between items-center border-t border-outline-variant pt-6">
+                <span class="font-anton text-xl text-secondary">${{item.price.toLocaleString('es-CO')}}</span>
+                <button (click)="addToCart(item)" class="text-secondary hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-3xl">add_shopping_cart</span>
+                </button>
+            </div>
+        </article>
+    </div>
+
+    <!-- Floating Cart Launcher -->
+    <button *ngIf="data.cartCount() > 0" 
+            (click)="showCart.set(true)"
+            class="fixed bottom-10 right-10 z-[80] bg-secondary text-on-secondary p-6 shadow-brutal-gold animate-bounce flex items-center gap-4 group">
+        <span class="material-symbols-outlined text-3xl">shopping_cart</span>
+        <span class="font-anton text-xl">{{data.cartCount()}}</span>
+    </button>
+
+    <!-- Modal Cart Drawer -->
+    <div *ngIf="showCart()" class="fixed inset-0 z-[100] flex justify-end bg-black/60 backdrop-blur-sm">
+        <div (click)="$event.stopPropagation()" class="cart-drawer w-full max-w-md bg-background border-l-2 border-outline-variant h-full flex flex-col animate-in slide-in-from-right duration-500">
+            <!-- Cart Header -->
+            <div class="p-8 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                <h2 class="font-anton text-4xl text-white uppercase tracking-tighter">TU PEDIDO</h2>
+                <button (click)="showCart.set(false)" class="text-stark-gray hover:text-white">
+                    <span class="material-symbols-outlined text-3xl">close</span>
+                </button>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="flex-1 overflow-y-auto p-8 space-y-8">
+                <div *ngFor="let item of data.publicCart()" class="flex flex-col gap-4 border-b border-outline-variant/30 pb-6">
+                    <div class="flex justify-between items-start">
+                        <span class="font-anton text-2xl text-white uppercase tracking-tight">{{item.name}}</span>
+                        <span class="font-anton text-secondary text-xl">${{(item.price * item.quantity).toLocaleString('es-CO')}}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-4 bg-surface-container-low border border-outline-variant p-2">
+                            <button (click)="updateQty(item.menuItemId, -1)" class="w-8 h-8 font-anton text-white hover:text-secondary">-</button>
+                            <span class="font-anton text-lg text-white w-4 text-center">{{item.quantity}}</span>
+                            <button (click)="updateQty(item.menuItemId, 1)" class="w-8 h-8 font-anton text-white hover:text-secondary">+</button>
+                        </div>
+                        <button (click)="data.removeFromPublicCart(item.menuItemId)" class="text-[10px] font-label-caps text-tomato tracking-widest uppercase">ELIMINAR</button>
+                    </div>
+                </div>
+
+                <div *ngIf="data.cartCount() === 0" class="h-full flex flex-col items-center justify-center opacity-20 py-20">
+                    <span class="material-symbols-outlined text-7xl mb-4">shopping_basket</span>
+                    <p class="font-label-caps tracking-widest uppercase">El carrito está vacío</p>
+                </div>
+            </div>
+
+            <!-- Cart Footer -->
+            <div class="p-8 bg-surface-container-low border-t border-outline-variant space-y-8">
+                <div class="flex justify-between items-end">
+                    <span class="font-label-caps text-stark-gray uppercase tracking-widest">TOTAL PEDIDO</span>
+                    <span class="font-anton text-5xl text-secondary">${{data.cartTotal().toLocaleString('es-CO')}}</span>
+                </div>
+                <button (click)="sendOrder()" 
+                        [disabled]="data.cartCount() === 0"
+                        class="w-full bg-emerald text-white font-anton py-6 text-2xl uppercase tracking-[0.2em] shadow-brutal hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-20 flex items-center justify-center gap-4">
+                    PEDIR POR WHATSAPP ➔
+                </button>
+                <p class="text-center font-label-caps text-[9px] text-stark-gray opacity-50 uppercase tracking-widest">SERÁS REDIRIGIDO A WHATSAPP PARA FINALIZAR</p>
+            </div>
+        </div>
+    </div>
+
+</section>

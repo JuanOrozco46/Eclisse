@@ -1,0 +1,193 @@
+@use "sass:color";
+// @import "tailwindcss"; 
+/* Using CDN for Tailwind to ensure stability with current build config */
+
+@theme {
+  /* === CORE BRAND (STITCH DESIGN) === */
+  --color-secondary: #e9c349; /* Brand Gold */
+  --color-primary: #c6c6c6;   /* Main Silver/White */
+  --color-stark-gray: #D4D4D4;
+  --color-emerald: #008C45;
+  --color-tomato: #CD212A;
+
+  /* Background & Surfaces */
+  --color-background: #131313;
+  --color-surface-dim: #131313;
+  --color-surface-container: #20201f;
+  --color-surface-container-lowest: #0e0e0e;
+  --color-surface-container-low: #1c1b1b;
+  --color-surface-container-high: #2a2a2a;
+  --color-surface-container-highest: #353535;
+  --color-surface-variant: #353535;
+
+  /* On-Colors (Text) */
+  --color-on-background: #e5e2e1;
+  --color-on-surface: #e5e2e1;
+  --color-on-surface-variant: #cfc4c5;
+  --color-on-secondary: #3c2f00;
+
+  /* Outlines */
+  --color-outline: #988e90;
+  --color-outline-variant: #4c4546;
+
+  /* Error */
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+
+  /* === TYPOGRAPHY === */
+  --font-display-xl: "Anton", sans-serif;
+  --font-display-lg: "Anton", sans-serif;
+  --font-headline-lg: "Anton", sans-serif;
+  --font-body-lg: "Hanken Grotesk", sans-serif;
+  --font-body-md: "Hanken Grotesk", sans-serif;
+  --font-label-caps: "Space Mono", monospace;
+  --font-nav-link: "Hanken Grotesk", sans-serif;
+
+  /* === SPACING === */
+  --spacing-margin-desktop: 80px;
+  --spacing-margin-mobile: 20px;
+  --spacing-gutter: 24px;
+  --spacing-unit: 4px;
+}
+
+// === SCSS VARIABLES ===
+$secondary: #e9c349;
+$primary: #c6c6c6;
+$background: #131313;
+
+/* === GLOBAL REFINEMENTS === */
+html {
+    scroll-behavior: smooth;
+    background-color: #131313;
+    color-scheme: dark;
+}
+
+body {
+    background-color: #131313 !important;
+    color: var(--color-on-surface);
+    @apply antialiased selection:bg-secondary selection:text-on-secondary;
+    font-family: var(--font-body-md);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.main-content-shift {
+    padding-top: 80px; /* Space for top nav */
+    transition: all 0.3s ease;
+}
+
+.admin-content-shift {
+    @media (min-width: 768px) {
+        margin-left: 80px;
+    }
+}
+
+
+
+
+/* Custom Scrollbar - Brutalist Look */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: #000;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-outline-variant);
+    &:hover {
+        background: var(--color-stark-gray);
+    }
+}
+
+/* === BRUTALIST & PREMIUM UTILITIES === */
+.brutalist-border {
+    border: 1px solid var(--color-outline-variant);
+}
+
+.brutalist-border-gold {
+    border: 1px solid var(--color-secondary);
+}
+
+.tricolore-accent {
+    background: linear-gradient(to right, var(--color-emerald) 33.3%, #ffffff 33.3%, #ffffff 66.6%, var(--color-tomato) 66.6%);
+}
+
+/* Glassmorphism Refined */
+.glass-panel {
+    background: rgba(19, 19, 19, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Animations from Design */
+@keyframes urgent-pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+.urgent-pulse {
+    animation: urgent-pulse 2s infinite;
+}
+
+@keyframes gold-shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+.gold-shimmer {
+    background: linear-gradient(
+        90deg,
+        color.adjust($secondary, $lightness: -15%) 0%,
+        $secondary 25%,
+        color.adjust($secondary, $lightness: 20%) 50%,
+        $secondary 75%,
+        color.adjust($secondary, $lightness: -15%) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gold-shimmer 8s linear infinite;
+}
+
+/* Sidebar Text Helpers */
+.writing-vertical {
+    writing-mode: vertical-rl;
+}
+
+/* === BRAND ASSETS === */
+.texture-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+ h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display-lg);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+ }
+
+ p, span, a, li {
+    font-family: var(--font-body-md);
+ }
+
+ .section-label {
+    font-family: var(--font-label-caps);
+    text-transform: uppercase;
+    letter-spacing: 0.5em;
+    font-size: 10px;
+    color: var(--color-stark-gray);
+    opacity: 0.6;
+ }
+
+/* Font Classes */
+.font-anton { font-family: var(--font-display-lg); }
+.font-hanken { font-family: var(--font-body-md); }
+.font-mono-brutalist { font-family: var(--font-label-caps); }
+.font-label-caps { font-family: var(--font-label-caps); }
+
+

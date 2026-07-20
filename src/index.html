@@ -1,0 +1,63 @@
+<!doctype html>
+<html class="dark" lang="es">
+  <head>
+  <meta charset="utf-8">
+  <title>Eclisse - Pizza Napoletana</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Eclisse Pizza Napoletana - La mejor pizza artesanal en Bogotá. Pedidos por WhatsApp y experiencia premium.">
+  <meta name="theme-color" content="#0a0a0a">
+  <!-- Content Security Policy as a secondary layer -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com;">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: '#0a0a0a',
+              surface: '#131313',
+              secondary: '#e9c349',
+              primary: '#c6c6c6',
+              'stark-gray': '#D4D4D4',
+              'surface-container': '#1c1c1c',
+              'surface-container-lowest': '#050505',
+              'surface-container-low': '#111111',
+              'outline-variant': '#2a2a2a',
+              'tomato': '#CD212A',
+              'emerald': '#008C45',
+            },
+            fontFamily: {
+              anton: ['Anton', 'sans-serif'],
+              hanken: ['Hanken Grotesk', 'sans-serif'],
+              mono: ['Space Mono', 'monospace'],
+            },
+            letterSpacing: {
+              'tighter': '-0.05em',
+              'widest': '0.3em',
+              'brutal': '0.6em',
+            },
+            boxShadow: {
+              'brutal': '10px 10px 0px 0px rgba(0,0,0,1)',
+              'brutal-gold': '5px 5px 0px 0px #e9c349',
+            }
+          }
+        }
+      }
+    </script>
+    <!-- Google Fonts: Anton, Hanken Grotesk, Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
+    <script>window.addEventListener('DOMContentLoaded', () => { document.documentElement.classList.add('dark'); });</script>
+</head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>

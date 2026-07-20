@@ -1,0 +1,249 @@
+<div class="relative flex flex-col gap-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
+    <!-- Texture Overlay -->
+    <div class="fixed inset-0 texture-overlay z-0 opacity-10"></div>
+
+    <!-- Header & Filters -->
+    <header class="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8 border-b-2 border-outline-variant pb-12">
+        <div class="flex items-start gap-8">
+            <div class="writing-vertical font-anton text-stark-gray opacity-20 text-[10px] tracking-brutal uppercase translate-y-2">OPERATIONS // v3.0</div>
+            <div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-2 h-2 bg-secondary rounded-full animate-pulse"></div>
+                    <span class="font-label-caps text-[10px] text-secondary tracking-brutal uppercase">OPERACIONES EN TIEMPO REAL</span>
+                </div>
+                <h1 class="font-anton text-7xl md:text-9xl text-white uppercase leading-none tracking-tighter">ESTADÍSTICAS</h1>
+            </div>
+        </div>
+        
+        <!-- Filter Bar -->
+        <div class="flex flex-wrap items-center gap-3 bg-surface-container-low p-2 border border-outline-variant rounded-sm group shadow-brutal-gold">
+            <button (click)="setFilter('hoy')"
+                    class="px-6 py-2 font-label-caps text-[10px] uppercase tracking-widest transition-all"
+                    [ngClass]="selectedFilter() === 'hoy' ? 'bg-secondary text-on-secondary' : 'text-stark-gray hover:text-white'">Hoy</button>
+            <button (click)="setFilter('ayer')"
+                    class="px-6 py-2 font-label-caps text-[10px] uppercase tracking-widest transition-all"
+                    [ngClass]="selectedFilter() === 'ayer' ? 'bg-secondary text-on-secondary' : 'text-stark-gray hover:text-white'">Ayer</button>
+            <button (click)="setFilter('semana')"
+                    class="px-6 py-2 font-label-caps text-[10px] uppercase tracking-widest transition-all hidden md:block"
+                    [ngClass]="selectedFilter() === 'semana' ? 'bg-secondary text-on-secondary' : 'text-stark-gray hover:text-white'">Semana</button>
+            <div class="w-px h-6 bg-outline-variant mx-2"></div>
+            <div class="flex items-center gap-3 px-4 text-stark-gray font-label-caps text-[10px] border-r border-outline-variant mr-2">
+                <span class="material-symbols-outlined text-sm">calendar_month</span>
+                <span class="text-white">{{currentDate}}</span>
+            </div>
+            <button (click)="openExpenseModal()" class="bg-white text-black px-8 py-2 font-anton text-[11px] uppercase tracking-widest hover:bg-secondary transition-colors">
+                + GASTO RÁPIDO
+            </button>
+        </div>
+    </header>
+
+    <!-- KPI Grid -->
+    <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+        <!-- Ventas -->
+        <div routerLink="/dashboard/ventas" class="group border border-outline-variant bg-surface-container-lowest p-8 flex flex-col justify-between min-h-[220px] relative overflow-hidden shadow-brutal hover:shadow-none transition-all cursor-pointer">
+            <div class="flex justify-between items-start relative z-10">
+                <div class="w-12 h-12 border border-secondary flex items-center justify-center text-secondary font-anton text-2xl">$</div>
+                <span class="bg-emerald/10 text-emerald font-label-caps text-[9px] px-3 py-1 border border-emerald/20 uppercase tracking-widest">INGRESOS</span>
+            </div>
+            <div class="relative z-10 mt-8">
+                <p class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest mb-2 opacity-60">Ventas Hoy</p>
+                <h3 class="font-anton text-6xl text-white tracking-tighter">{{todaySalesTotal() > 0 ? '$' + todaySalesTotal().toLocaleString('es-CO') : '$0'}}</h3>
+            </div>
+            <div class="absolute -right-4 -bottom-4 font-anton text-stark-gray opacity-5 text-8xl select-none group-hover:opacity-10 transition-opacity">SALES</div>
+        </div>
+
+        <!-- Cuentas Abiertas / Pedidos del Día -->
+        <div routerLink="/dashboard/pos" class="group border border-outline-variant bg-surface-container-lowest p-8 flex flex-col justify-between min-h-[220px] relative overflow-hidden shadow-brutal hover:shadow-none transition-all cursor-pointer">
+            <div class="flex justify-between items-start relative z-10">
+                <div class="w-12 h-12 border border-stark-gray flex items-center justify-center text-stark-gray font-anton text-2xl">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <span class="bg-secondary/10 text-secondary font-label-caps text-[9px] px-3 py-1 border border-secondary/20 uppercase tracking-widest">{{ordersCount()}} ACTIVAS</span>
+            </div>
+            <div class="relative z-10 mt-8">
+                <p class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest mb-2 opacity-60">Pedidos del Día</p>
+                <h3 class="font-anton text-6xl text-white tracking-tighter">{{todayOrdersCount() > 0 ? (todayOrdersCount() < 10 ? '0'+todayOrdersCount() : todayOrdersCount()) : '00'}}</h3>
+            </div>
+            <div class="absolute -right-4 -bottom-4 font-anton text-stark-gray opacity-5 text-8xl select-none group-hover:opacity-10 transition-opacity">ORDERS</div>
+        </div>
+
+        <!-- Gastos -->
+        <div (click)="openExpenseModal()" class="group border border-outline-variant bg-surface-container-lowest p-8 flex flex-col justify-between min-h-[220px] relative overflow-hidden shadow-brutal hover:shadow-none transition-all cursor-pointer">
+            <div class="flex justify-between items-start relative z-10">
+                <div class="w-12 h-12 border border-tomato flex items-center justify-center text-tomato font-anton text-2xl">
+                    <span class="material-symbols-outlined">trending_down</span>
+                </div>
+                <span class="bg-tomato/10 text-tomato font-label-caps text-[9px] px-3 py-1 border border-tomato/20 uppercase tracking-widest">EGRESOS</span>
+            </div>
+            <div class="relative z-10 mt-8">
+                <p class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest mb-2 opacity-60">Gastos Hoy</p>
+                <h3 class="font-anton text-6xl text-white tracking-tighter">{{todayExpensesTotal() > 0 ? '$' + todayExpensesTotal().toLocaleString('es-CO') : '$0'}}</h3>
+            </div>
+            <div class="absolute -right-4 -bottom-4 font-anton text-stark-gray opacity-5 text-8xl select-none group-hover:opacity-10 transition-opacity">COSTS</div>
+        </div>
+
+        <!-- Utilidad -->
+        <div class="group border-2 border-secondary bg-secondary p-8 flex flex-col justify-between min-h-[220px] relative overflow-hidden transition-all shadow-brutal-gold cursor-pointer">
+            <div class="flex justify-between items-start relative z-10">
+                <div class="w-12 h-12 border-2 border-on-secondary flex items-center justify-center text-on-secondary font-anton text-2xl">
+                    <span class="material-symbols-outlined">payments</span>
+                </div>
+                <span class="bg-on-secondary text-secondary font-label-caps text-[9px] px-3 py-1 uppercase tracking-widest">NETO</span>
+            </div>
+            <div class="relative z-10 mt-8">
+                <p class="font-label-caps text-[10px] text-on-secondary uppercase tracking-widest mb-2 font-bold">Utilidad Hoy</p>
+                <h3 class="font-anton text-6xl text-on-secondary tracking-tighter">{{netProfit() !== 0 ? (netProfit() > 0 ? '$' : '-$') + Math.abs(netProfit()).toLocaleString('es-CO') : '$0'}}</h3>
+            </div>
+            <div class="absolute -right-4 -bottom-4 font-anton text-on-secondary opacity-20 text-8xl select-none">PROFIT</div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="border border-outline-variant bg-surface-container-low p-6 flex items-center gap-4">
+            <span class="material-symbols-outlined text-secondary text-2xl">restaurant</span>
+            <div>
+                <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase block">PLATOS EN CARTA</span>
+                <span class="font-anton text-3xl text-white">{{data.menuItems().length}}</span>
+            </div>
+        </div>
+        <div class="border border-outline-variant bg-surface-container-low p-6 flex items-center gap-4">
+            <span class="material-symbols-outlined text-emerald text-2xl">inventory_2</span>
+            <div>
+                <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase block">INSUMOS</span>
+                <span class="font-anton text-3xl text-white">{{data.ingredients().length}}</span>
+            </div>
+        </div>
+        <div class="border border-outline-variant bg-surface-container-low p-6 flex items-center gap-4" [ngClass]="{'border-tomato': lowStockItems().length > 0}">
+            <span class="material-symbols-outlined text-2xl" [ngClass]="lowStockItems().length > 0 ? 'text-tomato animate-pulse' : 'text-stark-gray'">warning</span>
+            <div>
+                <span class="font-label-caps text-[9px] uppercase tracking-widest block" [ngClass]="lowStockItems().length > 0 ? 'text-tomato' : 'text-stark-gray opacity-40'">STOCK BAJO</span>
+                <span class="font-anton text-3xl" [ngClass]="lowStockItems().length > 0 ? 'text-tomato' : 'text-white'">{{lowStockItems().length}}</span>
+            </div>
+        </div>
+        <div class="border border-outline-variant bg-surface-container-low p-6 flex items-center gap-4">
+            <span class="material-symbols-outlined text-secondary text-2xl">group</span>
+            <div>
+                <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase block">PERSONAL</span>
+                <span class="font-anton text-3xl text-white">{{staffMembers().length}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 pb-32">
+        <!-- Payment Breakdown -->
+        <div class="border border-outline-variant bg-surface-container-low p-10 flex flex-col min-h-[450px] relative group overflow-hidden">
+            <h4 class="font-anton text-3xl text-white uppercase mb-10 tracking-tighter">Desglose de Pagos</h4>
+            <div class="flex-1 flex flex-col gap-6">
+                <div *ngFor="let item of paymentData" class="flex flex-col gap-2">
+                    <div class="flex justify-between font-label-caps text-[10px] tracking-widest text-stark-gray">
+                        <span>{{item.label}}</span>
+                        <span class="text-white">{{item.percent}}%</span>
+                    </div>
+                    <div class="h-3 bg-background border border-outline-variant relative">
+                        <div class="absolute h-full shadow-brutal-gold transition-all duration-1000" 
+                             [style.backgroundColor]="item.color === 'secondary' ? 'var(--secondary)' : (item.color === 'emerald' ? 'var(--emerald)' : 'var(--stark-gray)')"
+                             [style.width.%]="item.percent"></div>
+                    </div>
+                </div>
+            </div>
+            <span class="absolute top-10 right-10 font-label-caps text-[9px] text-stark-gray opacity-40 uppercase tracking-brutal">REPORTE // 24H</span>
+        </div>
+        
+        <!-- Plate Performance -->
+        <div class="border border-outline-variant bg-surface-container-low p-10 flex flex-col min-h-[450px] relative group overflow-hidden">
+            <h4 class="font-anton text-3xl text-white uppercase mb-10 tracking-tighter">Rendimiento de Platos</h4>
+            <div class="flex-1 flex flex-col justify-center items-center gap-4" *ngIf="platePerformance().length === 0">
+                <span class="material-symbols-outlined text-stark-gray opacity-20 text-6xl">bar_chart</span>
+                <p class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest text-center">Esperando datos de ventas...</p>
+            </div>
+            <div class="flex-1 flex flex-col gap-4" *ngIf="platePerformance().length > 0">
+                <div class="flex items-end gap-3 h-40">
+                    <div *ngFor="let plate of platePerformance()" 
+                         class="flex-1 bg-secondary relative group/bar hover:bg-white transition-all shadow-brutal-gold"
+                         [style.height.%]="plate.percent">
+                        <span class="absolute bottom-full left-0 font-anton text-[10px] mb-2 -rotate-90 origin-left text-white opacity-0 group-hover/bar:opacity-100 transition-opacity whitespace-nowrap">{{plate.name}} ({{plate.count}})</span>
+                    </div>
+                </div>
+                <!-- Legend -->
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <div *ngFor="let plate of platePerformance()" class="flex items-center gap-1">
+                        <div class="w-2 h-2 bg-secondary"></div>
+                        <span class="font-label-caps text-[8px] text-stark-gray tracking-widest uppercase">{{plate.name}} ({{plate.count}})</span>
+                    </div>
+                </div>
+            </div>
+            <span class="absolute top-10 right-10 font-label-caps text-[9px] text-stark-gray opacity-40 uppercase tracking-brutal">ANALYTICS // v3.0</span>
+        </div>
+
+        <!-- Staff Activity -->
+        <div class="border border-outline-variant bg-surface-container-low p-10 flex flex-col min-h-[450px] relative group overflow-hidden">
+            <h4 class="font-anton text-3xl text-white uppercase mb-10 tracking-tighter">Personal Activo</h4>
+            <div class="flex-1 flex flex-col gap-4" *ngIf="staffMembers().length > 0">
+                <div *ngFor="let member of staffMembers()" class="flex items-center justify-between p-4 border border-outline-variant/30 hover:border-stark-gray transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 border border-outline-variant flex items-center justify-center font-anton text-sm text-stark-gray">
+                            {{member.name.substring(0,2).toUpperCase()}}
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="font-anton text-lg text-white uppercase leading-none">{{member.name}}</span>
+                            <span class="font-label-caps text-[8px] tracking-widest uppercase" [ngClass]="{'text-secondary': member.role === 'ADMIN', 'text-emerald': member.role === 'WAITER', 'text-tomato': member.role === 'KITCHEN'}">{{member.role}}</span>
+                        </div>
+                    </div>
+                    <span class="flex items-center gap-2 font-label-caps text-[9px] text-white">
+                        <span class="w-1.5 h-1.5 rounded-full" [ngClass]="member.status === 'ACTIVE' ? 'bg-emerald animate-pulse' : 'bg-stark-gray opacity-20'"></span>
+                        {{member.status}}
+                    </span>
+                </div>
+            </div>
+            <div *ngIf="staffMembers().length === 0" class="flex-1 flex flex-col items-center justify-center border border-outline-variant border-dashed p-8">
+                <span class="material-symbols-outlined text-stark-gray opacity-10 text-6xl mb-6">group</span>
+                <span class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest text-center">SIN PERSONAL REGISTRADO</span>
+            </div>
+            <button routerLink="/dashboard/personal" class="mt-8 py-4 border border-outline-variant hover:border-secondary hover:text-secondary transition-all font-label-caps text-[10px] uppercase tracking-widest">
+                GESTIONAR PERSONAL
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Expense Modal -->
+    <div *ngIf="showExpenseModal()" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-background/90 backdrop-blur-md" (click)="closeExpenseModal()"></div>
+        <div class="relative w-full max-w-md bg-surface-container-low border-2 border-outline-variant p-12 shadow-brutal animate-in fade-in zoom-in duration-300">
+            <header class="flex justify-between items-center mb-10 pb-6 border-b border-outline-variant">
+                <h2 class="font-anton text-4xl text-white uppercase tracking-tighter">GASTO RÁPIDO</h2>
+                <button (click)="closeExpenseModal()" class="material-symbols-outlined text-stark-gray hover:text-white transition-colors">close</button>
+            </header>
+
+            <form (ngSubmit)="saveExpense()" class="space-y-8">
+                <div class="space-y-2">
+                    <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Valor ($)</label>
+                    <input type="number" name="amount" [(ngModel)]="newExpense.amount" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Descripción</label>
+                    <input type="text" name="description" [(ngModel)]="newExpense.description" placeholder="Ej: Compra de quesos" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border">
+                </div>
+
+                <div class="space-y-2">
+                    <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Categoría</label>
+                    <select name="category" [(ngModel)]="newExpense.category" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary transition-colors border appearance-none outline-none">
+                        <option value="Operativo">Operativo</option>
+                        <option value="Ingredientes">Ingredientes</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Servicios">Servicios</option>
+                        <option value="Mantenimiento">Mantenimiento</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+
+                <div class="pt-4 flex gap-4">
+                    <button type="button" (click)="closeExpenseModal()" class="flex-1 py-5 border border-outline-variant text-stark-gray font-anton text-lg tracking-widest uppercase hover:bg-white/[0.05] transition-all">CANCELAR</button>
+                    <button type="submit" class="flex-1 py-5 bg-tomato text-white font-anton text-lg tracking-widest uppercase hover:bg-white hover:text-black transition-all shadow-brutal">REGISTRAR GASTO</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

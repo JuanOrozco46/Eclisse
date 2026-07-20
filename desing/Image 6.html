@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ECLISSE - CULINARY ATELIER</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Hanken+Grotesk:wght@400;600&amp;family=Space+Mono:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#e2e2e2",
+                    "primary-fixed-dim": "#c6c6c6",
+                    "on-error": "#690005",
+                    "on-secondary-container": "#342800",
+                    "on-surface-variant": "#cfc4c5",
+                    "tertiary": "#c6c6c7",
+                    "secondary": "#e9c349",
+                    "on-tertiary-container": "#747576",
+                    "surface-container-high": "#2a2a2a",
+                    "on-tertiary-fixed-variant": "#454747",
+                    "surface-dim": "#000000",
+                    "background": "#000000",
+                    "error-container": "#93000a",
+                    "surface-container-lowest": "#000000",
+                    "outline": "#988e90",
+                    "on-tertiary": "#2f3131",
+                    "tertiary-fixed": "#e2e2e2",
+                    "inverse-surface": "#e5e2e1",
+                    "on-secondary-fixed-variant": "#574500",
+                    "secondary-fixed": "#ffe088",
+                    "inverse-primary": "#5e5e5e",
+                    "on-primary-fixed": "#1b1b1b",
+                    "secondary-container": "#af8d11",
+                    "on-primary": "#303030",
+                    "surface-bright": "#393939",
+                    "on-tertiary-fixed": "#1a1c1c",
+                    "surface-container": "#000000",
+                    "surface": "#000000",
+                    "on-error-container": "#ffdad6",
+                    "error": "#ffb4ab",
+                    "stark-gray": "#D4D4D4",
+                    "primary-container": "#000000",
+                    "inverse-on-surface": "#313030",
+                    "emerald": "#008C45",
+                    "on-primary-container": "#757575",
+                    "surface-tint": "#c6c6c6",
+                    "tomato": "#CD212A",
+                    "surface-variant": "#000000",
+                    "on-primary-fixed-variant": "#474747",
+                    "secondary-fixed-dim": "#e9c349",
+                    "on-secondary": "#3c2f00",
+                    "tertiary-fixed-dim": "#c6c6c7",
+                    "on-background": "#e5e2e1",
+                    "on-secondary-fixed": "#241a00",
+                    "primary": "#c6c6c6",
+                    "outline-variant": "#4c4546",
+                    "surface-container-low": "#000000",
+                    "surface-container-highest": "#000000",
+                    "tertiary-container": "#000000",
+                    "on-surface": "#e5e2e1"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "20px",
+                    "unit": "4px",
+                    "overlap-sm": "-40px",
+                    "gutter": "24px",
+                    "overlap-lg": "-120px",
+                    "margin-desktop": "80px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Anton"],
+                    "display-xl": ["Anton"],
+                    "headline-lg": ["Anton"],
+                    "headline-lg-mobile": ["Anton"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "label-caps": ["Space Mono"],
+                    "nav-link": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "display-lg": ["80px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "400" }],
+                    "display-xl": ["120px", { "lineHeight": "100px", "letterSpacing": "-0.04em", "fontWeight": "400" }],
+                    "headline-lg": ["48px", { "lineHeight": "48px", "fontWeight": "400" }],
+                    "headline-lg-mobile": ["40px", { "lineHeight": "40px", "fontWeight": "400" }],
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                    "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                    "nav-link": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Brutalist Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e9c349;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen overflow-x-hidden selection:bg-secondary selection:text-surface-container-lowest">
+<!-- TopNavBar (Mobile Focus) -->
+<nav class="md:hidden flex justify-between items-center w-full px-margin-mobile py-8 max-w-full bg-background dark:bg-background text-on-background dark:text-on-background fixed top-0 z-50">
+<div class="font-display-xl text-headline-lg-mobile tracking-tighter text-on-background dark:text-on-background">ECLISSE</div>
+<div class="flex gap-4">
+<button class="hover:text-secondary dark:hover:text-secondary transition-colors duration-300">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+<button class="hover:text-secondary dark:hover:text-secondary transition-colors duration-300">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+</div>
+</nav>
+<!-- SideNavBar (Desktop Focus) -->
+<nav class="hidden lg:flex flex-col items-center py-margin-desktop space-y-12 bg-surface-container-lowest dark:bg-surface-container-lowest text-on-surface dark:text-on-surface fixed left-0 top-0 h-full w-[80px] z-50 border-r border-outline dark:border-outline-variant">
+<div class="flex-1 flex flex-col items-center justify-start space-y-24">
+<div class="font-display-lg text-display-lg text-on-surface dark:text-on-surface -rotate-90 origin-left mt-32 whitespace-nowrap">
+                ECLISSE
+            </div>
+<div class="flex flex-col space-y-8 mt-auto absolute bottom-margin-desktop">
+<a class="group flex flex-col items-center justify-center w-12 h-12 bg-secondary text-on-secondary-fixed font-bold hover:scale-110 transition-all duration-300" href="#" title="INICIO">
+<span class="material-symbols-outlined fill" data-icon="home" data-weight="fill">home</span>
+</a>
+<a class="group flex flex-col items-center justify-center w-12 h-12 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant dark:hover:bg-surface-variant hover:scale-110 transition-all duration-300" href="#" title="CARTA">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+</a>
+<a class="group flex flex-col items-center justify-center w-12 h-12 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant dark:hover:bg-surface-variant hover:scale-110 transition-all duration-300" href="#" title="FILOSOFÍA">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+</a>
+<a class="group flex flex-col items-center justify-center w-12 h-12 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant dark:hover:bg-surface-variant hover:scale-110 transition-all duration-300" href="#" title="CONTACTO">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+</a>
+</div>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="lg:ml-[80px] pt-24 lg:pt-0 relative w-full overflow-hidden bg-background">
+<!-- Hero Section -->
+<section class="min-h-screen relative flex items-center justify-center px-margin-mobile lg:px-margin-desktop pt-20 lg:pt-0 bg-background">
+<!-- Background brutalist elements -->
+<div class="absolute inset-0 z-0 pointer-events-none opacity-20">
+<div class="absolute top-1/4 left-1/4 w-[1px] h-1/2 bg-stark-gray transform rotate-45"></div>
+<div class="absolute bottom-1/4 right-1/4 w-1/2 h-[1px] bg-secondary"></div>
+</div>
+<!-- Italian Flag Accent Dots -->
+<div class="absolute top-8 right-8 lg:top-margin-desktop lg:right-margin-desktop flex gap-2 z-20">
+<div class="w-2 h-2 rounded-full bg-emerald"></div>
+<div class="w-2 h-2 rounded-full bg-white"></div>
+<div class="w-2 h-2 rounded-full bg-tomato"></div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full z-10 relative">
+<!-- Massive Typographic Heading -->
+<div class="lg:col-span-8 flex flex-col justify-center relative z-20">
+<h1 class="font-display-xl text-[80px] lg:text-display-xl text-secondary leading-none tracking-tighter uppercase mix-blend-exclusion">
+                        ECLISSE
+                    </h1><div class="flex gap-1 mt-2 opacity-50"><div class="w-1 h-1 bg-emerald rounded-full"></div><div class="w-1 h-1 bg-white rounded-full"></div><div class="w-1 h-1 bg-tomato rounded-full"></div></div>
+<h2 class="font-headline-lg text-headline-lg-mobile lg:text-headline-lg text-stark-gray mt-4 max-w-2xl mix-blend-difference">
+                        THE ATELIER OF DOUGH
+                    </h2>
+<div class="mt-12 lg:mt-24">
+<button class="font-label-caps text-label-caps border border-secondary text-secondary px-8 py-4 hover:bg-secondary hover:text-surface-container-lowest transition-colors duration-300 uppercase tracking-widest">
+                            RESERVAR
+                        </button>
+</div>
+</div>
+<!-- High Fashion Photography -->
+<div class="lg:col-span-4 relative mt-16 lg:mt-0 h-[614px] lg:h-[819px]">
+<div class="absolute inset-0 border border-outline p-2 -rotate-3 hover:rotate-0 transition-transform duration-700 bg-background">
+<img class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" data-alt="A macro, high-fashion style close-up of raw pizza dough being stretched by hands covered in flour. The lighting is dramatic and moody, utilizing stark chiaroscuro techniques typical of fine art photography, set against a completely black background. A subtle rim light highlights the texture of the dough, emphasizing its artisanal nature. The overall color palette is restricted to deep blacks, stark whites of the flour, and the pale tones of the dough, aligning with a premium, brutalist aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-MIaXday8Kxr3ym85d8xcY6BQUvX1Q0kuJ_NS5O7fgj0vq7wT3sEocw4BALA6xPK175RrENOL37j484PiZ1pbeJdgX3R89sKaBS8LVznKgC0EtxVGCPCbx0Ifku48PS6DF_ZrWcsvlfJYGnw5mmbDXTHt_1_0BNbi-mJliEJ13S1tb1feshiikcGZolkQC3iJikDVe8FcI8Y571ioCXcXtwe-pRxLjvSAz5aEtsY4EE0KXJ7fw3OpGm9Qn789z-uQJlOUCF_3vmkd"/>
+</div>
+<!-- Overlapping Price/Tag -->
+<div class="absolute -bottom-8 -left-8 lg:-left-overlap-sm bg-surface-container-lowest border border-stark-gray p-6 z-30">
+<span class="font-label-caps text-label-caps text-stark-gray block">EXPERIENCE NO. 01</span>
+<span class="font-headline-lg text-headline-lg-mobile text-white mt-2 block">RAW</span>
+</div>
+</div>
+</div>
+</section>
+<!-- The Atelier Section (Bento Grid) -->
+<section class="py-32 px-margin-mobile lg:px-margin-desktop relative border-t border-outline-variant mt-32 bg-background">
+<div class="mb-24 flex flex-col md:flex-row justify-between items-end">
+<h3 class="font-display-lg text-headline-lg-mobile lg:text-display-lg text-white max-w-xl leading-none">
+                    TENSION <br/>OVER<br/> HARMONY
+                </h3>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-sm mt-8 md:mt-0 md:text-right border-l md:border-l-0 md:border-r border-secondary pl-6 md:pl-0 md:pr-6">
+                    Rejecting the warmth of tradition. We craft in the cold. Precision, fire, and darkness define our atelier.
+                </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 auto-rows-[400px]">
+<!-- Bento Item 1: Large Image -->
+<div class="md:col-span-2 relative group overflow-hidden border border-outline bg-background">
+<img class="w-full h-full object-cover grayscale mix-blend-luminosity group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" data-alt="A highly stylized, low-key photograph of a modern Neapolitan pizza emerging from a glowing wood-fired oven. The surrounding environment is submerged in deep shadow, making the bright orange and red embers of the fire the primary light source. The crust of the pizza shows aggressive charring (leopard spotting), emphasizing the tension between perfect dough and destructive heat. The overall mood is intense, nocturnal, and exclusive, fitting a brutalist culinary aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCieXbI8VRvPu1gCM9hY9MXY1WYrCPZC4lJBCCt1qv5NZkoM4h3FKMNwvFxDiuql2hffGgoiQJXIxsaa4kK8my9nyPa9ocmdGHgK9Q190OHbVERWlHhHhs4YjvA8_yOFr86L7xOdEyYcrhxkOdjnO88XdvVcJmq8qTa2b7Ev6hyEx0KAoxurAMgtCq9ZtRqjk3iZMpIUW10NUuZesBFtQi2PUHcG3ao-nxwqWMePY028zY8wy2HvPQjhfvnFKppd4sx8Yb2mrl6t9Lb"/>
+<div class="absolute bottom-0 left-0 p-8 w-full bg-gradient-to-t from-background to-transparent">
+<span class="font-label-caps text-label-caps text-secondary">01 / THE FIRE</span>
+</div>
+</div>
+<!-- Bento Item 2: Text/Data -->
+<div class="bg-surface-container border border-outline p-8 flex flex-col justify-between">
+<div>
+<div class="flex flex-col w-3 h-8 mb-8"><div class="flex-1 bg-emerald"></div><div class="flex-1 bg-white"></div><div class="flex-1 bg-tomato"></div></div>
+<h4 class="font-headline-lg text-headline-lg-mobile text-white uppercase">Temperature</h4>
+<p class="font-label-caps text-label-caps text-stark-gray mt-4 tracking-widest">450°C / 90 SECONDS</p>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">The absolute edge of combustion. We push the hydration to its limit, resulting in a crust that shatters before it melts.</p>
+</div>
+<!-- Bento Item 3: Abstract Ingredient -->
+<div class="bg-surface-container border border-outline relative overflow-hidden group">
+<img class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" data-alt="A brutalist, top-down minimalist shot of a single crushed San Marzano tomato resting on a slab of matte black slate. The tomato is rendered in hyper-vivid crimson red, creating a violent contrast against the vast expanse of the textured dark background. A single drop of olive oil catches a stark white studio light. The composition uses excessive negative space to isolate the ingredient like an artifact in a contemporary gallery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFBYdmuhYtkEF3E9id6IzGwAN2PCyY83qk4wb28X4SnCrU8BuKmnpEaJ5t26ptKNULhSQFknM3vLwvaSDpNf-9bwbOVEGfjEMdHFEsZRFS9lchEgnynAx9gcGQAdf06ETt7v62GttbAVoEmcOkHhmXQNjFJuJfA7lqn_aJxCmOhTYsm4An4razpl6QzTDKdFId4hD-8eK75AMr9SoSbY0kIhHIfzEK7HvyjTYMn5K7IDdIZzAo1W6wTnE0bmA9_wFHVkNzJk4VvN_n"/>
+<div class="absolute top-8 left-8">
+<span class="font-label-caps text-label-caps text-white bg-primary-container border border-stark-gray px-3 py-1">MATERIA PRIMA</span>
+</div>
+</div>
+<!-- Bento Item 4: Wide Quote -->
+<div class="md:col-span-2 border border-stark-gray bg-background p-12 flex items-center justify-center text-center relative">
+<span class="material-symbols-outlined absolute top-8 left-8 text-surface-variant text-6xl" data-icon="format_quote">format_quote</span>
+<h3 class="font-headline-lg text-headline-lg-mobile lg:text-[56px] text-primary leading-tight mix-blend-difference">
+                        NOT A PIZZERIA.<br/>AN EXHIBITION OF GLUTEN.
+                    </h3>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="lg:ml-[80px] flex flex-col md:flex-row justify-between items-start md:items-end w-full space-y-8 p-margin-desktop border-t border-outline dark:border-outline-variant bg-background dark:bg-background text-stark-gray dark:text-stark-gray relative z-40 overflow-hidden">
+<!-- Massive background logo in footer -->
+<div class="absolute bottom-0 right-0 font-display-xl text-[20vw] leading-none text-on-background opacity-[0.03] pointer-events-none select-none overflow-hidden h-full flex items-end">
+            ECLISSE
+        </div>
+<div class="relative z-10">
+<p class="font-body-md text-body-md">©2024 ECLISSE PIZZERIA. ATELIER OF DOUGH.</p>
+</div>
+<div class="flex flex-col md:flex-row gap-8 relative z-10">
+<a class="font-label-caps text-label-caps text-secondary underline hover:opacity-50 transition-opacity" href="#">INSTAGRAM</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface transition-opacity" href="#">PRIVACIDAD</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface dark:hover:text-on-surface transition-opacity" href="#">COOKIES</a>
+</div>
+</footer>
+</body></html>
