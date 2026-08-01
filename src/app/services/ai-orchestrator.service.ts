@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { SupabaseService } from './supabase.service';
 
 export interface AIConfig {
   primaryModel: string;
@@ -16,6 +17,7 @@ export interface AIConfig {
 })
 export class AIOrchestratorService {
   private http = inject(HttpClient);
+  private sb = inject(SupabaseService);
 
   // Default configuration (using the order you suggested)
   config = signal<AIConfig>({
@@ -68,15 +70,39 @@ export class AIOrchestratorService {
     throw new Error('Invalid response from Gemini');
   }
 
-  saveConfig(newConfig: AIConfig) {
+  async saveConfig(newConfig: AIConfig) {
     this.config.set(newConfig);
     localStorage.setItem('bot_ai_config', JSON.stringify(newConfig));
+    try {
+      await this.sb.client.from('rappi_config').upsert({
+        id: 'bot_config',
+        connected: true,
+        api_key: JSON.stringify(newConfig)
+      });
+    } catch (e) {
+      console.error('Error saving bot config to Supabase:', e);
+    }
   }
 
-  loadConfig() {
+  async loadConfig() {
     const saved = localStorage.getItem('bot_ai_config');
     if (saved) {
       this.config.set(JSON.parse(saved));
+    }
+    try {
+      const { data } = await this.sb.client
+        .from('rappi_config')
+        .select('*')
+        .eq('id', 'bot_config')
+        .maybeSingle();
+      
+      if (data && data.api_key) {
+        const parsed = JSON.parse(data.api_key) as AIConfig;
+        this.config.set(parsed);
+        localStorage.setItem('bot_ai_config', JSON.stringify(parsed));
+      }
+    } catch (e) {
+      console.warn('Could not load bot config from Supabase, using local instead:', e);
     }
   }
 }
