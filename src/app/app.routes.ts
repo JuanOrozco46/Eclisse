@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home';
 import { MenuComponent } from './components/menu/menu';
 import { SecretComponent } from './components/secret/secret';
-import { EventsComponent } from './pages/events/events';
 import { LoginComponent } from './pages/login/login';
 import { AdminLayout } from './components/admin-layout/admin-layout';
 import { DashboardHome } from './pages/dashboard-home/dashboard-home';
@@ -22,7 +21,6 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'menu', component: MenuComponent },
   { path: 'el-secreto', component: SecretComponent },
-  { path: 'eventos', component: EventsComponent },
   { path: 'login', component: LoginComponent },
   { 
     path: 'dashboard', 

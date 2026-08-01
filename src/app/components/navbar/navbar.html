@@ -6,10 +6,10 @@
     <div class="flex items-center gap-12 h-full">
         <a class="font-anton text-4xl md:text-5xl text-white no-underline tracking-tighter hover:text-secondary transition-colors" routerLink="/">ECLISSE</a>
         
-        <!-- Desktop Navigation Links (Center-aligned in mobile but hidden, left-ish in desktop) -->
+        <!-- Desktop Navigation Links -->
         <div class="hidden lg:flex items-center gap-8 h-full">
             <a class="font-label-caps text-[10px] tracking-widest text-stark-gray hover:text-secondary uppercase transition-all flex items-center gap-2" 
-               routerLink="/" routerLinkActive="text-secondary font-bold">
+               routerLink="/" routerLinkActive="text-secondary font-bold" [routerLinkActiveOptions]="{exact: true}">
                <span class="w-1 h-1 bg-secondary rounded-full opacity-0 router-link-active:opacity-100"></span> INICIO
             </a>
             <a class="font-label-caps text-[10px] tracking-widest text-stark-gray hover:text-secondary uppercase transition-all flex items-center gap-2" 
@@ -19,10 +19,6 @@
             <a class="font-label-caps text-[10px] tracking-widest text-stark-gray hover:text-secondary uppercase transition-all flex items-center gap-2" 
                routerLink="/el-secreto" routerLinkActive="text-secondary font-bold">
                <span class="w-1 h-1 bg-secondary rounded-full opacity-0 router-link-active:opacity-100"></span> FILOSOFÍA
-            </a>
-            <a class="font-label-caps text-[10px] tracking-widest text-stark-gray hover:text-secondary uppercase transition-all flex items-center gap-2" 
-               routerLink="/eventos" routerLinkActive="text-secondary font-bold">
-               <span class="w-1 h-1 bg-secondary rounded-full opacity-0 router-link-active:opacity-100"></span> UBICACIÓN
             </a>
         </div>
     </div>
@@ -50,7 +46,6 @@
         <a (click)="toggleMenu()" class="font-anton text-6xl text-white hover:text-secondary transition-colors uppercase tracking-widest" routerLink="/">INICIO</a>
         <a (click)="toggleMenu()" class="font-anton text-6xl text-white hover:text-secondary transition-colors uppercase tracking-widest" routerLink="/menu">CARTA</a>
         <a (click)="toggleMenu()" class="font-anton text-6xl text-white hover:text-secondary transition-colors uppercase tracking-widest" routerLink="/el-secreto">FILOSOFÍA</a>
-        <a (click)="toggleMenu()" class="font-anton text-6xl text-white hover:text-secondary transition-colors uppercase tracking-widest" routerLink="/eventos">UBICACIÓN</a>
         <a (click)="toggleMenu()" class="font-anton text-2xl text-secondary border-t border-outline-variant pt-8 mt-10 uppercase tracking-[0.5em]" routerLink="/login">STAFF ACCESS</a>
     </div>
 </nav>
