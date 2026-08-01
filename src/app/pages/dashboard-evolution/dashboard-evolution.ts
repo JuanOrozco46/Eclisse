@@ -32,6 +32,34 @@ export class DashboardEvolution implements OnInit {
   rappiForm = { storeId: '', apiKey: '', webhookSecret: '' };
   rappiSaving = signal(false);
 
+  // AI Live Playground
+  testMessageText = '';
+  testLoading = signal<boolean>(false);
+  testMessages = signal<{ sender: 'user' | 'bot'; text: string; time: string }[]>([
+    { sender: 'bot', text: '¡Hola! Escribe un mensaje aquí para probar mis respuestas con la configuración actual.', time: 'Ahora' }
+  ]);
+
+  async sendTestMessage() {
+    const text = this.testMessageText.trim();
+    if (!text || this.testLoading()) return;
+
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    this.testMessages.update(m => [...m, { sender: 'user', text, time }]);
+    this.testMessageText = '';
+    this.testLoading.set(true);
+
+    try {
+      const response = await this.aiOrchestrator.generateResponse(text);
+      const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      this.testMessages.update(m => [...m, { sender: 'bot', text: response, time: botTime }]);
+    } catch (err: any) {
+      const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      this.testMessages.update(m => [...m, { sender: 'bot', text: `⚠️ Error: ${err.message || 'No se pudo conectar con la API. Verifica que la API Key esté colocada.'}`, time: botTime }]);
+    } finally {
+      this.testLoading.set(false);
+    }
+  }
+
   recentLogs = [
     { time: '19:42:01', event: 'Gemini 1.5 Flash', details: 'Respuesta generada exitosamente', status: 'Success' },
     { time: '19:40:15', event: 'Gemini 2.0 Flash', details: 'Fallback activado por saturación', status: 'Warning' },

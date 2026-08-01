@@ -148,6 +148,63 @@
                     </button>
                 </div>
 
+                <!-- AI Live Playground (Chat de Prueba) -->
+                <div class="border border-secondary/30 bg-surface-container-low p-10 relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 font-anton text-secondary opacity-5 text-[10rem] select-none rotate-12">LIVE</div>
+                    <div class="relative z-10 flex flex-col gap-6">
+                        <div class="flex items-center justify-between border-b border-outline-variant pb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="h-px w-10 bg-secondary"></div>
+                                <h3 class="font-anton text-3xl text-white uppercase tracking-tighter">PROBAR RESPUESTAS (PLAYGROUND)</h3>
+                            </div>
+                            <span class="font-label-caps text-[9px] text-emerald border border-emerald/30 px-3 py-1 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 bg-emerald rounded-full animate-pulse"></span>
+                                LISTO PARA PRUEBAS
+                            </span>
+                        </div>
+
+                        <!-- Chat Area -->
+                        <div class="h-64 bg-background/60 border border-outline-variant p-6 overflow-y-auto flex flex-col gap-4 font-hanken text-sm scrollbar-none">
+                            <div *ngFor="let msg of testMessages()" 
+                                 [ngClass]="{'self-end items-end': msg.sender === 'user', 'self-start items-start': msg.sender === 'bot'}" 
+                                 class="max-w-[80%] flex flex-col gap-1.5">
+                                <span class="font-label-caps text-[8px] text-stark-gray opacity-40 uppercase tracking-widest">
+                                    {{ msg.sender === 'user' ? 'TÚ (CLIENTE)' : 'LUISA IA' }} • {{msg.time}}
+                                </span>
+                                <div [ngClass]="{
+                                    'bg-secondary text-black shadow-brutal-gold px-4 py-3': msg.sender === 'user',
+                                    'bg-surface-container-highest text-white border border-outline-variant px-4 py-3': msg.sender === 'bot'
+                                }" class="leading-relaxed font-semibold">
+                                    {{msg.text}}
+                                </div>
+                            </div>
+                            <div *ngIf="testLoading()" class="self-start flex flex-col gap-1.5">
+                                <span class="font-label-caps text-[8px] text-stark-gray opacity-40 uppercase tracking-widest">LUISA IA • ESCRIBIENDO...</span>
+                                <div class="bg-surface-container-highest border border-outline-variant px-4 py-3 text-white flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-secondary rounded-full animate-bounce"></span>
+                                    <span class="w-2 h-2 bg-secondary rounded-full animate-bounce delay-100"></span>
+                                    <span class="w-2 h-2 bg-secondary rounded-full animate-bounce delay-200"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Send Box -->
+                        <div class="flex gap-4">
+                            <input type="text" 
+                                   [(ngModel)]="testMessageText" 
+                                   (keyup.enter)="sendTestMessage()"
+                                   placeholder="Hazle una pregunta a Luisa (ej. ¿Qué pizzas tienen?)..." 
+                                   class="flex-1 bg-background border border-outline-variant p-4 font-hanken text-sm text-white outline-none focus:border-secondary transition-colors"
+                                   [disabled]="testLoading()">
+                            <button (click)="sendTestMessage()" 
+                                    [disabled]="testLoading() || !testMessageText.trim()"
+                                    class="px-8 border-2 border-secondary bg-secondary text-black font-anton text-sm tracking-widest uppercase hover:bg-transparent hover:text-secondary transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                PROBAR
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Stats -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div class="border border-outline-variant p-8 flex flex-col gap-4">
