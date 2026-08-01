@@ -1,12 +1,13 @@
 <div class="relative">
-    <app-hero></app-hero>
+    <app-hero [heroImage]="photos().hero_main"></app-hero>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- SECTION 2: NUESTRAS PIZZAS (NOW FIRST!) -->
+    <!-- SECCIÓN 1: NUESTRAS PIZZAS                  -->
     <!-- ═══════════════════════════════════════════ -->
     <section id="carta" class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
         <div class="absolute inset-0 texture-overlay opacity-20"></div>
         <div class="max-w-7xl mx-auto relative z-10">
+
             <!-- Section Header -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-20">
                 <div>
@@ -23,15 +24,13 @@
                 </div>
             </div>
 
-            <!-- Pizza Showcase Grid -->
+            <!-- Pizza Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-8">
-                <!-- Dynamic Items from Admin -->
-                <div *ngFor="let item of featuredItems()" 
-                     class="group border border-outline-variant bg-background p-5 relative overflow-hidden hover:border-secondary transition-all duration-500 xl:col-span-1">
+                <div *ngFor="let item of featuredItems()"
+                     class="group border border-outline-variant bg-background p-5 relative overflow-hidden hover:border-secondary transition-all duration-500">
                     <div class="aspect-square mb-6 overflow-hidden border border-outline-variant relative bg-surface-container-low flex items-center justify-center">
                         <img *ngIf="item.image" [src]="item.image" [alt]="item.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
                         <span *ngIf="!item.image" class="material-symbols-outlined text-stark-gray opacity-20 text-6xl">restaurant</span>
-                        <div *ngSwitchCase="item.category === 'PIZZERÍA'" class="absolute top-3 left-3 bg-secondary text-on-secondary px-3 py-1 font-label-caps text-[8px] tracking-widest uppercase">ARTESANAL</div>
                     </div>
                     <h3 class="font-anton text-3xl text-white uppercase tracking-tighter mb-2 group-hover:text-secondary transition-colors">{{item.name}}</h3>
                     <p class="font-hanken text-[12px] text-stark-gray opacity-50 leading-relaxed mb-4">{{item.description}}</p>
@@ -50,7 +49,7 @@
                 </div>
             </div>
 
-            <!-- CTA -->
+            <!-- CTAs -->
             <div class="mt-20 flex flex-col sm:flex-row gap-6 items-center justify-center">
                 <a routerLink="/menu" class="inline-block border-2 border-secondary text-secondary font-anton text-2xl px-16 py-6 uppercase tracking-widest hover:bg-secondary hover:text-on-secondary transition-all shadow-brutal-gold hover:shadow-none no-underline">
                     VER CARTA COMPLETA
@@ -63,7 +62,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- SECTION 3: CÓMO PEDIR (NOW SECOND!) -->
+    <!-- SECCIÓN 2: CÓMO PEDIR                       -->
     <!-- ═══════════════════════════════════════════ -->
     <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative">
         <div class="max-w-7xl mx-auto">
@@ -73,7 +72,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-                <!-- Left: Steps -->
+                <!-- Pasos -->
                 <div class="flex flex-col gap-10">
                     <h2 class="font-anton text-6xl md:text-8xl text-white uppercase leading-none tracking-tighter">
                         PIDE EN<br/><span class="text-secondary">3 PASOS</span>
@@ -81,14 +80,12 @@
                     <p class="font-hanken text-lg text-stark-gray opacity-60 max-w-md leading-relaxed">
                         Sin apps complicadas. Escríbenos por WhatsApp, elige tu pizza y la llevamos a tu puerta.
                     </p>
-
-                    <!-- Steps -->
                     <div class="flex flex-col gap-8 mt-4">
                         <div class="flex gap-8 items-start group">
                             <div class="w-16 h-16 border-2 border-secondary flex items-center justify-center font-anton text-2xl text-secondary shrink-0 group-hover:bg-secondary group-hover:text-on-secondary transition-all">01</div>
                             <div>
                                 <h4 class="font-anton text-2xl text-white uppercase tracking-tighter mb-2">ESCRÍBENOS</h4>
-                                <p class="font-hanken text-sm text-stark-gray opacity-60">Envía un mensaje a nuestro WhatsApp y Luisa, nuestra anfitriona virtual, te guiará.</p>
+                                <p class="font-hanken text-sm text-stark-gray opacity-60">Envía un mensaje a nuestro WhatsApp y Luisa te guiará por la carta.</p>
                             </div>
                         </div>
                         <div class="flex gap-8 items-start group">
@@ -108,13 +105,12 @@
                     </div>
                 </div>
 
-                <!-- Right: CTA Cards -->
+                <!-- Cards de contacto -->
                 <div class="flex flex-col gap-8">
-                    <!-- WhatsApp Card -->
-                    <a href="https://wa.me/573004057195" target="_blank" 
+                    <a href="https://wa.me/573004057195" target="_blank"
                        class="border-2 border-emerald bg-emerald/5 p-10 flex items-center gap-8 group hover:bg-emerald/10 transition-all duration-500 no-underline relative overflow-hidden">
                         <div class="absolute -right-6 -bottom-6 font-anton text-emerald opacity-10 text-8xl select-none">WA</div>
-                        <div class="w-20 h-20 border-2 border-emerald flex items-center justify-center text-emerald text-4xl group-hover:bg-emerald group-hover:text-on-secondary transition-all shrink-0">💬</div>
+                        <div class="w-20 h-20 border-2 border-emerald flex items-center justify-center text-4xl group-hover:bg-emerald transition-all shrink-0">💬</div>
                         <div class="flex-1 relative z-10">
                             <h4 class="font-anton text-3xl text-white uppercase tracking-tighter group-hover:text-emerald transition-colors">WHATSAPP DIRECTO</h4>
                             <p class="font-label-caps text-[10px] text-stark-gray tracking-widest uppercase mt-2">HABLA CON LUISA · ATENCIÓN PERSONALIZADA</p>
@@ -122,11 +118,10 @@
                         <span class="text-emerald group-hover:translate-x-2 transition-transform text-3xl">→</span>
                     </a>
 
-                    <!-- Rappi Card -->
-                    <a href="https://www.rappi.com.co/restaurantes/900491852-eclisse" target="_blank" 
+                    <a href="https://www.rappi.com.co/restaurantes/900491852-eclisse" target="_blank"
                        class="border border-outline-variant bg-surface-container-low p-10 flex items-center gap-8 group hover:border-secondary transition-all duration-500 no-underline relative overflow-hidden">
                         <div class="absolute -right-6 -bottom-6 font-anton text-stark-gray opacity-5 text-8xl select-none">RAPPI</div>
-                        <div class="w-20 h-20 border border-outline-variant flex items-center justify-center text-secondary text-4xl group-hover:border-secondary transition-all shrink-0">🛵</div>
+                        <div class="w-20 h-20 border border-outline-variant flex items-center justify-center text-4xl group-hover:border-secondary transition-all shrink-0">🛵</div>
                         <div class="flex-1 relative z-10">
                             <h4 class="font-anton text-3xl text-white uppercase tracking-tighter group-hover:text-secondary transition-colors">PIDE POR RAPPI</h4>
                             <p class="font-label-caps text-[10px] text-stark-gray tracking-widest uppercase mt-2">DELIVERY PREMIUM</p>
@@ -139,121 +134,14 @@
     </section>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- SECTION 4: ¿QUÉ ES ECLISSE? (MOVED DOWN) -->
+    <!-- SECCIÓN 3: GALERÍA                          -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative z-10">
-        <div class="max-w-7xl mx-auto">
-            <!-- Section Header -->
-            <div class="flex items-center gap-4 mb-8">
-                <span class="font-anton text-secondary text-xl">03</span>
-                <div class="h-px flex-1 bg-outline-variant"></div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
-                <!-- Text -->
-                <div class="md:col-span-6 flex flex-col gap-8">
-                    <h2 class="font-anton text-6xl md:text-8xl text-white uppercase leading-none tracking-tighter">
-                        ¿QUÉ ES UNA<br/>COCINA<br/><span class="text-secondary">OCULTA?</span>
-                    </h2>
-                    <p class="font-hanken text-xl text-stark-gray opacity-70 leading-relaxed max-w-lg">
-                        Sin mesas, sin meseros, sin local al público. Eclisse opera desde un <strong class="text-white">atelier privado</strong> donde todo el presupuesto se invierte en lo que importa: <strong class="text-secondary">ingredientes premium y técnica artesanal.</strong>
-                    </p>
-                    <div class="grid grid-cols-3 gap-6 pt-8 border-t border-outline-variant">
-                        <div class="flex flex-col items-center text-center gap-2 group">
-                            <span class="material-symbols-outlined text-secondary text-4xl group-hover:scale-110 transition-transform">local_fire_department</span>
-                            <span class="font-label-caps text-[9px] text-stark-gray opacity-60 tracking-widest uppercase">HORNO OONI<br/>12 PULGADAS</span>
-                        </div>
-                        <div class="flex flex-col items-center text-center gap-2 group">
-                            <span class="material-symbols-outlined text-secondary text-4xl group-hover:scale-110 transition-transform">timer</span>
-                            <span class="font-label-caps text-[9px] text-stark-gray opacity-60 tracking-widest uppercase">MASA 48H<br/>FERMENTACIÓN</span>
-                        </div>
-                        <div class="flex flex-col items-center text-center gap-2 group">
-                            <span class="material-symbols-outlined text-secondary text-4xl group-hover:scale-110 transition-transform">delivery_dining</span>
-                            <span class="font-label-caps text-[9px] text-stark-gray opacity-60 tracking-widest uppercase">SOLO<br/>DOMICILIOS</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Image: Artisan Process -->
-                <div class="md:col-span-6 relative group">
-                    <div class="absolute -top-8 -right-8 font-anton text-stark-gray opacity-[0.04] text-[8rem] select-none pointer-events-none leading-none">DARK<br/>KITCHEN</div>
-                    <div class="border border-outline-variant p-3 bg-surface-container-lowest shadow-brutal group-hover:shadow-none transition-all duration-500">
-                        <img src="/assets/proceso_artesanal.png" 
-                             alt="Proceso artesanal de pizza Eclisse" 
-                             class="w-full h-[450px] object-cover grayscale group-hover:grayscale-0 transition-all duration-1000">
-                    </div>
-                    <div class="absolute -bottom-6 -left-6 bg-secondary text-on-secondary px-6 py-4 font-anton text-sm tracking-widest uppercase shadow-brutal-gold">
-                        100% ARTESANAL
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════ -->
-    <!-- SECTION 5: EL RITUAL DEL FUEGO (MOVED DOWN) -->
-    <!-- ═══════════════════════════════════════════ -->
-    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-[#050505] relative overflow-hidden">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-            
-            <div class="relative order-2 md:order-1">
-                <div class="border-2 border-outline-variant p-2 bg-background relative z-10 shadow-brutal">
-                    <img src="/assets/napoletana_ritual.png" 
-                         alt="Auténtica Pizza Napoletana Eclisse" 
-                         class="w-full h-[500px] object-cover contrast-[1.1] brightness-[0.9]">
-                    <div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
-                </div>
-                <!-- Temperature Badge -->
-                <div class="absolute -top-10 -right-10 bg-tomato text-white p-10 font-anton flex flex-col items-center justify-center rotate-6 shadow-2xl z-20">
-                    <span class="text-6xl leading-none">500°C</span>
-                    <span class="text-xs tracking-widest uppercase mt-2">CALOR EXTREMO</span>
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-10 order-1 md:order-2">
-                <div class="flex items-center gap-4">
-                    <span class="font-anton text-secondary text-xl">04</span>
-                    <div class="h-px w-24 bg-outline-variant"></div>
-                </div>
-                <h2 class="font-anton text-6xl md:text-8xl text-white uppercase leading-none tracking-tighter">
-                    EL RITUAL<br/>DEL <span class="text-tomato">FUEGO</span>
-                </h2>
-                <div class="flex flex-col gap-8">
-                    <div class="flex gap-6 items-start">
-                        <span class="material-symbols-outlined text-tomato text-4xl">local_fire_department</span>
-                        <div class="flex flex-col gap-2">
-                            <h4 class="font-anton text-2xl text-white uppercase tracking-tighter">HORNO OONI 12"</h4>
-                            <p class="font-hanken text-lg text-stark-gray opacity-60 leading-relaxed">
-                                Nuestra piedra alcanza los 500°C en minutos, creando el choque térmico necesario para una masa etérea y crujiente.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex gap-6 items-start">
-                        <span class="material-symbols-outlined text-secondary text-4xl">precision_manufacturing</span>
-                        <div class="flex flex-col gap-2">
-                            <h4 class="font-anton text-2xl text-white uppercase tracking-tighter">ARTESANÍA TÉCNICA</h4>
-                            <p class="font-hanken text-lg text-stark-gray opacity-60 leading-relaxed">
-                                El tamaño portátil de nuestro atelier nos permite un control absoluto. No producimos en masa, horneamos por obsesión.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <button routerLink="/el-secreto" class="w-fit font-anton text-secondary text-lg border-b-2 border-secondary pb-3 hover:text-white hover:border-white transition-all uppercase tracking-[0.3em] mt-6">
-                    DESCUBRE EL SECRETO ➔
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════ -->
-    <!-- SECTION 6: INSTAGRAM FEED -->
-    <!-- ═══════════════════════════════════════════ -->
-    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative overflow-hidden">
+    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
         <div class="max-w-7xl mx-auto flex flex-col gap-16">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                 <div>
                     <div class="flex items-center gap-4 mb-6">
-                        <span class="font-anton text-secondary text-xl">SOCIAL</span>
+                        <span class="font-anton text-secondary text-xl">03</span>
                         <div class="h-px w-24 bg-outline-variant"></div>
                     </div>
                     <h2 class="font-anton text-6xl md:text-8xl text-white uppercase leading-none tracking-tighter">SIGUE EL<br/><span class="text-secondary">RITUAL</span></h2>
@@ -264,23 +152,20 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Post 1 -->
                 <div class="aspect-square relative group overflow-hidden border border-outline-variant">
-                    <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000">
+                    <img [src]="photos().gallery_1" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt="Eclisse Pizza">
                     <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
                         <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"La paciencia es el ingrediente principal. 48 horas de espera para 90 segundos de fuego."</p>
                     </div>
                 </div>
-                <!-- Post 2 -->
                 <div class="aspect-square relative group overflow-hidden border border-outline-variant">
-                    <img src="https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?q=80&w=2050&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000">
+                    <img [src]="photos().gallery_2" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt="Eclisse Pizza">
                     <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
                         <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"Obsesión por el detalle. Solo ingredientes que nos emocionen."</p>
                     </div>
                 </div>
-                <!-- Post 3 -->
                 <div class="aspect-square relative group overflow-hidden border border-outline-variant">
-                    <img src="https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000">
+                    <img [src]="photos().gallery_3" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt="Eclisse Pizza">
                     <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
                         <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"Miel picante artesanal. El equilibrio perfecto entre el dulce y la llama."</p>
                     </div>
@@ -290,14 +175,14 @@
     </section>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- SECTION 7: UBICACIÓN & CONTACTO -->
+    <!-- SECCIÓN 4: UBICACIÓN                        -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
+    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative overflow-hidden">
         <div class="absolute inset-0 texture-overlay opacity-10"></div>
         <div class="max-w-5xl mx-auto relative z-10 text-center flex flex-col items-center gap-10">
             <div class="flex items-center gap-4 w-full max-w-xs mx-auto">
                 <div class="h-px flex-1 bg-outline-variant"></div>
-                <span class="font-anton text-secondary text-xl">05</span>
+                <span class="font-anton text-secondary text-xl">04</span>
                 <div class="h-px flex-1 bg-outline-variant"></div>
             </div>
             <span class="material-symbols-outlined text-secondary text-7xl">location_on</span>
@@ -305,12 +190,18 @@
                 ARMENIA,<br/>QUINDÍO
             </h2>
             <p class="font-hanken text-xl text-stark-gray opacity-60 max-w-md leading-relaxed">
-                Calle 2N 18-144 · Zona estratégica para domicilios rápidos en toda la ciudad.
+                Calle 2N 18-144 · Solo domicilios. Cobertura rápida en toda la ciudad.
             </p>
-            <a routerLink="/eventos" class="border-2 border-secondary text-secondary font-anton text-xl px-14 py-5 uppercase tracking-widest hover:bg-secondary hover:text-on-secondary transition-all shadow-brutal-gold hover:shadow-none no-underline">
-                VER MAPA INTERACTIVO
-            </a>
+            <div class="flex flex-col sm:flex-row gap-6">
+                <a href="https://wa.me/573004057195" target="_blank"
+                   class="border-2 border-emerald text-emerald font-anton text-xl px-14 py-5 uppercase tracking-widest hover:bg-emerald hover:text-on-secondary transition-all no-underline">
+                    💬 HACER UN PEDIDO
+                </a>
+                <a routerLink="/eventos"
+                   class="border border-outline-variant text-white font-anton text-xl px-14 py-5 uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all no-underline">
+                    VER UBICACIÓN
+                </a>
+            </div>
         </div>
     </section>
-
 </div>

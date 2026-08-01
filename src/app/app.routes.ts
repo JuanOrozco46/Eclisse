@@ -14,6 +14,7 @@ import { DashboardPos } from './pages/dashboard-pos/dashboard-pos';
 import { DashboardUsers } from './pages/dashboard-users';
 import { DashboardKitchen } from './pages/dashboard-kitchen';
 import { DashboardMenu } from './pages/dashboard-menu';
+import { DashboardAppearance } from './pages/dashboard-appearance';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -37,6 +38,7 @@ export const routes: Routes = [
       { path: 'personal', component: DashboardUsers },
       { path: 'cocina', component: DashboardKitchen },
       { path: 'carta', component: DashboardMenu },
+      { path: 'apariencia', component: DashboardAppearance },
     ]
 
   },
