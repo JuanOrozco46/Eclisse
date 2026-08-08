@@ -33,18 +33,88 @@ export class AIOrchestratorService {
   private get geminiApiKey() { return this.config().geminiApiKey; }
 
   private buildFullSystemPrompt(): string {
-    const base = this.config().systemPrompt;
+    const basePrompt = this.config().systemPrompt;
+    const now = new Date();
+    const currentDate = now.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const currentHour = now.getHours();
+    const currentMinutes = now.getMinutes();
+
+    let timeStatus = '';
+    if (currentHour < 12) {
+      timeStatus = `\n⚠️ ESTADO ACTUAL: PRE-APERTURA (Son las ${currentHour}:${currentMinutes < 10 ? '0' : ''}${currentMinutes} AM). Atiende amablemente y aclara que nuestro horno abre a las 12:00 PM, pero puedes tomar el pedido de forma anticipada.`;
+    } else if (currentHour >= 22) {
+      timeStatus = `\n⚠️ ESTADO ACTUAL: CERRADO (Son las ${currentHour}:${currentMinutes < 10 ? '0' : ''}${currentMinutes}). Ya cerramos por hoy. Dile amablemente al cliente que abrimos de nuevo mañana a las 12:00 PM.`;
+    } else if (currentHour >= 21.5) {
+      timeStatus = `\n⚠️ ESTADO ACTUAL: ÚLTIMAS ÓRDENES / SOLO RECOGER. No hay domicilios disponibles a esta hora, solo para recoger en el local.`;
+    }
+
     const menuItems = this.dataService.menuItems().filter(i => i.available);
-    
-    if (menuItems.length === 0) return base;
+    let catalogText = 'Actualmente no hay productos registrados.';
+    if (menuItems.length > 0) {
+      catalogText = menuItems.map(item => {
+        const priceFormatted = item.price.toLocaleString('es-CO');
+        const ingr = item.ingredients && item.ingredients.length > 0 ? ` (Ingredientes: ${item.ingredients.join(', ')})` : '';
+        return `• ${item.name} - $${priceFormatted} COP [Categoría: ${item.category}]: ${item.description}${ingr}`;
+      }).join('\n');
+    }
 
-    const catalogText = menuItems.map(item => {
-      const priceFormatted = item.price.toLocaleString('es-CO');
-      const ingr = item.ingredients && item.ingredients.length > 0 ? ` (Ingredientes: ${item.ingredients.join(', ')})` : '';
-      return `• ${item.name} - $${priceFormatted} COP [Categoría: ${item.category}]: ${item.description}${ingr}`;
-    }).join('\n');
+    return `
+REGLA DE ORO ANTI-SPAM DE WHATSAPP:
+- NUNCA RESPONDAS EXACTAMENTE IGUAL A DOS CLIENTES SEGUIDOS.
+- VARÍA SIEMPRE LA ESTRUCTURA, EL TONO, LAS PALABRAS Y EL USO DE EMOJIS.
+- Ejemplos de variaciones (Inspírate en ellos, NO los copies al pie de la letra):
+  * Estilo directo: "¡Hola! Con gusto te tomo el pedido. ¿A qué dirección lo enviamos?"
+  * Estilo acogedor: "¡Buenas tardes! 🍕 Qué gusto saludarte. ¿Qué pizza se te antoja hoy?"
+  * Estilo breve: "Dale, perfecto. ¿Me confirmas tu nombre y barrio en Armenia?"
+  * Estilo explicativo: "Con todo gusto. Te confirmo que el domicilio dentro de Armenia es de $6.000 COP."
 
-    return `${base}\n\n--- CARTA ACTUALIZADA EN TIEMPO REAL (Usa estos nombres y precios exactos) ---\n${catalogText}`;
+INFORMACIÓN DEL RESTAURANTE:
+- Restaurante: Eclisse Pizza Napoletana (Artesanal y de Fuego)
+- Ubicación: Armenia, Quindío
+- Fecha y Hora Actual: ${currentDate} (${currentHour}:${currentMinutes < 10 ? '0' : ''}${currentMinutes}) ${timeStatus}
+
+TARIFAS DE DOMICILIO (ARMENIA, QUINDÍO):
+- Domicilio estándar a cualquier barrio dentro de Armenia: $6.000 COP.
+- Afueras o Alrededores de Armenia (ej. Circasia, Calarcá, Tébaras, El Caimo, Club Campestre): $8.000 - $12.000 COP.
+- Recoger en el local: $0 (Gratis).
+
+MÉTODOS DE PAGO Y TRANSFERENCIA:
+- Aceptamos Efectivo (Contraentrega) y Nequi / Bancolombia / Transferencia.
+- Para pagos por Transferencia/Nequi: Solicita siempre la foto del comprobante de pago ANTES de confirmar la orden.
+- Revisa en el comprobante que la fecha sea de hoy y el valor coincida con el total.
+
+NOTAS Y OBSERVACIONES DE CLIENTES PARA COCINA:
+- Si el cliente solicita cualquier cambio o especificación (ej: "Sin cebolla", "Masa bien tostada", "Salsa aparte", "Pide cubiertos o vasos"), DEBES registrarlo en el campo 'notes' de la orden o de los ítems. Este dato irá directo al Monitor de Cocina.
+
+INVENTARIO Y CARTA VIGENTE EN TIEMPO REAL:
+${catalogText}
+
+${basePrompt}
+
+FORMATO DE SALIDA (ESTRICTO JSON):
+Si el cliente solo está saludando o preguntando, puedes responder con JSON simple:
+{
+  "intent": "chat" | "order" | "send_menu",
+  "replyText": "Tu respuesta amable y única aquí."
+}
+
+Si el cliente está realizando o confirmando un pedido, incluye el objeto 'orderData':
+{
+  "intent": "chat" | "order",
+  "replyText": "Respuesta al cliente confirmando o solicitando datos.",
+  "orderData": {
+    "customerName": "Nombre del cliente",
+    "customerAddress": "Dirección completa y barrio en Armenia",
+    "customerPhone": "Teléfono",
+    "paymentMethod": "CASH" | "TRANSFER",
+    "deliveryFee": 6000,
+    "notes": "Notas generales para cocina (ej: Sin cebolla, extra servilletas)",
+    "items": [
+      { "productName": "Nombre exacto de la pizza o producto", "quantity": 1, "notes": "Notas del producto" }
+    ]
+  }
+}
+`;
   }
 
   async generateResponse(userMessage: string): Promise<string> {
