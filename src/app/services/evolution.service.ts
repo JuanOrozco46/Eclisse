@@ -38,7 +38,7 @@ export class EvolutionService {
     try {
       // Connect to Evolution API - Fetch instance state
       const response: any = await firstValueFrom(
-        this.http.get(`${this.baseUrl}/instance/connectionState/${instanceName}`, { headers: this.headers })
+        this.http.get(`${this.baseUrl}/instance/connectionState/${instanceName}?apikey=${this.apiKey}`, { headers: this.headers })
       );
       
       const status = response.instance?.state || 'disconnected';
@@ -48,8 +48,6 @@ export class EvolutionService {
         number: response.instance?.ownerJid
       });
     } catch (err: any) {
-      // Handle known 404 or other connection errors
-      // If instance doesn't exist, we might need to create it or just show disconnected
       if (err.status === 404) {
         this.instanceStatus.set({ instanceName, status: 'disconnected' });
       } else {
@@ -67,13 +65,13 @@ export class EvolutionService {
       let response: any;
       try {
         response = await firstValueFrom(
-          this.http.get(`${this.baseUrl}/instance/connect/${instanceName}`, { headers: this.headers })
+          this.http.get(`${this.baseUrl}/instance/connect/${instanceName}?apikey=${this.apiKey}`, { headers: this.headers })
         );
       } catch (err: any) {
         // If 404, the instance hasn't been created in Evolution API yet. Create it!
         if (err.status === 404) {
           response = await firstValueFrom(
-            this.http.post(`${this.baseUrl}/instance/create`, {
+            this.http.post(`${this.baseUrl}/instance/create?apikey=${this.apiKey}`, {
               instanceName,
               qrcode: true,
               integration: 'WHATSAPP-BAILEYS'
@@ -113,7 +111,7 @@ export class EvolutionService {
   async logoutInstance(instanceName: string = this.defaultInstance) {
     try {
       await firstValueFrom(
-        this.http.delete(`${this.baseUrl}/instance/logout/${instanceName}`, { headers: this.headers })
+        this.http.delete(`${this.baseUrl}/instance/logout/${instanceName}?apikey=${this.apiKey}`, { headers: this.headers })
       );
       await this.checkStatus(instanceName);
     } catch (err) {
