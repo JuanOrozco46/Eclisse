@@ -62,17 +62,49 @@ export class EvolutionService {
 
   async connectInstance(instanceName: string = this.defaultInstance) {
     this.loading.set(true);
+    this.error.set(null);
     try {
-      // Get QR code or connection data
-      const response: any = await firstValueFrom(
-        this.http.get(`${this.baseUrl}/instance/connect/${instanceName}`, { headers: this.headers })
-      );
+      let response: any;
+      try {
+        response = await firstValueFrom(
+          this.http.get(`${this.baseUrl}/instance/connect/${instanceName}`, { headers: this.headers })
+        );
+      } catch (err: any) {
+        // If 404, the instance hasn't been created in Evolution API yet. Create it!
+        if (err.status === 404) {
+          response = await firstValueFrom(
+            this.http.post(`${this.baseUrl}/instance/create`, {
+              instanceName,
+              qrcode: true,
+              integration: 'WHATSAPP-BAILEYS'
+            }, { headers: this.headers })
+          );
+        } else {
+          throw err;
+        }
+      }
+
+      // Extract QR base64 or code
+      const rawQr = response?.base64 || response?.code || response?.qrcode?.base64 || response?.qrcode?.code;
       
-      if (response.code) {
-        this.instanceStatus.update(s => s ? { ...s, qrcode: response.code } : { instanceName, status: 'disconnected', qrcode: response.code });
+      let qrCodeFormatted = null;
+      if (rawQr) {
+        if (rawQr.startsWith('data:') || rawQr.startsWith('http')) {
+          qrCodeFormatted = rawQr;
+        } else {
+          qrCodeFormatted = `data:image/png;base64,${rawQr}`;
+        }
+      }
+
+      if (qrCodeFormatted) {
+        this.instanceStatus.update(s => s ? { ...s, qrcode: qrCodeFormatted } : { instanceName, status: 'disconnected', qrcode: qrCodeFormatted });
+      } else {
+        this.error.set('No se pudo obtener el código QR de respuesta. Intenta de nuevo.');
       }
     } catch (err: any) {
-      this.error.set('Could not generate connection QR');
+      console.error('Error connecting instance:', err);
+      const msg = err.error?.message || err.message || 'No se pudo generar el QR de conexión';
+      this.error.set(`Error de conexión: ${msg}`);
     } finally {
       this.loading.set(false);
     }
