@@ -53,14 +53,37 @@ import { EvolutionService } from '../services/evolution.service';
 
       <!-- Config Modal Delivery Drivers Group -->
       <div *ngIf="showDeliveryGroupModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-        <div class="bg-surface-container-low border-2 border-outline-variant p-8 max-w-md w-full flex flex-col gap-6 relative">
+        <div class="bg-surface-container-low border-2 border-outline-variant p-8 max-w-lg w-full flex flex-col gap-6 relative max-h-[90vh] overflow-y-auto">
           <h2 class="font-anton text-3xl text-white uppercase tracking-tighter">CONFIGURAR GRUPO DE DOMICILIARIOS</h2>
           <p class="font-label-caps text-xs text-stark-gray tracking-widest uppercase">
             Ingresa el número de WhatsApp o ID de Grupo al que el bot enviará la solicitud cuando hagas clic en "SOLICITAR DOMICILIO".
           </p>
-          <input type="text" [(ngModel)]="deliveryGroupInput" placeholder="Ej: 573001234567 o Group ID"
-                 class="w-full bg-background border border-outline-variant p-4 font-anton text-white focus:border-secondary outline-none">
-          <div class="flex justify-end gap-4">
+
+          <div class="flex flex-col gap-2">
+            <label class="font-label-caps text-[10px] text-secondary uppercase">ID o Número de Grupo</label>
+            <input type="text" [(ngModel)]="deliveryGroupInput" placeholder="Ej: 12036301234567@g.us o 573001234567"
+                   class="w-full bg-background border border-outline-variant p-4 font-anton text-white focus:border-secondary outline-none text-sm">
+          </div>
+
+          <div class="border-t border-outline-variant/40 pt-4 flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+              <span class="font-label-caps text-[10px] text-stark-gray uppercase">¿No conoces el ID del Grupo?</span>
+              <button (click)="loadWhatsAppGroups()" [disabled]="loadingGroups()"
+                      class="px-3 py-1.5 border border-emerald/50 text-emerald font-anton text-xs uppercase hover:bg-emerald/10 transition-all">
+                {{ loadingGroups() ? 'CARGANDO...' : 'CARGARMIS GRUPOS DE WA' }}
+              </button>
+            </div>
+
+            <div *ngIf="availableGroups().length > 0" class="flex flex-col gap-2 max-h-48 overflow-y-auto border border-outline-variant/30 p-2 bg-background">
+              <button *ngFor="let g of availableGroups()" (click)="selectGroup(g.id)"
+                      class="text-left p-3 hover:bg-surface-container-low border border-outline-variant/20 flex justify-between items-center transition-all">
+                <span class="font-anton text-sm text-white">{{g.subject}}</span>
+                <span class="font-label-caps text-[9px] text-stark-gray opacity-60">{{g.id.slice(0, 15)}}...</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-4 mt-2">
             <button (click)="showDeliveryGroupModal.set(false)" class="px-6 py-3 border border-outline-variant text-stark-gray font-anton text-sm uppercase">CANCELAR</button>
             <button (click)="saveDeliveryGroupPhone()" class="px-6 py-3 bg-emerald text-black font-anton text-sm uppercase hover:brightness-110">GUARDAR</button>
           </div>
@@ -221,6 +244,19 @@ export class DashboardKitchen {
   
   showDeliveryGroupModal = signal<boolean>(false);
   deliveryGroupInput = this.evolution.deliveryGroupNumber();
+  availableGroups = signal<{ id: string; subject: string }[]>([]);
+  loadingGroups = signal<boolean>(false);
+
+  async loadWhatsAppGroups() {
+    this.loadingGroups.set(true);
+    const groups = await this.evolution.fetchGroups();
+    this.availableGroups.set(groups);
+    this.loadingGroups.set(false);
+  }
+
+  selectGroup(groupId: string) {
+    this.deliveryGroupInput = groupId;
+  }
 
   saveDeliveryGroupPhone() {
     this.evolution.setDeliveryGroupNumber(this.deliveryGroupInput);

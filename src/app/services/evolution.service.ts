@@ -122,10 +122,11 @@ export class EvolutionService {
 
   async sendTextMessage(number: string, text: string, instanceName: string = this.defaultInstance): Promise<boolean> {
     try {
-      const cleanNumber = number.replace(/\D/g, '');
+      // If destination is a Group JID (contains @g.us), keep it as is, otherwise clean digits for phone numbers
+      const destination = number.includes('@g.us') ? number.trim() : number.replace(/\D/g, '');
       const response: any = await firstValueFrom(
         this.http.post(`${this.baseUrl}/message/sendText/${instanceName}`, {
-          number: cleanNumber,
+          number: destination,
           text: text
         }, { headers: this.headers })
       );
@@ -133,6 +134,21 @@ export class EvolutionService {
     } catch (err: any) {
       console.error('Error sending WhatsApp message via Evolution API:', err);
       return false;
+    }
+  }
+
+  async fetchGroups(instanceName: string = this.defaultInstance): Promise<{ id: string; subject: string }[]> {
+    try {
+      const response: any = await firstValueFrom(
+        this.http.get(`${this.baseUrl}/group/fetchAllGroups/${instanceName}?getParticipants=false`, { headers: this.headers })
+      );
+      if (Array.isArray(response)) {
+        return response.map((g: any) => ({ id: g.id, subject: g.subject || g.id }));
+      }
+      return [];
+    } catch (err) {
+      console.error('Error fetching WhatsApp groups:', err);
+      return [];
     }
   }
 
