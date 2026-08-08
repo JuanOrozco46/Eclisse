@@ -2,6 +2,8 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { DataService } from './data.service';
+import { SupabaseService } from './supabase.service';
+import { environment } from '../../environments/environment';
 
 export interface AIConfig {
   primaryModel: string;
@@ -10,6 +12,7 @@ export interface AIConfig {
   systemPrompt: string;
   antiBlockDelay: number; // in ms
   geminiApiKey: string;
+  menuImageUrl?: string;
 }
 
 @Injectable({
@@ -27,13 +30,15 @@ export class AIOrchestratorService {
     tertiaryModel: 'gemini-1.5-pro',
     systemPrompt: 'Tu nombre es Luisa y eres la anfitriona virtual de Eclisse Pizza Napoletana. Tu tono es profesional pero muy acogedor y sofisticado. Tu objetivo es guiar a los clientes a través de nuestra carta artesanal, ayudarles con sus pedidos y transmitir la pasión por la pizza auténtica. Siempre respondes con cortesía y usas un lenguaje que refleja la calidad premium de Eclisse.',
     antiBlockDelay: 2000,
-    geminiApiKey: ''
+    geminiApiKey: '',
+    menuImageUrl: environment.menuImageUrl
   });
 
   private get geminiApiKey() { return this.config().geminiApiKey; }
 
   private buildFullSystemPrompt(): string {
     const basePrompt = this.config().systemPrompt;
+    const menuImage = this.config().menuImageUrl || environment.menuImageUrl;
     const now = new Date();
     const currentDate = now.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const currentHour = now.getHours();
@@ -68,15 +73,22 @@ REGLA DE ORO ANTI-SPAM DE WHATSAPP:
   * Estilo breve: "Dale, perfecto. ¿Me confirmas tu nombre y barrio en Armenia?"
   * Estilo explicativo: "Con todo gusto. Te confirmo que el domicilio dentro de Armenia es de $6.000 COP."
 
-INFORMACIÓN DEL RESTAURANTE:
-- Restaurante: Eclisse Pizza Napoletana (Artesanal y de Fuego)
-- Ubicación: Armenia, Quindío
+INFORMACIÓN DEL RESTAURANTE Y CONCEPTO:
+- Nombre: Eclisse Pizza Napoletana (Artesanal y de Fuego)
+- Modelo de Negocio: COCINA OCULTA (Dark Kitchen). No atendemos mesas en el sitio ni contamos con salón comedor.
+- Dirección Única de Recogida: Calle 2 norte #18-144, Armenia, Quindío.
+- Si el cliente pregunta dónde están ubicados o desea RECOGER su pedido en persona, aclárale amablemente que somos una cocina oculta y dale la dirección exacta: Calle 2 norte #18-144, Armenia.
+- Ubicación General: Armenia, Quindío
 - Fecha y Hora Actual: ${currentDate} (${currentHour}:${currentMinutes < 10 ? '0' : ''}${currentMinutes}) ${timeStatus}
+
+IMAGEN DE LA CARTA / MENÚ DIGITAL:
+- Enlace de la Carta/Menú: ${menuImage}
+- Si el cliente solicita el menú, la carta o fotos de las pizzas (intent "send_menu" o texto pidiendo el menú), incluye o comparte el enlace de la carta (${menuImage}) con una frase acogedora.
 
 TARIFAS DE DOMICILIO (ARMENIA, QUINDÍO):
 - Domicilio estándar a cualquier barrio dentro de Armenia: $6.000 COP.
 - Afueras o Alrededores de Armenia (ej. Circasia, Calarcá, Tébaras, El Caimo, Club Campestre): $8.000 - $12.000 COP.
-- Recoger en el local: $0 (Gratis).
+- Recoger en el local (Calle 2 norte #18-144): $0 (Gratis).
 
 MÉTODOS DE PAGO Y TRANSFERENCIA:
 - Aceptamos Efectivo (Contraentrega) y Nequi / Bancolombia / Transferencia.
