@@ -3,6 +3,7 @@
   "outputDirectory": "dist/web-app/browser",
   "framework": null,
   "rewrites": [
+    { "source": "/api/evolution/:path*", "destination": "https://elhornobotprueba1.onrender.com/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

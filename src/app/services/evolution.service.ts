@@ -15,8 +15,12 @@ export interface EvolutionInstance {
 export class EvolutionService {
   private http = inject(HttpClient);
   
-  // Configuration from User
-  private readonly baseUrl = 'https://elhornobotprueba1.onrender.com';
+  private get baseUrl() {
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      return '/api/evolution';
+    }
+    return 'https://elhornobotprueba1.onrender.com';
+  }
   private readonly apiKey = 'secreto123';
   private readonly defaultInstance = 'ECLISSE_WA_01';
 
