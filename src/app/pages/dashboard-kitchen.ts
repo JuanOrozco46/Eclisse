@@ -1,11 +1,13 @@
 import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DataService, SalesOrder, DeliveryStatus } from '../services/data.service';
+import { EvolutionService } from '../services/evolution.service';
 
 @Component({
   selector: 'app-dashboard-kitchen',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="relative flex flex-col gap-12 animate-in fade-in slide-in-from-right-8 duration-700">
       <!-- Top KDS Header -->
@@ -19,7 +21,13 @@ import { DataService, SalesOrder, DeliveryStatus } from '../services/data.servic
           </div>
         </div>
         
-        <div class="flex gap-6 flex-wrap relative z-10">
+        <div class="flex gap-6 flex-wrap items-center relative z-10">
+          <button (click)="showDeliveryGroupModal.set(true)" 
+                  class="border border-emerald/40 hover:border-emerald bg-emerald/10 text-emerald font-anton px-4 py-3 text-xs tracking-widest uppercase transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">groups</span>
+            {{ evolution.deliveryGroupNumber() ? 'GRUPO DOMICILIOS: OK' : ' CONFIGURAR GRUPO DOMICILIOS' }}
+          </button>
+
           <div class="flex flex-col items-center border border-outline-variant px-6 py-3 bg-background">
              <span class="font-label-caps text-[9px] text-stark-gray opacity-40 uppercase">EN PREPARACIÓN</span>
              <span class="font-anton text-4xl text-white">{{preparingOrdersCount()}}</span>
@@ -42,6 +50,22 @@ import { DataService, SalesOrder, DeliveryStatus } from '../services/data.servic
           </div>
         </div>
       </header>
+
+      <!-- Config Modal Delivery Drivers Group -->
+      <div *ngIf="showDeliveryGroupModal()" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+        <div class="bg-surface-container-low border-2 border-outline-variant p-8 max-w-md w-full flex flex-col gap-6 relative">
+          <h2 class="font-anton text-3xl text-white uppercase tracking-tighter">CONFIGURAR GRUPO DE DOMICILIARIOS</h2>
+          <p class="font-label-caps text-xs text-stark-gray tracking-widest uppercase">
+            Ingresa el número de WhatsApp o ID de Grupo al que el bot enviará la solicitud cuando hagas clic en "SOLICITAR DOMICILIO".
+          </p>
+          <input type="text" [(ngModel)]="deliveryGroupInput" placeholder="Ej: 573001234567 o Group ID"
+                 class="w-full bg-background border border-outline-variant p-4 font-anton text-white focus:border-secondary outline-none">
+          <div class="flex justify-end gap-4">
+            <button (click)="showDeliveryGroupModal.set(false)" class="px-6 py-3 border border-outline-variant text-stark-gray font-anton text-sm uppercase">CANCELAR</button>
+            <button (click)="saveDeliveryGroupPhone()" class="px-6 py-3 bg-emerald text-black font-anton text-sm uppercase hover:brightness-110">GUARDAR</button>
+          </div>
+        </div>
+      </div>
 
       <!-- KDS Grid -->
       <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -155,13 +179,13 @@ import { DataService, SalesOrder, DeliveryStatus } from '../services/data.servic
                         (click)="dispatchOrder(order)"
                         class="w-full py-5 font-anton text-lg tracking-brutal uppercase bg-secondary text-on-secondary hover:bg-emerald transition-all flex items-center justify-center gap-3 animate-pulse">
                   <span class="material-symbols-outlined text-xl">local_shipping</span>
-                  DAR SALIDA AL PEDIDO
+                  ORDEN LISTA / EN CAMINO
                 </button>
                 <!-- After dispatch: already on the way -->
                 <div *ngIf="order.deliveryStatus === 'ON_THE_WAY'"
                      class="w-full py-5 font-anton text-lg tracking-brutal uppercase bg-emerald/20 text-emerald text-center flex items-center justify-center gap-3 border-t border-emerald/20">
                   <span class="material-symbols-outlined text-xl">check_circle</span>
-                  EN CAMINO — WA ENVIADO
+                  EN CAMINO — CLIENTE NOTIFICADO ✓
                 </div>
               </ng-container>
             </ng-container>
@@ -191,9 +215,18 @@ import { DataService, SalesOrder, DeliveryStatus } from '../services/data.servic
 })
 export class DashboardKitchen {
   data = inject(DataService);
+  evolution = inject(EvolutionService);
   
   kitchenOrders = this.data.kitchenOrders;
   
+  showDeliveryGroupModal = signal<boolean>(false);
+  deliveryGroupInput = this.evolution.deliveryGroupNumber();
+
+  saveDeliveryGroupPhone() {
+    this.evolution.setDeliveryGroupNumber(this.deliveryGroupInput);
+    this.showDeliveryGroupModal.set(false);
+  }
+
   preparingOrdersCount = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.status === 'PREPARING').length);
   pendingOrdersCount   = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.status === 'PENDING').length);
   priorityOrdersCount  = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.priority).length);
@@ -204,32 +237,52 @@ export class DashboardKitchen {
     this.data.updateOrderStatus(order.id, status);
   }
 
-  requestDelivery(order: SalesOrder) {
+  async requestDelivery(order: SalesOrder) {
     this.data.updateDeliveryStatus(order.id, 'REQUESTED');
-  }
 
-  dispatchOrder(order: SalesOrder) {
-    this.data.updateDeliveryStatus(order.id, 'ON_THE_WAY');
-    this.data.updateOrderStatus(order.id, 'READY');
-    this.sendDispatchWhatsApp(order);
-  }
+    const groupPhone = this.evolution.deliveryGroupNumber();
+    if (!groupPhone) {
+      this.showDeliveryGroupModal.set(true);
+      return;
+    }
 
-  private sendDispatchWhatsApp(order: SalesOrder) {
-    if (!order.customerPhone) return;
-    
-    const phone = order.customerPhone.replace(/\D/g, '');
     const total = order.total.toLocaleString('es-CO');
     const items = order.items.map(i => `• ${i.quantity}x ${i.name}`).join('\n');
-    
-    const message = 
-      `¡Hola! 🍕 Tu pedido de *Eclisse* ya va en camino 🛵\n\n` +
+    const phone = order.customerPhone || 'Cliente directo';
+
+    const groupMsg = 
+      `🛵 *SOLICITUD DE DOMICILIO - ECLISSE PIZZA*\n\n` +
       `*Pedido #${order.id.slice(-4)}*\n` +
       `${items}\n\n` +
-      `*Total: $${total}*\n\n` +
-      `¡Gracias por tu preferencia! Pronto estaremos en tu puerta 🔥`;
-    
-    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, '_blank');
+      `📍 *Contacto Cliente:* ${phone}\n` +
+      `💰 *Total a Cobrar:* $${total} COP\n\n` +
+      `Por favor responder en el grupo para tomar la orden.`;
+
+    await this.evolution.sendTextMessage(groupPhone, groupMsg);
+  }
+
+  async dispatchOrder(order: SalesOrder) {
+    this.data.updateDeliveryStatus(order.id, 'ON_THE_WAY');
+    this.data.updateOrderStatus(order.id, 'READY');
+
+    if (order.customerPhone) {
+      const phone = order.customerPhone.replace(/\D/g, '');
+      const total = order.total.toLocaleString('es-CO');
+      const items = order.items.map(i => `• ${i.quantity}x ${i.name}`).join('\n');
+      
+      const message = 
+        `¡Hola! 🍕 Tu pedido de *Eclisse Pizza* ya va en camino 🛵🔥\n\n` +
+        `*Pedido #${order.id.slice(-4)}*\n` +
+        `${items}\n\n` +
+        `*Total:* $${total} COP\n\n` +
+        `El domiciliario ya ha recogido tu orden. ¡Gracias por tu preferencia!`;
+
+      const sent = await this.evolution.sendTextMessage(phone, message);
+      if (!sent) {
+        const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank');
+      }
+    }
   }
 
   getElapsedTime(order: SalesOrder): number {

@@ -112,6 +112,30 @@ export class EvolutionService {
     }
   }
 
+  // Delivery Group Configuration
+  deliveryGroupNumber = signal<string>(localStorage.getItem('delivery_group_number') || '');
+
+  setDeliveryGroupNumber(num: string) {
+    this.deliveryGroupNumber.set(num);
+    localStorage.setItem('delivery_group_number', num);
+  }
+
+  async sendTextMessage(number: string, text: string, instanceName: string = this.defaultInstance): Promise<boolean> {
+    try {
+      const cleanNumber = number.replace(/\D/g, '');
+      const response: any = await firstValueFrom(
+        this.http.post(`${this.baseUrl}/message/sendText/${instanceName}`, {
+          number: cleanNumber,
+          text: text
+        }, { headers: this.headers })
+      );
+      return !!response;
+    } catch (err: any) {
+      console.error('Error sending WhatsApp message via Evolution API:', err);
+      return false;
+    }
+  }
+
   async logoutInstance(instanceName: string = this.defaultInstance) {
     try {
       await firstValueFrom(

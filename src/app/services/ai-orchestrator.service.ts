@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { SupabaseService } from './supabase.service';
+import { DataService } from './data.service';
 
 export interface AIConfig {
   primaryModel: string;
@@ -18,6 +18,7 @@ export interface AIConfig {
 export class AIOrchestratorService {
   private http = inject(HttpClient);
   private sb = inject(SupabaseService);
+  private dataService = inject(DataService);
 
   // Default configuration (using the order you suggested)
   config = signal<AIConfig>({
@@ -30,6 +31,21 @@ export class AIOrchestratorService {
   });
 
   private get geminiApiKey() { return this.config().geminiApiKey; }
+
+  private buildFullSystemPrompt(): string {
+    const base = this.config().systemPrompt;
+    const menuItems = this.dataService.menuItems().filter(i => i.available);
+    
+    if (menuItems.length === 0) return base;
+
+    const catalogText = menuItems.map(item => {
+      const priceFormatted = item.price.toLocaleString('es-CO');
+      const ingr = item.ingredients && item.ingredients.length > 0 ? ` (Ingredientes: ${item.ingredients.join(', ')})` : '';
+      return `• ${item.name} - $${priceFormatted} COP [Categoría: ${item.category}]: ${item.description}${ingr}`;
+    }).join('\n');
+
+    return `${base}\n\n--- CARTA ACTUALIZADA EN TIEMPO REAL (Usa estos nombres y precios exactos) ---\n${catalogText}`;
+  }
 
   async generateResponse(userMessage: string): Promise<string> {
     const models = [
@@ -55,9 +71,11 @@ export class AIOrchestratorService {
     // Implementación real de la llamada a Gemini API
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiApiKey}`;
     
+    const fullSystemPrompt = this.buildFullSystemPrompt();
+
     const body = {
       contents: [{
-        parts: [{ text: `${this.config().systemPrompt}\n\nCliente: ${prompt}` }]
+        parts: [{ text: `${fullSystemPrompt}\n\nCliente: ${prompt}` }]
       }]
     };
 
