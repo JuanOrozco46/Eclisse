@@ -38,7 +38,7 @@ export class EvolutionService {
     try {
       // Connect to Evolution API - Fetch instance state
       const response: any = await firstValueFrom(
-        this.http.get(`${this.baseUrl}/instance/connectionState/${instanceName}?apikey=${this.apiKey}`, { headers: this.headers })
+        this.http.get(`${this.baseUrl}/instance/connectionState/${instanceName}?apikey=${this.apiKey}`)
       );
       
       const status = response.instance?.state || 'disconnected';
@@ -65,7 +65,7 @@ export class EvolutionService {
       let response: any;
       try {
         response = await firstValueFrom(
-          this.http.get(`${this.baseUrl}/instance/connect/${instanceName}?apikey=${this.apiKey}`, { headers: this.headers })
+          this.http.get(`${this.baseUrl}/instance/connect/${instanceName}?apikey=${this.apiKey}`)
         );
       } catch (err: any) {
         // If 404, the instance hasn't been created in Evolution API yet. Create it!
@@ -75,7 +75,7 @@ export class EvolutionService {
               instanceName,
               qrcode: true,
               integration: 'WHATSAPP-BAILEYS'
-            }, { headers: this.headers })
+            })
           );
         } else {
           throw err;
@@ -111,7 +111,7 @@ export class EvolutionService {
   async logoutInstance(instanceName: string = this.defaultInstance) {
     try {
       await firstValueFrom(
-        this.http.delete(`${this.baseUrl}/instance/logout/${instanceName}?apikey=${this.apiKey}`, { headers: this.headers })
+        this.http.delete(`${this.baseUrl}/instance/logout/${instanceName}?apikey=${this.apiKey}`)
       );
       await this.checkStatus(instanceName);
     } catch (err) {
