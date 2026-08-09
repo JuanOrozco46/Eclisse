@@ -1,16 +1,9 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist/web-app/browser",
-  "functions": {
-    "api/*.js": {
-      "memory": 256,
-      "maxDuration": 30
-    }
-  },
   "rewrites": [
     { "source": "/api/evolution/:path*", "destination": "https://elhornobotprueba1.onrender.com/:path*" },
-    { "source": "/api/whatsapp-webhook", "destination": "/api/whatsapp-webhook.js" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/((?!api|assets|favicon|manifest|registerSW).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
