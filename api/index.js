@@ -78,14 +78,12 @@ async function fetchMenuItems() {
 function buildSystemPrompt(menuItems, customPrompt) {
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
   const currentHour = now.getHours();
-  const currentMinutes = now.getMinutes();
-  const pad = (n) => n < 10 ? '0' + n : '' + n;
 
   let timeStatus = '';
-  if (currentHour < 12) {
-    timeStatus = `⚠️ PRE-APERTURA: Abrimos a las 12:00 PM. Puedes tomar el pedido anticipado.`;
-  } else if (currentHour >= 22) {
-    timeStatus = `⚠️ CERRADO. Abrimos mañana a las 12:00 PM.`;
+  if (currentHour < 17) {
+    timeStatus = `⚠️ PRE-APERTURA: Abrimos a las 5:00 PM. Puedes tomar el pedido anticipado.`;
+  } else if (currentHour >= 23) {
+    timeStatus = `⚠️ CERRADO: Ya cerramos por hoy. Abrimos mañana a las 5:00 PM.`;
   }
 
   let catalogText = 'Sin productos disponibles en este momento.';
@@ -107,6 +105,7 @@ REGLAS CRÍTICAS:
 - Varía siempre el tono para evitar spam.
 ${timeStatus ? '\n' + timeStatus : ''}
 
+Horario de atención: 5:00 PM a 11:00 PM todos los días.
 Domicilio Armenia: $6.000 | Afueras: $8.000-$12.000 | Recogida: gratis
 Pago: Efectivo o Nequi 3223119008
 
@@ -164,8 +163,14 @@ async function callGemini(systemPrompt, userMessage, history = [], config) {
   return null;
 }
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function sendWhatsAppMessage(jid, text) {
   try {
+    // Delay aleatorio entre 0.5s y 8.5s para emular comportamiento humano seguro en Vercel
+    const delay = Math.floor(Math.random() * (8500 - 500 + 1) + 500);
+    await sleep(delay);
+
     await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_API_KEY },
@@ -178,6 +183,9 @@ async function sendWhatsAppMessage(jid, text) {
 
 async function sendWhatsAppImage(jid, imageUrl, caption) {
   try {
+    const delay = Math.floor(Math.random() * (8500 - 500 + 1) + 500);
+    await sleep(delay);
+
     await fetch(`${EVOLUTION_API_URL}/message/sendMedia/${EVOLUTION_INSTANCE}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_API_KEY },
@@ -201,6 +209,13 @@ function isMenuRequest(text) {
     lower.includes('que hay') || lower.includes('qué hay') ||
     lower.includes('pizzas') || lower.includes('productos') ||
     lower.includes('foto') || lower.includes('fotos');
+}
+
+// Detecta si el mensaje es muy corto/cortante para ignorar la respuesta
+function isCurtMessage(text) {
+  const clean = text.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?¡!]/g, "");
+  const curtWords = ['ok', 'okey', 'vale', 'gracias', 'grx', 'thx', 'bueno', 'listo', 'thanks', 'ty', 'chao', 'adios'];
+  return curtWords.includes(clean);
 }
 
 module.exports = async (req, res) => {
@@ -247,6 +262,11 @@ module.exports = async (req, res) => {
         return res.status(200).json({ status: 'audio_handled' });
       }
       return res.status(200).json({ status: 'no_text' });
+    }
+
+    // Ignorar si el mensaje es cortante/agradecimiento simple
+    if (isCurtMessage(messageText)) {
+      return res.status(200).json({ status: 'curt_message_ignored' });
     }
 
     addToConversation(phoneNumber, 'user', messageText);
