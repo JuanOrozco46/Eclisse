@@ -10,9 +10,8 @@ const EVOLUTION_INSTANCE = 'ECLISSE_WA_01';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDdlFUJubsRWVAMERl2sJODSBx41WE7tWM';
 const MENU_IMAGE_URL = 'https://eclisse.vercel.app/assets/menu-eclisse.jpg';
 
-// ─── Memory Store for WhatsApp Conversations ───────────────
 const conversationCache = new Map();
-const CONVERSATION_TTL = 30 * 60 * 1000; // 30 mins
+const CONVERSATION_TTL = 30 * 60 * 1000;
 
 function getConversation(phone) {
   const entry = conversationCache.get(phone);
@@ -34,18 +33,15 @@ function addToConversation(phone, role, text) {
   conversationCache.set(phone, existing);
 }
 
-// ─── Fetch Menu Items from Supabase ─────────────────────────
 async function fetchMenuItems() {
   try {
     const { data } = await supabase.from('menu_items').select('*').eq('available', true);
     return data || [];
   } catch (e) {
-    console.error('Error fetching menu items:', e);
     return [];
   }
 }
 
-// ─── Build Rich System Prompt ───────────────────────────────
 function buildSystemPrompt(menuItems) {
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
   const currentDate = now.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -58,8 +54,6 @@ function buildSystemPrompt(menuItems) {
     timeStatus = `\n⚠️ ESTADO ACTUAL: PRE-APERTURA (Son las ${currentHour}:${pad(currentMinutes)} AM). Atiende amablemente y aclara que nuestro horno abre a las 12:00 PM, pero puedes tomar el pedido de forma anticipada.`;
   } else if (currentHour >= 22) {
     timeStatus = `\n⚠️ ESTADO ACTUAL: CERRADO (Son las ${currentHour}:${pad(currentMinutes)}). Ya cerramos por hoy. Dile amablemente al cliente que abrimos de nuevo mañana a las 12:00 PM.`;
-  } else if (currentHour >= 21 && currentMinutes >= 30) {
-    timeStatus = `\n⚠️ ESTADO ACTUAL: ÚLTIMAS ÓRDENES / SOLO RECOGER. No hay domicilios disponibles a esta hora, solo para recoger en el local.`;
   }
 
   let catalogText = 'Actualmente no hay productos registrados en la carta.';
@@ -74,15 +68,9 @@ function buildSystemPrompt(menuItems) {
   return `REGLA DE ORO ANTI-SPAM DE WHATSAPP:
 - NUNCA RESPONDAS EXACTAMENTE IGUAL A DOS CLIENTES SEGUIDOS.
 - VARÍA SIEMPRE LA ESTRUCTURA, EL TONO, LAS PALABRAS Y EL USO DE EMOJIS.
-- Ejemplos de variaciones (Inspírate en ellos, NO los copies al pie de la letra):
-  * Estilo directo: "¡Hola! Con gusto te tomo el pedido. ¿A qué dirección lo enviamos?"
-  * Estilo acogedor: "¡Buenas tardes! 🍕 Qué gusto saludarte. ¿Qué pizza se te antoja hoy?"
-  * Estilo breve: "Dale, perfecto. ¿Me confirmas tu nombre y barrio en Armenia?"
-  * Estilo explicativo: "Con todo gusto. Te confirmo que el domicilio dentro de Armenia es de $6.000 COP."
 
 INFORMACIÓN DEL RESTAURANTE Y CONCEPTO:
 - Tu nombre es Luisa y eres la anfitriona virtual de Eclisse Pizza Napoletana.
-- Tu tono es profesional pero muy acogedor y sofisticado.
 - Nombre del Restaurante: Eclisse Pizza Napoletana (Artesanal y de Fuego)
 - Modelo de Negocio: COCINA OCULTA (Dark Kitchen). NO atendemos mesas en el sitio ni tenemos salón comedor. Solo domicilios y para recoger.
 - Dirección Única de Recogida: Calle 2 norte #18-144, Armenia, Quindío.
@@ -102,17 +90,12 @@ MÉTODOS DE PAGO:
 - Aceptamos Efectivo (Contraentrega) y Nequi/Transferencia.
 - Datos de Nequi: Nequi al 3223119008 o Llave Nequi @3223119008.
 
-NOTAS PARA COCINA:
-- Si el cliente solicita especificaciones especiales ("sin cebolla", "masa tostada"), regístralas claramente.
-
 INVENTARIO Y CARTA VIGENTE EN TIEMPO REAL:
 ${catalogText}`;
 }
 
-// ─── Call Gemini with Fallbacks and History ────────────────
 async function callGemini(systemPrompt, userMessage, history = []) {
-  const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
-
+  const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
   const contents = [];
   for (const h of history) {
     contents.push({ role: h.role, parts: [{ text: h.text }] });
@@ -139,14 +122,11 @@ async function callGemini(systemPrompt, userMessage, history = []) {
       if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
         return data.candidates[0].content.parts[0].text;
       }
-    } catch (e) {
-      console.error(`Gemini model ${model} error:`, e.message);
-    }
+    } catch (e) {}
   }
   return null;
 }
 
-// ─── Send WhatsApp Message via Evolution API ───────────────
 async function sendWhatsAppMessage(number, text) {
   try {
     await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
@@ -154,21 +134,28 @@ async function sendWhatsAppMessage(number, text) {
       headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_API_KEY },
       body: JSON.stringify({ number, text })
     });
-  } catch (e) {
-    console.error('Error sending WhatsApp message:', e.message);
-  }
+  } catch (e) {}
 }
 
-// ─── Main Vercel Serverless Webhook Handler ─────────────────
 module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(200).json({ status: 'ok', message: 'Eclisse WhatsApp Webhook Active' });
+  // CORS support
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method === 'GET') {
+    return res.status(200).json({ status: 'ok', service: 'Eclisse WhatsApp Webhook', active: true });
   }
 
   try {
     const body = req.body || {};
     if (body.event !== 'messages.upsert') {
-      return res.status(200).json({ status: 'ignored_event' });
+      return res.status(200).json({ status: 'ignored_event', event: body.event });
     }
 
     const data = body.data;
@@ -178,7 +165,6 @@ module.exports = async function handler(req, res) {
     const fromMe = data.key?.fromMe || false;
     const messageType = data.messageType || '';
 
-    // Ignore group chats and self messages
     if (remoteJid.includes('@g.us') || fromMe) {
       return res.status(200).json({ status: 'ignored_group_or_self' });
     }
@@ -186,7 +172,6 @@ module.exports = async function handler(req, res) {
     const messageText = data.message?.conversation || data.message?.extendedTextMessage?.text || '';
     const phoneNumber = remoteJid.replace('@s.whatsapp.net', '');
 
-    // Handle audio messages gracefully
     if (!messageText.trim()) {
       if (messageType === 'audioMessage' || messageType === 'pttMessage') {
         await sendWhatsAppMessage(phoneNumber, '¡Hola! 🍕 Por el momento solo puedo leer mensajes de texto. ¿Podrías escribirme tu pedido o consulta? ¡Muchas gracias!');
@@ -195,30 +180,20 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ status: 'no_text' });
     }
 
-    // Load history and add current user message
     const history = getConversation(phoneNumber);
     addToConversation(phoneNumber, 'user', messageText);
 
-    // Fetch live menu catalog from Supabase
     const menuItems = await fetchMenuItems();
     const systemPrompt = buildSystemPrompt(menuItems);
-
-    // Generate AI response
     const aiResponse = await callGemini(systemPrompt, messageText, history);
 
     if (aiResponse) {
-      // Save model response to conversation history
       addToConversation(phoneNumber, 'model', aiResponse);
-
-      // Human-like delay (1.5 seconds)
-      await new Promise(r => setTimeout(r, 1500));
-
       await sendWhatsAppMessage(phoneNumber, aiResponse);
     }
 
-    return res.status(200).json({ status: 'ok', phone: phoneNumber });
+    return res.status(200).json({ status: 'ok', phone: phoneNumber, responseSent: !!aiResponse });
   } catch (err) {
-    console.error('Webhook Error:', err);
     return res.status(500).json({ error: err.message });
   }
 };
