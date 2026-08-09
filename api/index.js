@@ -1,14 +1,14 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const SUPABASE_URL = 'https://pcmcfhhbpmbrrxpuodoh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjbWNmaGhicG1icnJ4cHVvZG9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MTYwNDcsImV4cCI6MjEwMDA5MjA0N30.nTTSxgA-Lhpl85jGZ1itrTwvbSwa5APZeZOKMvYpiQQ';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://pcmcfhhbpmbrrxpuodoh.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjbWNmaGhicG1icnJ4cHVvZG9oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1MTYwNDcsImV4cCI6MjEwMDA5MjA0N30.nTTSxgA-Lhpl85jGZ1itrTwvbSwa5APZeZOKMvYpiQQ';
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const EVOLUTION_API_URL = 'https://elhornobotprueba1.onrender.com';
-const EVOLUTION_API_KEY = 'secreto123';
-const EVOLUTION_INSTANCE = 'ECLISSE_WA_01';
-const FALLBACK_GEMINI_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDdlFUJubsRWVAMERl2sJODSBx41WE7tWM';
-const MENU_IMAGE_URL = 'https://eclisse.vercel.app/assets/menu-eclisse.jpg';
+const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || 'https://elhornobotprueba1.onrender.com';
+const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || 'secreto123';
+const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE_NAME || process.env.EVOLUTION_INSTANCE || 'ECLISSE_WA_01';
+const FALLBACK_GEMINI_KEY = process.env.GEMINI_API_KEY || '';
+const MENU_IMAGE_URL = process.env.MENU || 'https://eclisse.vercel.app/assets/menu-eclisse.jpg';
 
 const conversationCache = new Map();
 const CONVERSATION_TTL = 30 * 60 * 1000;
