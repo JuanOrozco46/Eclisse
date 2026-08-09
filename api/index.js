@@ -7,7 +7,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const EVOLUTION_API_URL = 'https://elhornobotprueba1.onrender.com';
 const EVOLUTION_API_KEY = 'secreto123';
 const EVOLUTION_INSTANCE = 'ECLISSE_WA_01';
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDdlFUJubsRWVAMERl2sJODSBx41WE7tWM';
+const FALLBACK_GEMINI_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDdlFUJubsRWVAMERl2sJODSBx41WE7tWM';
 const MENU_IMAGE_URL = 'https://eclisse.vercel.app/assets/menu-eclisse.jpg';
 
 const conversationCache = new Map();
@@ -33,6 +33,38 @@ function addToConversation(phone, role, text) {
   conversationCache.set(phone, existing);
 }
 
+// ─── Fetch Bot Config & Gemini API Key dynamically ──────────
+async function fetchBotConfig() {
+  try {
+    const { data } = await supabase
+      .from('rappi_config')
+      .select('*')
+      .eq('id', 'bot_config')
+      .maybeSingle();
+
+    if (data && data.api_key) {
+      const parsed = JSON.parse(data.api_key);
+      return {
+        geminiApiKey: parsed.geminiApiKey || FALLBACK_GEMINI_KEY,
+        primaryModel: parsed.primaryModel || 'gemini-2.0-flash',
+        secondaryModel: parsed.secondaryModel || 'gemini-2.0-flash-lite',
+        tertiaryModel: parsed.tertiaryModel || 'gemini-1.5-pro',
+        systemPrompt: parsed.systemPrompt || ''
+      };
+    }
+  } catch (e) {
+    console.error('Error fetching bot config from Supabase:', e);
+  }
+
+  return {
+    geminiApiKey: FALLBACK_GEMINI_KEY,
+    primaryModel: 'gemini-2.0-flash',
+    secondaryModel: 'gemini-2.0-flash-lite',
+    tertiaryModel: 'gemini-1.5-pro',
+    systemPrompt: ''
+  };
+}
+
 async function fetchMenuItems() {
   try {
     const { data } = await supabase.from('menu_items').select('*').eq('available', true);
@@ -42,7 +74,7 @@ async function fetchMenuItems() {
   }
 }
 
-function buildSystemPrompt(menuItems) {
+function buildSystemPrompt(menuItems, customPrompt) {
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
   const currentDate = now.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const currentHour = now.getHours();
@@ -91,11 +123,26 @@ MÉTODOS DE PAGO:
 - Datos de Nequi: Nequi al 3223119008 o Llave Nequi @3223119008.
 
 INVENTARIO Y CARTA VIGENTE EN TIEMPO REAL:
-${catalogText}`;
+${catalogText}
+
+${customPrompt || ''}`;
 }
 
-async function callGemini(systemPrompt, userMessage, history = []) {
-  const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+async function callGemini(systemPrompt, userMessage, history = [], config) {
+  // Normalize model names if user typed typo models like gemini1-2.5-flash
+  const sanitizeModel = (m) => {
+    if (!m) return 'gemini-2.0-flash';
+    return m.replace(/^gemini1-/, 'gemini-').trim();
+  };
+
+  const models = [
+    sanitizeModel(config.primaryModel),
+    sanitizeModel(config.secondaryModel),
+    sanitizeModel(config.tertiaryModel),
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite'
+  ];
+
   const contents = [];
   for (const h of history) {
     contents.push({ role: h.role, parts: [{ text: h.text }] });
@@ -104,7 +151,7 @@ async function callGemini(systemPrompt, userMessage, history = []) {
 
   for (const model of models) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.geminiApiKey}`;
       const body = {
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: contents,
@@ -122,7 +169,9 @@ async function callGemini(systemPrompt, userMessage, history = []) {
       if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
         return data.candidates[0].content.parts[0].text;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(`Gemini model ${model} error:`, e.message);
+    }
   }
   return null;
 }
@@ -182,9 +231,12 @@ module.exports = async (req, res) => {
     const history = getConversation(phoneNumber);
     addToConversation(phoneNumber, 'user', messageText);
 
+    // Fetch dynamic bot config (including API Key & models saved in UI)
+    const botConfig = await fetchBotConfig();
+
     const menuItems = await fetchMenuItems();
-    const systemPrompt = buildSystemPrompt(menuItems);
-    const aiResponse = await callGemini(systemPrompt, messageText, history);
+    const systemPrompt = buildSystemPrompt(menuItems, botConfig.systemPrompt);
+    const aiResponse = await callGemini(systemPrompt, messageText, history, botConfig);
 
     if (aiResponse) {
       addToConversation(phoneNumber, 'model', aiResponse);
