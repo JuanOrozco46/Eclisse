@@ -8,7 +8,7 @@ const EVOLUTION_API_URL = process.env.EVOLUTION_API_URL || 'https://elhornobotpr
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || 'secreto123';
 const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE_NAME || process.env.EVOLUTION_INSTANCE || 'ECLISSE_WA_01';
 const FALLBACK_GEMINI_KEY = process.env.GEMINI_API_KEY || '';
-const MENU_IMAGE_URL = process.env.MENU || 'https://eclisse.vercel.app/assets/menu-eclisse.jpg';
+const MENU_IMAGE_URL = process.env.MENU || process.env.menuImageUrl || process.env.MENU_IMAGE_URL || 'https://eclisse.vercel.app/assets/menu-eclisse.jpg';
 
 const conversationCache = new Map();
 const CONVERSATION_TTL = 30 * 60 * 1000;
