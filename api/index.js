@@ -221,13 +221,10 @@ module.exports = async (req, res) => {
 
     const messageText = data.message?.conversation || data.message?.extendedTextMessage?.text || '';
 
-    // Si remoteJid es un LID interno (@lid), usar el campo sender del body que contiene el número real
-    let phoneNumber;
-    if (remoteJid.includes('@lid') && body.sender) {
-      phoneNumber = body.sender.replace('@s.whatsapp.net', '');
-    } else {
-      phoneNumber = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
-    }
+    // Usar remoteJid completo para enviar (Evolution API maneja @lid nativamente)
+    const sendToJid = remoteJid;
+    // Usar como clave de caché solo el ID limpio
+    const phoneNumber = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
 
     if (!messageText.trim()) {
       if (messageType === 'audioMessage' || messageType === 'pttMessage') {
@@ -249,7 +246,7 @@ module.exports = async (req, res) => {
 
     if (aiResponse) {
       addToConversation(phoneNumber, 'model', aiResponse);
-      await sendWhatsAppMessage(phoneNumber, aiResponse);
+      await sendWhatsAppMessage(sendToJid, aiResponse);
     }
 
     return res.status(200).json({ status: 'ok', phone: phoneNumber, responseSent: !!aiResponse });
