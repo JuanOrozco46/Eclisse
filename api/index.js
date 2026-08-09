@@ -66,13 +66,26 @@ async function fetchBotConfig() {
   };
 }
 
+const DEFAULT_MENU = [
+  { id: '1', name: 'Bianca', price: 25000, category: 'Pizzas', description: 'Salsa blanca de la casa, queso mozzarella, tocineta ahumada, queso costeño y pimienta.', ingredients: ['Salsa blanca', 'Queso mozzarella', 'Tocineta ahumada', 'Queso costeño', 'Pimienta'], available: true },
+  { id: '2', name: 'Lumina', price: 25000, category: 'Pizzas', description: 'Salsa de tomate de la casa, queso mozzarella, tomate cherry, pesto y mozzarella di bufala.', ingredients: ['Salsa de tomate', 'Queso mozzarella', 'Tomate cherry', 'Pesto', 'Mozzarella di bufala'], available: true },
+  { id: '3', name: 'Hawaianna', price: 25000, category: 'Pizzas', description: 'Piña caramelizada, jamón ahumado, queso mozzarella, salsa de tomate de la casa y cilantro.', ingredients: ['Piña caramelizada', 'Jamón ahumado', 'Queso mozzarella', 'Salsa de tomate', 'Cilantro'], available: true },
+  { id: '4', name: 'Dorato', price: 25000, category: 'Pizzas', description: 'Salsa de tomate de la casa, chorizo ahumado en trozos, maíz dulce y queso costeño.', ingredients: ['Salsa de tomate', 'Chorizo ahumado', 'Maíz dulce', 'Queso costeño'], available: true },
+  { id: '5', name: 'Amalgama', price: 25000, category: 'Pizzas', description: 'Salsa de tomate de la casa, queso mozzarella, pollo en trozos, pimentón y cebolla morada.', ingredients: ['Salsa de tomate', 'Queso mozzarella', 'Pollo en trozos', 'Pimentón', 'Cebolla morada'], available: true },
+  { id: '6', name: 'Dolce Fiamma', price: 25000, category: 'Pizzas', description: 'Salsa de tomate de la casa, queso mozzarella, pepperoni, cebolla morada y miel picante.', ingredients: ['Salsa de tomate', 'Queso mozzarella', 'Pepperoni', 'Cebolla morada', 'Miel picante'], available: true },
+  { id: '7', name: 'Coca-Cola Original 250ml', price: 3000, category: 'Bebidas', description: 'Coca-Cola Original 250 ml', ingredients: [], available: true },
+  { id: '8', name: 'Coca-Cola Zero 250ml', price: 3000, category: 'Bebidas', description: 'Coca-Cola Zero 250 ml', ingredients: [], available: true },
+  { id: '9', name: 'Quatro 250ml', price: 3000, category: 'Bebidas', description: 'Quatro 250 ml', ingredients: [], available: true },
+  { id: '10', name: 'Coca-Cola Original 1.5L', price: 8000, category: 'Bebidas', description: 'Coca-Cola Original 1.5 Litros', ingredients: [], available: true },
+  { id: '11', name: 'Coca-Cola Zero 1.5L', price: 8000, category: 'Bebidas', description: 'Coca-Cola Zero 1.5 Litros', ingredients: [], available: true }
+];
+
 async function fetchMenuItems() {
   try {
     const { data } = await supabase.from('menu_items').select('*').eq('available', true);
-    return data || [];
-  } catch (e) {
-    return [];
-  }
+    if (data && data.length > 0) return data;
+  } catch (e) {}
+  return DEFAULT_MENU;
 }
 
 function buildSystemPrompt(menuItems, customPrompt) {

@@ -117,12 +117,26 @@ function toCamel(obj: Record<string, any>): Record<string, any> {
   return result;
 }
 
+export const DEFAULT_MENU_ITEMS: MenuItem[] = [
+  { id: '1', name: 'Bianca', price: 25000, category: 'Pizzas', description: 'Salsa blanca de la casa, queso mozzarella, tocineta ahumada, queso costeño y pimienta.', ingredients: ['Salsa blanca', 'Queso mozzarella', 'Tocineta ahumada', 'Queso costeño', 'Pimienta'], available: true },
+  { id: '2', name: 'Lumina', price: 25000, category: 'Pizzas', description: 'Salsa de tomate de la casa, queso mozzarella, tomate cherry, pesto y mozzarella di bufala.', ingredients: ['Salsa de tomate', 'Queso mozzarella', 'Tomate cherry', 'Pesto', 'Mozzarella di bufala'], available: true },
+  { id: '3', name: 'Hawaianna', price: 25000, category: 'Pizzas', description: 'Piña caramelizada, jamón ahumado, queso mozzarella, salsa de tomate de la casa y cilantro.', ingredients: ['Piña caramelizada', 'Jamón ahumado', 'Queso mozzarella', 'Salsa de tomate', 'Cilantro'], available: true },
+  { id: '4', name: 'Dorato', price: 25000, category: 'Pizzas', description: 'Salsa de tomate de la casa, chorizo ahumado en trozos, maíz dulce y queso costeño.', ingredients: ['Salsa de tomate', 'Chorizo ahumado', 'Maíz dulce', 'Queso costeño'], available: true },
+  { id: '5', name: 'Amalgama', price: 25000, category: 'Pizzas', description: 'Salsa de tomate de la casa, queso mozzarella, pollo en trozos, pimentón y cebolla morada.', ingredients: ['Salsa de tomate', 'Queso mozzarella', 'Pollo en trozos', 'Pimentón', 'Cebolla morada'], available: true },
+  { id: '6', name: 'Dolce Fiamma', price: 25000, category: 'Pizzas', description: 'Salsa de tomate de la casa, queso mozzarella, pepperoni, cebolla morada y miel picante.', ingredients: ['Salsa de tomate', 'Queso mozzarella', 'Pepperoni', 'Cebolla morada', 'Miel picante'], available: true },
+  { id: '7', name: 'Coca-Cola Original 250ml', price: 3000, category: 'Bebidas', description: 'Coca-Cola Original 250 ml', ingredients: [], available: true },
+  { id: '8', name: 'Coca-Cola Zero 250ml', price: 3000, category: 'Bebidas', description: 'Coca-Cola Zero 250 ml', ingredients: [], available: true },
+  { id: '9', name: 'Quatro 250ml', price: 3000, category: 'Bebidas', description: 'Quatro 250 ml', ingredients: [], available: true },
+  { id: '10', name: 'Coca-Cola Original 1.5L', price: 8000, category: 'Bebidas', description: 'Coca-Cola Original 1.5 Litros', ingredients: [], available: true },
+  { id: '11', name: 'Coca-Cola Zero 1.5L', price: 8000, category: 'Bebidas', description: 'Coca-Cola Zero 1.5 Litros', ingredients: [], available: true }
+];
+
 @Injectable({ providedIn: 'root' })
 export class DataService {
   private sb = inject(SupabaseService);
 
   // ─── SIGNALS (UI reactivo) ─────────────────────────────────
-  menuItems = signal<MenuItem[]>([]);
+  menuItems = signal<MenuItem[]>(DEFAULT_MENU_ITEMS);
   ingredients = signal<Ingredient[]>([]);
   staff = signal<StaffMember[]>([]);
   transactions = signal<Transaction[]>([]);
@@ -234,7 +248,7 @@ export class DataService {
         this.sb.client.from('rappi_config').select('*').limit(1).single(),
       ]);
 
-      if (menuRes.data) this.menuItems.set(menuRes.data.map(r => toCamel(r) as MenuItem));
+      if (menuRes.data && menuRes.data.length > 0) this.menuItems.set(menuRes.data.map(r => toCamel(r) as MenuItem));
       if (ingRes.data) this.ingredients.set(ingRes.data.map(r => toCamel(r) as Ingredient));
       if (staffRes.data) this.staff.set(staffRes.data.map(r => toCamel(r) as StaffMember));
       if (txRes.data) this.transactions.set(txRes.data.map(r => toCamel(r) as Transaction));
