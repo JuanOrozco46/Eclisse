@@ -234,6 +234,7 @@ export class DataService {
   // ─── CONSTRUCTOR ───────────────────────────────────────────
   constructor() {
     this.loadAll();
+    this.subscribeToOrders();
   }
 
   /** Carga inicial de todos los datos desde Supabase */
@@ -257,6 +258,54 @@ export class DataService {
     } catch (e) {
       console.error('Error loading from Supabase:', e);
     }
+  }
+
+  /**
+   * Suscripción Realtime a la tabla orders.
+   * INSERT → agrega el pedido al signal (aparece en cocina al instante).
+   * UPDATE → actualiza el pedido existente en el signal.
+   * DELETE → elimina el pedido del signal.
+   */
+  private subscribeToOrders() {
+    this.sb.client
+      .channel('orders-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'orders' },
+        (payload) => {
+          const newOrder = toCamel(payload.new) as SalesOrder;
+          // Evitar duplicados: solo agregar si el id no existe ya
+          this.orders.update(current => {
+            if (current.some(o => o.id === newOrder.id)) return current;
+            return [...current, newOrder];
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders' },
+        (payload) => {
+          const updated = toCamel(payload.new) as SalesOrder;
+          this.orders.update(current =>
+            current.map(o => o.id === updated.id ? updated : o)
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'orders' },
+        (payload) => {
+          const deletedId = payload.old?.['id'];
+          if (deletedId) {
+            this.orders.update(current => current.filter(o => o.id !== deletedId));
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Realtime orders: suscripción activa');
+        }
+      });
   }
 
   // ─── RAPPI CONFIG ──────────────────────────────────────────
