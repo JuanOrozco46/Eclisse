@@ -14,10 +14,6 @@ const MENU_IMAGE_URL = process.env.MENU || process.env.menuImageUrl || process.e
 const conversationCache = new Map();
 const CONVERSATION_TTL = 30 * 60 * 1000;
 
-// ─── Debounce cache (anti-spam delay) ────────────────────────
-const debounceCache = new Map();
-const DEBOUNCE_DELAY_MS = 2000; // 2 segundos de espera antes de procesar
-
 function getConversation(phone) {
   const entry = conversationCache.get(phone);
   if (!entry) return [];
@@ -207,35 +203,6 @@ function isMenuRequest(text) {
     lower.includes('foto') || lower.includes('fotos');
 }
 
-// Procesa el mensaje con debounce: espera DEBOUNCE_DELAY_MS antes de responder
-// Si llega otro mensaje en ese tiempo, acumula y solo responde al final
-function processWithDebounce(phoneNumber, sendToJid, messageText, handlerFn) {
-  return new Promise((resolve) => {
-    if (debounceCache.has(phoneNumber)) {
-      const existing = debounceCache.get(phoneNumber);
-      existing.messages.push(messageText);
-      clearTimeout(existing.timer);
-      existing.timer = setTimeout(async () => {
-        debounceCache.delete(phoneNumber);
-        const combined = existing.messages.join(' ');
-        await handlerFn(combined);
-        resolve();
-      }, DEBOUNCE_DELAY_MS);
-    } else {
-      const entry = {
-        messages: [messageText],
-        timer: setTimeout(async () => {
-          debounceCache.delete(phoneNumber);
-          const combined = entry.messages.join(' ');
-          await handlerFn(combined);
-          resolve();
-        }, DEBOUNCE_DELAY_MS)
-      };
-      debounceCache.set(phoneNumber, entry);
-    }
-  });
-}
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -282,33 +249,26 @@ module.exports = async (req, res) => {
       return res.status(200).json({ status: 'no_text' });
     }
 
-    // Responder con debounce para agrupar mensajes rápidos
-    res.status(200).json({ status: 'processing' });
+    addToConversation(phoneNumber, 'user', messageText);
 
-    processWithDebounce(phoneNumber, sendToJid, messageText, async (combinedText) => {
-      try {
-        addToConversation(phoneNumber, 'user', combinedText);
+    // Si pide el menú, enviar imagen directamente
+    if (isMenuRequest(messageText)) {
+      await sendWhatsAppImage(sendToJid, MENU_IMAGE_URL, '');
+      addToConversation(phoneNumber, 'model', '[Imagen del menú enviada]');
+      return res.status(200).json({ status: 'menu_sent' });
+    }
 
-        // Si pide el menú, enviar imagen directamente
-        if (isMenuRequest(combinedText)) {
-          await sendWhatsAppImage(sendToJid, MENU_IMAGE_URL, '');
-          addToConversation(phoneNumber, 'model', '[Imagen del menú enviada]');
-          return;
-        }
+    const botConfig = await fetchBotConfig();
+    const menuItems = await fetchMenuItems();
+    const systemPrompt = buildSystemPrompt(menuItems, botConfig.systemPrompt);
+    const aiResponse = await callGemini(systemPrompt, messageText, getConversation(phoneNumber), botConfig);
 
-        const botConfig = await fetchBotConfig();
-        const menuItems = await fetchMenuItems();
-        const systemPrompt = buildSystemPrompt(menuItems, botConfig.systemPrompt);
-        const aiResponse = await callGemini(systemPrompt, combinedText, getConversation(phoneNumber), botConfig);
+    if (aiResponse) {
+      addToConversation(phoneNumber, 'model', aiResponse);
+      await sendWhatsAppMessage(sendToJid, aiResponse);
+    }
 
-        if (aiResponse) {
-          addToConversation(phoneNumber, 'model', aiResponse);
-          await sendWhatsAppMessage(sendToJid, aiResponse);
-        }
-      } catch (err) {
-        console.error('Error processing debounced message:', err);
-      }
-    });
+    return res.status(200).json({ status: 'ok', responseSent: !!aiResponse });
 
   } catch (err) {
     console.error('Webhook processing error:', err);
