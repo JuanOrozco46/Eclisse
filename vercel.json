@@ -1,8 +1,10 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist/web-app/browser",
-  "rewrites": [
-    { "source": "/api/evolution/:path*", "destination": "https://elhornobotprueba1.onrender.com/:path*" },
-    { "source": "/((?!api|assets|favicon|manifest|registerSW).*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/api/evolution/(.*)", "dest": "https://elhornobotprueba1.onrender.com/$1" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
