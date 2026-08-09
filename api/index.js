@@ -10,8 +10,13 @@ const EVOLUTION_INSTANCE = process.env.EVOLUTION_INSTANCE_NAME || process.env.EV
 const FALLBACK_GEMINI_KEY = process.env.GEMINI_API_KEY || '';
 const MENU_IMAGE_URL = process.env.MENU || process.env.menuImageUrl || process.env.MENU_IMAGE_URL || 'https://eclisse.vercel.app/assets/menu-eclisse.jpg';
 
+// ─── Conversation cache ───────────────────────────────────────
 const conversationCache = new Map();
 const CONVERSATION_TTL = 30 * 60 * 1000;
+
+// ─── Debounce cache (anti-spam delay) ────────────────────────
+const debounceCache = new Map();
+const DEBOUNCE_DELAY_MS = 2000; // 2 segundos de espera antes de procesar
 
 function getConversation(phone) {
   const entry = conversationCache.get(phone);
@@ -46,9 +51,9 @@ async function fetchBotConfig() {
       const parsed = JSON.parse(data.api_key);
       return {
         geminiApiKey: parsed.geminiApiKey || FALLBACK_GEMINI_KEY,
-        primaryModel: parsed.primaryModel || 'gemini-2.0-flash',
-        secondaryModel: parsed.secondaryModel || 'gemini-2.0-flash-lite',
-        tertiaryModel: parsed.tertiaryModel || 'gemini-1.5-pro',
+        primaryModel: parsed.primaryModel || 'gemini-2.5-flash',
+        secondaryModel: parsed.secondaryModel || 'gemini-2.5-pro',
+        tertiaryModel: parsed.tertiaryModel || 'gemini-3.5-flash',
         systemPrompt: parsed.systemPrompt || ''
       };
     }
@@ -58,9 +63,9 @@ async function fetchBotConfig() {
 
   return {
     geminiApiKey: FALLBACK_GEMINI_KEY,
-    primaryModel: 'gemini-2.0-flash',
-    secondaryModel: 'gemini-2.0-flash-lite',
-    tertiaryModel: 'gemini-1.5-pro',
+    primaryModel: 'gemini-2.5-flash',
+    secondaryModel: 'gemini-2.5-pro',
+    tertiaryModel: 'gemini-3.5-flash',
     systemPrompt: ''
   };
 }
@@ -76,63 +81,48 @@ async function fetchMenuItems() {
 
 function buildSystemPrompt(menuItems, customPrompt) {
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-  const currentDate = now.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const currentHour = now.getHours();
   const currentMinutes = now.getMinutes();
   const pad = (n) => n < 10 ? '0' + n : '' + n;
 
   let timeStatus = '';
   if (currentHour < 12) {
-    timeStatus = `\n⚠️ ESTADO ACTUAL: PRE-APERTURA (Son las ${currentHour}:${pad(currentMinutes)} AM). Atiende amablemente y aclara que nuestro horno abre a las 12:00 PM, pero puedes tomar el pedido de forma anticipada.`;
+    timeStatus = `⚠️ PRE-APERTURA: Abrimos a las 12:00 PM. Puedes tomar el pedido anticipado.`;
   } else if (currentHour >= 22) {
-    timeStatus = `\n⚠️ ESTADO ACTUAL: CERRADO (Son las ${currentHour}:${pad(currentMinutes)}). Ya cerramos por hoy. Dile amablemente al cliente que abrimos de nuevo mañana a las 12:00 PM.`;
+    timeStatus = `⚠️ CERRADO. Abrimos mañana a las 12:00 PM.`;
   }
 
-  let catalogText = 'Actualmente no hay productos registrados en la carta.';
+  let catalogText = 'Sin productos disponibles en este momento.';
   if (menuItems && menuItems.length > 0) {
     catalogText = menuItems.map(item => {
       const price = Number(item.price || 0).toLocaleString('es-CO');
-      const ingredients = item.ingredients && item.ingredients.length > 0 ? ` (Ingredientes: ${item.ingredients.join(', ')})` : '';
-      return `• ${item.name} - $${price} COP [Categoría: ${item.category || 'General'}]: ${item.description || ''}${ingredients}`;
+      const ingredients = item.ingredients && item.ingredients.length > 0 ? ` (${item.ingredients.join(', ')})` : '';
+      return `• ${item.name} $${price} COP: ${item.description || ''}${ingredients}`;
     }).join('\n');
   }
 
-  return `REGLA DE ORO ANTI-SPAM DE WHATSAPP:
-- NUNCA RESPONDAS EXACTAMENTE IGUAL A DOS CLIENTES SEGUIDOS.
-- VARÍA SIEMPRE LA ESTRUCTURA, EL TONO, LAS PALABRAS Y EL USO DE EMOJIS.
+  return `Eres Luisa, asistente de Eclisse Pizza Napoletana (Armenia, Quindío). Cocina oculta: solo domicilios y recogida en Calle 2 norte #18-144.
 
-INFORMACIÓN DEL RESTAURANTE Y CONCEPTO:
-- Tu nombre es Luisa y eres la anfitriona virtual de Eclisse Pizza Napoletana.
-- Nombre del Restaurante: Eclisse Pizza Napoletana (Artesanal y de Fuego)
-- Modelo de Negocio: COCINA OCULTA (Dark Kitchen). NO atendemos mesas en el sitio ni tenemos salón comedor. Solo domicilios y para recoger.
-- Dirección Única de Recogida: Calle 2 norte #18-144, Armenia, Quindío.
-- Ubicación: Armenia, Quindío, Colombia
-- Fecha y Hora Actual: ${currentDate} (${currentHour}:${pad(currentMinutes)}) ${timeStatus}
+REGLAS CRÍTICAS:
+- Respuestas MUY CORTAS. Máximo 2-3 líneas.
+- Solo responde lo que te preguntan. Sin información extra.
+- Nunca menciones que no hay productos si no te lo preguntan.
+- Si piden el menú, responde SOLO: "Aquí está nuestra carta 🍕" (sin más texto, el sistema enviará la imagen).
+- Varía siempre el tono para evitar spam.
+${timeStatus ? '\n' + timeStatus : ''}
 
-IMAGEN DE LA CARTA / MENÚ DIGITAL:
-- Enlace de la Carta/Menú: ${MENU_IMAGE_URL}
-- Si el cliente solicita el menú, la carta o fotos de las pizzas, comparte el enlace: ${MENU_IMAGE_URL}
+Domicilio Armenia: $6.000 | Afueras: $8.000-$12.000 | Recogida: gratis
+Pago: Efectivo o Nequi 3223119008
 
-TARIFAS DE DOMICILIO (ARMENIA, QUINDÍO):
-- Domicilio estándar a cualquier barrio dentro de Armenia: $6.000 COP.
-- Afueras o Alrededores de Armenia: $8.000 - $12.000 COP.
-- Recoger en el local (Calle 2 norte #18-144): $0 (Gratis).
-
-MÉTODOS DE PAGO:
-- Aceptamos Efectivo (Contraentrega) y Nequi/Transferencia.
-- Datos de Nequi: Nequi al 3223119008 o Llave Nequi @3223119008.
-
-INVENTARIO Y CARTA VIGENTE EN TIEMPO REAL:
+CARTA:
 ${catalogText}
 
 ${customPrompt || ''}`;
 }
 
 async function callGemini(systemPrompt, userMessage, history = [], config) {
-  // Normalize model names if user typed typo models like gemini1-2.5-flash
   const sanitizeModel = (m) => {
-    if (!m) return 'gemini-2.0-flash';
-    // Fix typo prefix: gemini1- → gemini-
+    if (!m) return 'gemini-2.5-flash';
     return m.toLowerCase().replace(/^gemini1-/, 'gemini-').trim();
   };
 
@@ -157,7 +147,7 @@ async function callGemini(systemPrompt, userMessage, history = [], config) {
       const body = {
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: contents,
-        generationConfig: { temperature: 0.9, maxOutputTokens: 500 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 150 }
       };
 
       const res = await fetch(url, {
@@ -178,14 +168,72 @@ async function callGemini(systemPrompt, userMessage, history = [], config) {
   return null;
 }
 
-async function sendWhatsAppMessage(number, text) {
+async function sendWhatsAppMessage(jid, text) {
   try {
     await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_API_KEY },
-      body: JSON.stringify({ number, text })
+      body: JSON.stringify({ number: jid, text })
     });
-  } catch (e) {}
+  } catch (e) {
+    console.error('Error sending text message:', e.message);
+  }
+}
+
+async function sendWhatsAppImage(jid, imageUrl, caption) {
+  try {
+    await fetch(`${EVOLUTION_API_URL}/message/sendMedia/${EVOLUTION_INSTANCE}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_API_KEY },
+      body: JSON.stringify({
+        number: jid,
+        mediatype: 'image',
+        media: imageUrl,
+        caption: caption || ''
+      })
+    });
+  } catch (e) {
+    console.error('Error sending image message:', e.message);
+  }
+}
+
+// Detecta si el cliente está pidiendo el menú
+function isMenuRequest(text) {
+  const lower = text.toLowerCase();
+  return lower.includes('menu') || lower.includes('menú') || lower.includes('carta') ||
+    lower.includes('que tienen') || lower.includes('qué tienen') ||
+    lower.includes('que hay') || lower.includes('qué hay') ||
+    lower.includes('pizzas') || lower.includes('productos') ||
+    lower.includes('foto') || lower.includes('fotos');
+}
+
+// Procesa el mensaje con debounce: espera DEBOUNCE_DELAY_MS antes de responder
+// Si llega otro mensaje en ese tiempo, acumula y solo responde al final
+function processWithDebounce(phoneNumber, sendToJid, messageText, handlerFn) {
+  return new Promise((resolve) => {
+    if (debounceCache.has(phoneNumber)) {
+      const existing = debounceCache.get(phoneNumber);
+      existing.messages.push(messageText);
+      clearTimeout(existing.timer);
+      existing.timer = setTimeout(async () => {
+        debounceCache.delete(phoneNumber);
+        const combined = existing.messages.join(' ');
+        await handlerFn(combined);
+        resolve();
+      }, DEBOUNCE_DELAY_MS);
+    } else {
+      const entry = {
+        messages: [messageText],
+        timer: setTimeout(async () => {
+          debounceCache.delete(phoneNumber);
+          const combined = entry.messages.join(' ');
+          await handlerFn(combined);
+          resolve();
+        }, DEBOUNCE_DELAY_MS)
+      };
+      debounceCache.set(phoneNumber, entry);
+    }
+  });
 }
 
 module.exports = async (req, res) => {
@@ -228,30 +276,42 @@ module.exports = async (req, res) => {
 
     if (!messageText.trim()) {
       if (messageType === 'audioMessage' || messageType === 'pttMessage') {
-        await sendWhatsAppMessage(phoneNumber, '¡Hola! 🍕 Por el momento solo puedo leer mensajes de texto. ¿Podrías escribirme tu pedido o consulta? ¡Muchas gracias!');
+        await sendWhatsAppMessage(sendToJid, 'Solo puedo leer texto 😊 ¿Podrías escribirme?');
         return res.status(200).json({ status: 'audio_handled' });
       }
       return res.status(200).json({ status: 'no_text' });
     }
 
-    const history = getConversation(phoneNumber);
-    addToConversation(phoneNumber, 'user', messageText);
+    // Responder con debounce para agrupar mensajes rápidos
+    res.status(200).json({ status: 'processing' });
 
-    // Fetch dynamic bot config (including API Key & models saved in UI)
-    const botConfig = await fetchBotConfig();
+    processWithDebounce(phoneNumber, sendToJid, messageText, async (combinedText) => {
+      try {
+        addToConversation(phoneNumber, 'user', combinedText);
 
-    const menuItems = await fetchMenuItems();
-    const systemPrompt = buildSystemPrompt(menuItems, botConfig.systemPrompt);
-    const aiResponse = await callGemini(systemPrompt, messageText, history, botConfig);
+        // Si pide el menú, enviar imagen directamente
+        if (isMenuRequest(combinedText)) {
+          await sendWhatsAppImage(sendToJid, MENU_IMAGE_URL, '');
+          addToConversation(phoneNumber, 'model', '[Imagen del menú enviada]');
+          return;
+        }
 
-    if (aiResponse) {
-      addToConversation(phoneNumber, 'model', aiResponse);
-      await sendWhatsAppMessage(sendToJid, aiResponse);
-    }
+        const botConfig = await fetchBotConfig();
+        const menuItems = await fetchMenuItems();
+        const systemPrompt = buildSystemPrompt(menuItems, botConfig.systemPrompt);
+        const aiResponse = await callGemini(systemPrompt, combinedText, getConversation(phoneNumber), botConfig);
 
-    return res.status(200).json({ status: 'ok', phone: phoneNumber, responseSent: !!aiResponse });
+        if (aiResponse) {
+          addToConversation(phoneNumber, 'model', aiResponse);
+          await sendWhatsAppMessage(sendToJid, aiResponse);
+        }
+      } catch (err) {
+        console.error('Error processing debounced message:', err);
+      }
+    });
+
   } catch (err) {
-    console.error("Webhook processing error:", err);
+    console.error('Webhook processing error:', err);
     return res.status(500).json({ error: err.message });
   }
 };
