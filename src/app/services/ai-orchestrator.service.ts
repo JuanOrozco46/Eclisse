@@ -92,6 +92,7 @@ TARIFAS DE DOMICILIO (ARMENIA, QUINDÍO):
 
 MÉTODOS DE PAGO Y TRANSFERENCIA:
 - Aceptamos Efectivo (Contraentrega) y Nequi / Bancolombia / Transferencia.
+- Datos de Nequi: Nequi al 3223119008 o Llave Nequi @3223119008.
 - Para pagos por Transferencia/Nequi: Solicita siempre la foto del comprobante de pago ANTES de confirmar la orden.
 - Revisa en el comprobante que la fecha sea de hoy y el valor coincida con el total.
 

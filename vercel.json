@@ -4,6 +4,7 @@
   "framework": null,
   "rewrites": [
     { "source": "/api/evolution/:path*", "destination": "https://elhornobotprueba1.onrender.com/:path*" },
+    { "source": "/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
