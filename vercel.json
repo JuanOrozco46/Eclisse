@@ -3,6 +3,7 @@
   "outputDirectory": "dist/web-app/browser",
   "rewrites": [
     { "source": "/api/evolution/:path*", "destination": "https://elhornobotprueba1.onrender.com/:path*" },
+    { "source": "/api/whatsapp-webhook", "destination": "/api/whatsapp-webhook.js" },
     { "source": "/((?!api|assets|favicon|manifest|registerSW).*)", "destination": "/index.html" }
   ],
   "headers": [
