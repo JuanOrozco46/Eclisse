@@ -132,15 +132,17 @@ async function callGemini(systemPrompt, userMessage, history = [], config) {
   // Normalize model names if user typed typo models like gemini1-2.5-flash
   const sanitizeModel = (m) => {
     if (!m) return 'gemini-2.0-flash';
-    return m.replace(/^gemini1-/, 'gemini-').trim();
+    // Fix typo prefix: gemini1- → gemini-
+    return m.toLowerCase().replace(/^gemini1-/, 'gemini-').trim();
   };
 
   const models = [
-    sanitizeModel(config.primaryModel),
-    sanitizeModel(config.secondaryModel),
-    sanitizeModel(config.tertiaryModel),
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite'
+    sanitizeModel(config.primaryModel)   || 'gemini-2.5-flash',
+    sanitizeModel(config.secondaryModel) || 'gemini-2.5-pro',
+    sanitizeModel(config.tertiaryModel)  || 'gemini-3.5-flash',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
+    'gemini-3.5-flash'
   ];
 
   const contents = [];
