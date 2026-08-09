@@ -220,7 +220,14 @@ module.exports = async (req, res) => {
     }
 
     const messageText = data.message?.conversation || data.message?.extendedTextMessage?.text || '';
-    const phoneNumber = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
+
+    // Si remoteJid es un LID interno (@lid), usar el campo sender del body que contiene el número real
+    let phoneNumber;
+    if (remoteJid.includes('@lid') && body.sender) {
+      phoneNumber = body.sender.replace('@s.whatsapp.net', '');
+    } else {
+      phoneNumber = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
+    }
 
     if (!messageText.trim()) {
       if (messageType === 'audioMessage' || messageType === 'pttMessage') {
