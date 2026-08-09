@@ -218,7 +218,7 @@ module.exports = async (req, res) => {
     }
 
     const messageText = data.message?.conversation || data.message?.extendedTextMessage?.text || '';
-    const phoneNumber = remoteJid.replace('@s.whatsapp.net', '');
+    const phoneNumber = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
 
     if (!messageText.trim()) {
       if (messageType === 'audioMessage' || messageType === 'pttMessage') {
@@ -245,6 +245,7 @@ module.exports = async (req, res) => {
 
     return res.status(200).json({ status: 'ok', phone: phoneNumber, responseSent: !!aiResponse });
   } catch (err) {
+    console.error("Webhook processing error:", err);
     return res.status(500).json({ error: err.message });
   }
 };
