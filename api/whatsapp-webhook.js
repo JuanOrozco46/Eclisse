@@ -10,15 +10,42 @@ const EVOLUTION_INSTANCE = 'ECLISSE_WA_01';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDdlFUJubsRWVAMERl2sJODSBx41WE7tWM';
 const MENU_IMAGE_URL = 'https://eclisse.vercel.app/assets/menu-eclisse.jpg';
 
+// ─── Memory Store for WhatsApp Conversations ───────────────
+const conversationCache = new Map();
+const CONVERSATION_TTL = 30 * 60 * 1000; // 30 mins
+
+function getConversation(phone) {
+  const entry = conversationCache.get(phone);
+  if (!entry) return [];
+  if (Date.now() - entry.lastUpdated > CONVERSATION_TTL) {
+    conversationCache.delete(phone);
+    return [];
+  }
+  return entry.messages;
+}
+
+function addToConversation(phone, role, text) {
+  const existing = conversationCache.get(phone) || { messages: [], lastUpdated: Date.now() };
+  existing.messages.push({ role, text });
+  if (existing.messages.length > 10) {
+    existing.messages = existing.messages.slice(-10);
+  }
+  existing.lastUpdated = Date.now();
+  conversationCache.set(phone, existing);
+}
+
+// ─── Fetch Menu Items from Supabase ─────────────────────────
 async function fetchMenuItems() {
   try {
     const { data } = await supabase.from('menu_items').select('*').eq('available', true);
     return data || [];
   } catch (e) {
+    console.error('Error fetching menu items:', e);
     return [];
   }
 }
 
+// ─── Build Rich System Prompt ───────────────────────────────
 function buildSystemPrompt(menuItems) {
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
   const currentDate = now.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -44,14 +71,18 @@ function buildSystemPrompt(menuItems) {
     }).join('\n');
   }
 
-  return `INSTRUCCIONES PARA VARIAR LA RESPUESTA:
-- NUNCA repitas la misma frase dos veces seguidas.
-- Usa DIFERENTES ESTRUCTURAS cada vez.
-
-REGLA DE ORO ANTI-SPAM: PARA EVITAR RESTRICCIONES DE WHATSAPP, NUNCA RESPONDAS EXACTAMENTE IGUAL A DOS CLIENTES. VARÍA SIEMPRE LA ESTRUCTURA, EL TONO, LAS PALABRAS Y EL USO DE EMOJIS.
+  return `REGLA DE ORO ANTI-SPAM DE WHATSAPP:
+- NUNCA RESPONDAS EXACTAMENTE IGUAL A DOS CLIENTES SEGUIDOS.
+- VARÍA SIEMPRE LA ESTRUCTURA, EL TONO, LAS PALABRAS Y EL USO DE EMOJIS.
+- Ejemplos de variaciones (Inspírate en ellos, NO los copies al pie de la letra):
+  * Estilo directo: "¡Hola! Con gusto te tomo el pedido. ¿A qué dirección lo enviamos?"
+  * Estilo acogedor: "¡Buenas tardes! 🍕 Qué gusto saludarte. ¿Qué pizza se te antoja hoy?"
+  * Estilo breve: "Dale, perfecto. ¿Me confirmas tu nombre y barrio en Armenia?"
+  * Estilo explicativo: "Con todo gusto. Te confirmo que el domicilio dentro de Armenia es de $6.000 COP."
 
 INFORMACIÓN DEL RESTAURANTE Y CONCEPTO:
 - Tu nombre es Luisa y eres la anfitriona virtual de Eclisse Pizza Napoletana.
+- Tu tono es profesional pero muy acogedor y sofisticado.
 - Nombre del Restaurante: Eclisse Pizza Napoletana (Artesanal y de Fuego)
 - Modelo de Negocio: COCINA OCULTA (Dark Kitchen). NO atendemos mesas en el sitio ni tenemos salón comedor. Solo domicilios y para recoger.
 - Dirección Única de Recogida: Calle 2 norte #18-144, Armenia, Quindío.
@@ -60,7 +91,7 @@ INFORMACIÓN DEL RESTAURANTE Y CONCEPTO:
 
 IMAGEN DE LA CARTA / MENÚ DIGITAL:
 - Enlace de la Carta/Menú: ${MENU_IMAGE_URL}
-- Si el cliente solicita el menú, la carta o fotos de las pizzas, RESPONDE con una frase acogedora corta y comparte el enlace: ${MENU_IMAGE_URL}
+- Si el cliente solicita el menú, la carta o fotos de las pizzas, comparte el enlace: ${MENU_IMAGE_URL}
 
 TARIFAS DE DOMICILIO (ARMENIA, QUINDÍO):
 - Domicilio estándar a cualquier barrio dentro de Armenia: $6.000 COP.
@@ -71,34 +102,51 @@ MÉTODOS DE PAGO:
 - Aceptamos Efectivo (Contraentrega) y Nequi/Transferencia.
 - Datos de Nequi: Nequi al 3223119008 o Llave Nequi @3223119008.
 
+NOTAS PARA COCINA:
+- Si el cliente solicita especificaciones especiales ("sin cebolla", "masa tostada"), regístralas claramente.
+
 INVENTARIO Y CARTA VIGENTE EN TIEMPO REAL:
 ${catalogText}`;
 }
 
-async function callGemini(systemPrompt, userMessage) {
-  const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+// ─── Call Gemini with Fallbacks and History ────────────────
+async function callGemini(systemPrompt, userMessage, history = []) {
+  const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+
+  const contents = [];
+  for (const h of history) {
+    contents.push({ role: h.role, parts: [{ text: h.text }] });
+  }
+  contents.push({ role: 'user', parts: [{ text: userMessage }] });
+
   for (const model of models) {
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
       const body = {
         system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: 'user', parts: [{ text: userMessage }] }]
+        contents: contents,
+        generationConfig: { temperature: 0.9, maxOutputTokens: 500 }
       };
+
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
+
       if (!res.ok) continue;
       const data = await res.json();
       if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
         return data.candidates[0].content.parts[0].text;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(`Gemini model ${model} error:`, e.message);
+    }
   }
   return null;
 }
 
+// ─── Send WhatsApp Message via Evolution API ───────────────
 async function sendWhatsAppMessage(number, text) {
   try {
     await fetch(`${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`, {
@@ -106,18 +154,21 @@ async function sendWhatsAppMessage(number, text) {
       headers: { 'Content-Type': 'application/json', 'apikey': EVOLUTION_API_KEY },
       body: JSON.stringify({ number, text })
     });
-  } catch (e) {}
+  } catch (e) {
+    console.error('Error sending WhatsApp message:', e.message);
+  }
 }
 
+// ─── Main Vercel Serverless Webhook Handler ─────────────────
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(200).json({ status: 'ok', message: 'Webhook active' });
+    return res.status(200).json({ status: 'ok', message: 'Eclisse WhatsApp Webhook Active' });
   }
 
   try {
     const body = req.body || {};
     if (body.event !== 'messages.upsert') {
-      return res.status(200).json({ status: 'ignored' });
+      return res.status(200).json({ status: 'ignored_event' });
     }
 
     const data = body.data;
@@ -125,27 +176,49 @@ module.exports = async function handler(req, res) {
 
     const remoteJid = data.key?.remoteJid || '';
     const fromMe = data.key?.fromMe || false;
+    const messageType = data.messageType || '';
 
+    // Ignore group chats and self messages
     if (remoteJid.includes('@g.us') || fromMe) {
-      return res.status(200).json({ status: 'ignored' });
+      return res.status(200).json({ status: 'ignored_group_or_self' });
     }
 
     const messageText = data.message?.conversation || data.message?.extendedTextMessage?.text || '';
+    const phoneNumber = remoteJid.replace('@s.whatsapp.net', '');
+
+    // Handle audio messages gracefully
     if (!messageText.trim()) {
+      if (messageType === 'audioMessage' || messageType === 'pttMessage') {
+        await sendWhatsAppMessage(phoneNumber, '¡Hola! 🍕 Por el momento solo puedo leer mensajes de texto. ¿Podrías escribirme tu pedido o consulta? ¡Muchas gracias!');
+        return res.status(200).json({ status: 'audio_handled' });
+      }
       return res.status(200).json({ status: 'no_text' });
     }
 
-    const phoneNumber = remoteJid.replace('@s.whatsapp.net', '');
+    // Load history and add current user message
+    const history = getConversation(phoneNumber);
+    addToConversation(phoneNumber, 'user', messageText);
+
+    // Fetch live menu catalog from Supabase
     const menuItems = await fetchMenuItems();
     const systemPrompt = buildSystemPrompt(menuItems);
-    const aiResponse = await callGemini(systemPrompt, messageText);
+
+    // Generate AI response
+    const aiResponse = await callGemini(systemPrompt, messageText, history);
 
     if (aiResponse) {
+      // Save model response to conversation history
+      addToConversation(phoneNumber, 'model', aiResponse);
+
+      // Human-like delay (1.5 seconds)
+      await new Promise(r => setTimeout(r, 1500));
+
       await sendWhatsAppMessage(phoneNumber, aiResponse);
     }
 
-    return res.status(200).json({ status: 'ok' });
+    return res.status(200).json({ status: 'ok', phone: phoneNumber });
   } catch (err) {
+    console.error('Webhook Error:', err);
     return res.status(500).json({ error: err.message });
   }
 };
