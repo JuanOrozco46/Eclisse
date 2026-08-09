@@ -7,11 +7,10 @@
       "maxDuration": 30
     }
   },
-  "routes": [
-    { "src": "/api/evolution/(.*)", "dest": "https://elhornobotprueba1.onrender.com/$1" },
-    { "src": "/api/whatsapp-webhook", "dest": "/api/whatsapp-webhook.js" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/evolution/:path*", "destination": "https://elhornobotprueba1.onrender.com/:path*" },
+    { "source": "/api/whatsapp-webhook", "destination": "/api/whatsapp-webhook.js" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
