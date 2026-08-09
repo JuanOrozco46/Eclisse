@@ -143,7 +143,7 @@ async function callGemini(systemPrompt, userMessage, history = [], config) {
       const body = {
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: contents,
-        generationConfig: { temperature: 0.7, maxOutputTokens: 150 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 300 }
       };
 
       const res = await fetch(url, {
