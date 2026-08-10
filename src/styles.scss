@@ -1,5 +1,7 @@
 @use "sass:color";
-@import "tailwindcss";
+/* Tailwind v4 se inyecta via PostCSS — no requiere @import aquí.
+   El angular.json apunta a este archivo en "styles" y el pipeline
+   de Vite/PostCSS aplica @tailwindcss/postcss automáticamente. */
 
 @theme {
   /* === CORE BRAND (STITCH DESIGN) === */
