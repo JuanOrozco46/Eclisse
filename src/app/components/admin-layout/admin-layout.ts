@@ -1,4 +1,4 @@
-import { Component, inject, computed, HostListener } from '@angular/core';
+import { Component, inject, computed, HostListener, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
@@ -13,7 +13,7 @@ import { DataService } from '../../services/data.service';
   templateUrl: './admin-layout.html',
   styles: ``,
 })
-export class AdminLayout {
+export class AdminLayout implements OnInit {
   private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private data = inject(DataService);
@@ -21,6 +21,11 @@ export class AdminLayout {
   userRole = computed(() => this.auth.currentUser()?.role || 'ADMIN');
   userName = computed(() => this.auth.currentUser()?.name || 'Admin User');
   pendingCount = computed(() => this.data.orders().filter(o => o.status === 'PENDING').length);
+
+  ngOnInit() {
+    // Carga datos admin solo cuando el usuario autenticado entra al dashboard
+    this.data.loadAdminData();
+  }
 
   hasRole(role: string): boolean {
     if (this.userRole() === 'ADMIN') return true; 

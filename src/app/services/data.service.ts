@@ -257,19 +257,29 @@ export class DataService {
 
   // ─── CONSTRUCTOR ───────────────────────────────────────────
   constructor() {
-    this.loadAll();
+    this.loadPublicData();
     this.subscribeToOrders();
   }
 
-  /** Carga inicial de todos los datos desde Supabase */
-  private async loadAll() {
-    // Últimos 3 días para pedidos, últimos 7 días para transacciones
+  /** Carga datos públicos (menú) — disponible para todos los visitantes */
+  async loadPublicData() {
+    try {
+      const menuRes = await this.sb.client.from('menu_items').select('*');
+      if (menuRes.data && menuRes.data.length > 0) {
+        this.menuItems.set(menuRes.data.map(r => toCamel(r) as MenuItem));
+      }
+    } catch (e) {
+      console.error('Error loading menu:', e);
+    }
+  }
+
+  /** Carga datos del dashboard — solo llamar cuando el usuario está autenticado */
+  async loadAdminData() {
     const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     try {
-      const [menuRes, ingRes, staffRes, txRes, ordRes, rappiRes] = await Promise.all([
-        this.sb.client.from('menu_items').select('*'),
+      const [ingRes, staffRes, txRes, ordRes, rappiRes] = await Promise.all([
         this.sb.client.from('ingredients').select('*'),
         this.sb.client.from('staff').select('*'),
         this.sb.client.from('transactions').select('*')
@@ -283,14 +293,13 @@ export class DataService {
         this.sb.client.from('rappi_config').select('*').limit(1).single(),
       ]);
 
-      if (menuRes.data && menuRes.data.length > 0) this.menuItems.set(menuRes.data.map(r => toCamel(r) as MenuItem));
       if (ingRes.data)    this.ingredients.set(ingRes.data.map(r => toCamel(r) as Ingredient));
       if (staffRes.data)  this.staff.set(staffRes.data.map(r => toCamel(r) as StaffMember));
       if (txRes.data)     this.transactions.set(txRes.data.map(r => toCamel(r) as Transaction));
       if (ordRes.data)    this.orders.set(ordRes.data.map(r => toCamel(r) as SalesOrder));
       if (rappiRes.data)  this.rappiConfig.set(toCamel(rappiRes.data) as RappiConfig);
     } catch (e) {
-      console.error('Error loading from Supabase:', e);
+      console.error('Error loading admin data from Supabase:', e);
     }
   }
 
