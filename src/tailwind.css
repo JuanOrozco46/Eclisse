@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+/* Build: 2026-08-10T03:20:30Z */
+
 @theme {
   --color-secondary: #e9c349;
   --color-primary: #c6c6c6;
@@ -34,4 +36,5 @@
   --spacing-margin-mobile: 20px;
   --spacing-gutter: 24px;
   --spacing-unit: 4px;
+  --cache-bust: 1;
 }
