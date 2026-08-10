@@ -1,1 +1,51 @@
-@import "tailwindcss";
+@import "tailwindcss/theme" theme(reference);
+@import "tailwindcss/utilities";
+
+@theme {
+  /* === CORE BRAND (STITCH DESIGN) === */
+  --color-secondary: #e9c349; /* Brand Gold */
+  --color-primary: #c6c6c6;   /* Main Silver/White */
+  --color-stark-gray: #D4D4D4;
+  --color-emerald: #008C45;
+  --color-tomato: #CD212A;
+
+  /* Background & Surfaces */
+  --color-background: #131313;
+  --color-surface-dim: #131313;
+  --color-surface-container: #20201f;
+  --color-surface-container-lowest: #0e0e0e;
+  --color-surface-container-low: #1c1b1b;
+  --color-surface-container-high: #2a2a2a;
+  --color-surface-container-highest: #353535;
+  --color-surface-variant: #353535;
+
+  /* On-Colors (Text) */
+  --color-on-background: #e5e2e1;
+  --color-on-surface: #e5e2e1;
+  --color-on-surface-variant: #cfc4c5;
+  --color-on-secondary: #3c2f00;
+
+  /* Outlines */
+  --color-outline: #988e90;
+  --color-outline-variant: #4c4546;
+
+  /* Error */
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+
+  /* === TYPOGRAPHY === */
+  --font-display-xl: "Anton", sans-serif;
+  --font-display-lg: "Anton", sans-serif;
+  --font-headline-lg: "Anton", sans-serif;
+  --font-body-lg: "Hanken Grotesk", sans-serif;
+  --font-body-md: "Hanken Grotesk", sans-serif;
+  --font-label-caps: "Space Mono", monospace;
+  --font-nav-link: "Hanken Grotesk", sans-serif;
+
+  /* === SPACING === */
+  --spacing-margin-desktop: 80px;
+  --spacing-margin-mobile: 20px;
+  --spacing-gutter: 24px;
+  --spacing-unit: 4px;
+}
