@@ -60,6 +60,7 @@ export interface SalesOrder {
   paymentMethod?: string;
   source?: OrderSource;
   customerPhone?: string;
+  customerName?: string;   // nombre del contacto de WhatsApp (pushName)
   deliveryStatus?: DeliveryStatus;
   rappiOrderId?: string;
 }
@@ -75,18 +76,19 @@ export interface RappiConfig {
 // ─── Helper: snake_case ↔ camelCase mappers ────────────────
 function toSnake(obj: Record<string, any>): Record<string, any> {
   const map: Record<string, string> = {
-    costPerUnit: 'cost_per_unit',
-    createdAt: 'created_at',
-    orderId: 'order_id',
-    menuItemId: 'menu_item_id',
-    paymentMethod: 'payment_method',
-    customerPhone: 'customer_phone',
+    costPerUnit:    'cost_per_unit',
+    createdAt:      'created_at',
+    orderId:        'order_id',
+    menuItemId:     'menu_item_id',
+    paymentMethod:  'payment_method',
+    customerPhone:  'customer_phone',
+    customerName:   'customer_name',
     deliveryStatus: 'delivery_status',
-    rappiOrderId: 'rappi_order_id',
-    storeId: 'store_id',
-    apiKey: 'api_key',
-    webhookSecret: 'webhook_secret',
-    connectedAt: 'connected_at',
+    rappiOrderId:   'rappi_order_id',
+    storeId:        'store_id',
+    apiKey:         'api_key',
+    webhookSecret:  'webhook_secret',
+    connectedAt:    'connected_at',
   };
   const result: Record<string, any> = {};
   for (const [key, value] of Object.entries(obj)) {
@@ -97,22 +99,44 @@ function toSnake(obj: Record<string, any>): Record<string, any> {
 
 function toCamel(obj: Record<string, any>): Record<string, any> {
   const map: Record<string, string> = {
-    cost_per_unit: 'costPerUnit',
-    created_at: 'createdAt',
-    order_id: 'orderId',
-    menu_item_id: 'menuItemId',
+    cost_per_unit:  'costPerUnit',
+    created_at:     'createdAt',
+    order_id:       'orderId',
+    menu_item_id:   'menuItemId',
     payment_method: 'paymentMethod',
     customer_phone: 'customerPhone',
-    delivery_status: 'deliveryStatus',
+    customer_name:  'customerName',
+    delivery_status:'deliveryStatus',
     rappi_order_id: 'rappiOrderId',
-    store_id: 'storeId',
-    api_key: 'apiKey',
+    store_id:       'storeId',
+    api_key:        'apiKey',
     webhook_secret: 'webhookSecret',
-    connected_at: 'connectedAt',
+    connected_at:   'connectedAt',
   };
   const result: Record<string, any> = {};
   for (const [key, value] of Object.entries(obj)) {
-    result[map[key] || key] = value;
+    const camelKey = map[key] || key;
+
+    // items viene de Supabase como jsonb — puede ser string si el driver no lo parsea
+    if (camelKey === 'items') {
+      if (typeof value === 'string') {
+        try { result[camelKey] = JSON.parse(value); }
+        catch { result[camelKey] = []; }
+      } else if (Array.isArray(value)) {
+        // Cada ítem puede tener menu_item_id → convertir a camelCase también
+        result[camelKey] = value.map((item: any) => {
+          if (item && typeof item === 'object') {
+            return toCamel(item as Record<string, any>);
+          }
+          return item;
+        });
+      } else {
+        result[camelKey] = value ?? [];
+      }
+      continue;
+    }
+
+    result[camelKey] = value;
   }
   return result;
 }
@@ -239,22 +263,32 @@ export class DataService {
 
   /** Carga inicial de todos los datos desde Supabase */
   private async loadAll() {
+    // Últimos 3 días para pedidos, últimos 7 días para transacciones
+    const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
     try {
       const [menuRes, ingRes, staffRes, txRes, ordRes, rappiRes] = await Promise.all([
         this.sb.client.from('menu_items').select('*'),
         this.sb.client.from('ingredients').select('*'),
         this.sb.client.from('staff').select('*'),
-        this.sb.client.from('transactions').select('*').order('timestamp', { ascending: false }),
-        this.sb.client.from('orders').select('*'),
+        this.sb.client.from('transactions').select('*')
+          .gte('date', sevenDaysAgo)
+          .order('timestamp', { ascending: false })
+          .limit(500),
+        this.sb.client.from('orders').select('*')
+          .gte('timestamp', threeDaysAgo)
+          .order('timestamp', { ascending: false })
+          .limit(200),
         this.sb.client.from('rappi_config').select('*').limit(1).single(),
       ]);
 
       if (menuRes.data && menuRes.data.length > 0) this.menuItems.set(menuRes.data.map(r => toCamel(r) as MenuItem));
-      if (ingRes.data) this.ingredients.set(ingRes.data.map(r => toCamel(r) as Ingredient));
-      if (staffRes.data) this.staff.set(staffRes.data.map(r => toCamel(r) as StaffMember));
-      if (txRes.data) this.transactions.set(txRes.data.map(r => toCamel(r) as Transaction));
-      if (ordRes.data) this.orders.set(ordRes.data.map(r => toCamel(r) as SalesOrder));
-      if (rappiRes.data) this.rappiConfig.set(toCamel(rappiRes.data) as RappiConfig);
+      if (ingRes.data)    this.ingredients.set(ingRes.data.map(r => toCamel(r) as Ingredient));
+      if (staffRes.data)  this.staff.set(staffRes.data.map(r => toCamel(r) as StaffMember));
+      if (txRes.data)     this.transactions.set(txRes.data.map(r => toCamel(r) as Transaction));
+      if (ordRes.data)    this.orders.set(ordRes.data.map(r => toCamel(r) as SalesOrder));
+      if (rappiRes.data)  this.rappiConfig.set(toCamel(rappiRes.data) as RappiConfig);
     } catch (e) {
       console.error('Error loading from Supabase:', e);
     }
@@ -321,21 +355,29 @@ export class DataService {
   }
 
   // ─── MENU ──────────────────────────────────────────────────
+  private bustBotMenuCache() {
+    // Invalida el caché del menú en el bot de Vercel (fire-and-forget)
+    fetch('/api?action=bust-cache', { headers: { 'x-api-key': 'secreto123' } }).catch(() => {});
+  }
+
   async addMenuItem(item: Omit<MenuItem, 'id'>) {
     const id = 'menu_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
     const newItem = { ...item, id };
     this.menuItems.update(items => [...items, newItem]);
     await this.sb.client.from('menu_items').insert(toSnake(newItem));
+    this.bustBotMenuCache();
   }
 
   async updateMenuItem(id: string, updates: Partial<MenuItem>) {
     this.menuItems.update(items => items.map(i => i.id === id ? { ...i, ...updates } : i));
     await this.sb.client.from('menu_items').update(toSnake(updates)).eq('id', id);
+    this.bustBotMenuCache();
   }
 
   async deleteMenuItem(id: string) {
     this.menuItems.update(items => items.filter(i => i.id !== id));
     await this.sb.client.from('menu_items').delete().eq('id', id);
+    this.bustBotMenuCache();
   }
 
   // ─── INGREDIENTS ───────────────────────────────────────────

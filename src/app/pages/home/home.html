@@ -4,7 +4,8 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- SECCIÓN 1: NUESTRAS PIZZAS                  -->
     <!-- ═══════════════════════════════════════════ -->
-    <section id="carta" class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
+    <section id="carta" aria-label="Nuestras pizzas"
+             class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
         <div class="absolute inset-0 texture-overlay opacity-20"></div>
         <div class="max-w-7xl mx-auto relative z-10">
 
@@ -26,25 +27,31 @@
 
             <!-- Pizza Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-8">
-                <div *ngFor="let item of featuredItems()"
+                <article *ngFor="let item of featuredItems()"
                      class="group border border-outline-variant bg-background p-5 relative overflow-hidden hover:border-secondary transition-all duration-500">
                     <div class="aspect-square mb-6 overflow-hidden border border-outline-variant relative bg-surface-container-low flex items-center justify-center">
-                        <img *ngIf="item.image" [src]="item.image" [alt]="item.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                        <span *ngIf="!item.image" class="material-symbols-outlined text-stark-gray opacity-20 text-6xl">restaurant</span>
+                        <img *ngIf="item.image" [src]="item.image"
+                             [alt]="item.name + ' — pizza napoletana artesanal Eclisse Armenia'"
+                             width="400" height="400"
+                             loading="lazy"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <span *ngIf="!item.image" class="material-symbols-outlined text-stark-gray opacity-20 text-6xl" aria-hidden="true">restaurant</span>
                     </div>
                     <h3 class="font-anton text-3xl text-white uppercase tracking-tighter mb-2 group-hover:text-secondary transition-colors">{{item.name}}</h3>
                     <p class="font-hanken text-[12px] text-stark-gray opacity-50 leading-relaxed mb-4">{{item.description}}</p>
                     <div class="flex justify-between items-center pt-4 border-t border-outline-variant">
                         <span class="font-anton text-xl text-secondary">${{item.price.toLocaleString('es-CO')}}</span>
-                        <button (click)="addToCart(item)" class="text-secondary hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-2xl">add_shopping_cart</span>
+                        <button (click)="addToCart(item)"
+                                [attr.aria-label]="'Agregar ' + item.name + ' al carrito'"
+                                class="text-secondary hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-2xl" aria-hidden="true">add_shopping_cart</span>
                         </button>
                     </div>
-                </div>
+                </article>
 
                 <!-- Empty State -->
-                <div *ngIf="featuredItems().length === 0" class="col-span-full py-20 border border-outline-variant border-dashed flex flex-col items-center">
-                    <span class="material-symbols-outlined text-stark-gray opacity-20 text-6xl mb-4">restaurant</span>
+                <div *ngIf="featuredItems().length === 0" class="col-span-full py-20 border border-outline-variant border-dashed flex flex-col items-center" role="status" aria-label="Cargando carta">
+                    <span class="material-symbols-outlined text-stark-gray opacity-20 text-6xl mb-4" aria-hidden="true">restaurant</span>
                     <p class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest">ACTUALIZANDO CARTA...</p>
                 </div>
             </div>
@@ -64,7 +71,8 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- SECCIÓN 2: CÓMO PEDIR                       -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative">
+    <section aria-label="Cómo hacer tu pedido"
+             class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative">
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center gap-4 mb-8">
                 <span class="font-anton text-secondary text-xl">02</span>
@@ -136,7 +144,8 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- SECCIÓN 3: GALERÍA                          -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
+    <section aria-label="Galería de Eclisse Pizza"
+             class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
         <div class="max-w-7xl mx-auto flex flex-col gap-16">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                 <div>
@@ -152,24 +161,30 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="aspect-square relative group overflow-hidden border border-outline-variant">
-                    <img [src]="photos().gallery_1" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt="Eclisse Pizza">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
+                <figure class="aspect-square relative group overflow-hidden border border-outline-variant">
+                    <img [src]="photos().gallery_1" width="600" height="600" loading="lazy"
+                         class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
+                         alt="Masa de pizza napoletana Eclisse — fermentación 48 horas, Armenia Quindío">
+                    <figcaption class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
                         <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"La paciencia es el ingrediente principal. 48 horas de espera para 90 segundos de fuego."</p>
-                    </div>
-                </div>
-                <div class="aspect-square relative group overflow-hidden border border-outline-variant">
-                    <img [src]="photos().gallery_2" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt="Eclisse Pizza">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
+                    </figcaption>
+                </figure>
+                <figure class="aspect-square relative group overflow-hidden border border-outline-variant">
+                    <img [src]="photos().gallery_2" width="600" height="600" loading="lazy"
+                         class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
+                         alt="Ingredientes artesanales seleccionados para pizza Eclisse — mozzarella y pesto">
+                    <figcaption class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
                         <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"Obsesión por el detalle. Solo ingredientes que nos emocionen."</p>
-                    </div>
-                </div>
-                <div class="aspect-square relative group overflow-hidden border border-outline-variant">
-                    <img [src]="photos().gallery_3" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000" alt="Eclisse Pizza">
-                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
+                    </figcaption>
+                </figure>
+                <figure class="aspect-square relative group overflow-hidden border border-outline-variant">
+                    <img [src]="photos().gallery_3" width="600" height="600" loading="lazy"
+                         class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
+                         alt="Pizza Dolce Fiamma con miel picante artesanal — Eclisse Pizza Armenia">
+                    <figcaption class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
                         <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"Miel picante artesanal. El equilibrio perfecto entre el dulce y la llama."</p>
-                    </div>
-                </div>
+                    </figcaption>
+                </figure>
             </div>
         </div>
     </section>
@@ -177,7 +192,8 @@
     <!-- ═══════════════════════════════════════════ -->
     <!-- SECCIÓN 4: UBICACIÓN                        -->
     <!-- ═══════════════════════════════════════════ -->
-    <section class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative overflow-hidden">
+    <section aria-label="Ubicación y contacto"
+             class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative overflow-hidden">
         <div class="absolute inset-0 texture-overlay opacity-10"></div>
         <div class="max-w-5xl mx-auto relative z-10 text-center flex flex-col items-center gap-10">
             <div class="flex items-center gap-4 w-full max-w-xs mx-auto">

@@ -1,6 +1,5 @@
 @use "sass:color";
-// @import "tailwindcss"; 
-/* Using CDN for Tailwind to ensure stability with current build config */
+@import "tailwindcss";
 
 @theme {
   /* === CORE BRAND (STITCH DESIGN) === */

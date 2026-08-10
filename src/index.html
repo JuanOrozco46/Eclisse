@@ -1,63 +1,140 @@
 <!doctype html>
 <html class="dark" lang="es">
-  <head>
+<head>
   <meta charset="utf-8">
-  <title>Eclisse - Pizza Napoletana</title>
+  <title>Eclisse Pizza Napoletana · Armenia, Quindío</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Eclisse Pizza Napoletana - La mejor pizza artesanal en Bogotá. Pedidos por WhatsApp y experiencia premium.">
+
+  <!-- ── SEO primario ───────────────────────────────────────── -->
+  <meta name="description"
+        content="Eclisse Pizza Napoletana en Armenia, Quindío. Pizzas artesanales al horno de leña. Domicilios y recogida en Calle 2N 18-144. Pedidos por WhatsApp o Rappi. Horario 5 PM – 11 PM.">
+  <meta name="keywords"
+        content="pizza armenia quindio, pizza napoletana armenia, domicilio pizza armenia, eclisse pizza, pizza artesanal armenia colombia">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Eclisse Pizza Napoletana">
+  <link rel="canonical" href="https://eclisse.vercel.app/">
+
+  <!-- ── Open Graph (WhatsApp, Facebook, iMessage) ──────────── -->
+  <meta property="og:type"        content="restaurant">
+  <meta property="og:site_name"   content="Eclisse Pizza Napoletana">
+  <meta property="og:title"       content="Eclisse Pizza Napoletana · Armenia, Quindío">
+  <meta property="og:description" content="Pizzas artesanales al horno de leña en Armenia. Domicilios y recogida. Pedidos por WhatsApp 🍕">
+  <meta property="og:url"         content="https://eclisse.vercel.app/">
+  <meta property="og:image"       content="https://eclisse.vercel.app/assets/pizzas_group.jpg">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"   content="Pizzas artesanales Eclisse — Armenia, Quindío">
+  <meta property="og:locale"      content="es_CO">
+
+  <!-- ── Twitter / X Cards ─────────────────────────────────── -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Eclisse Pizza Napoletana · Armenia, Quindío">
+  <meta name="twitter:description" content="Pizzas artesanales al horno de leña. Domicilios en Armenia. Pedidos por WhatsApp 🍕">
+  <meta name="twitter:image"       content="https://eclisse.vercel.app/assets/pizzas_group.jpg">
+  <meta name="twitter:image:alt"   content="Pizzas artesanales Eclisse — Armenia, Quindío">
+
+  <!-- ── Iconos / PWA ──────────────────────────────────────── -->
   <meta name="theme-color" content="#0a0a0a">
-  <!-- Content Security Policy as a secondary layer -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://images.unsplash.com;">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              background: '#0a0a0a',
-              surface: '#131313',
-              secondary: '#e9c349',
-              primary: '#c6c6c6',
-              'stark-gray': '#D4D4D4',
-              'surface-container': '#1c1c1c',
-              'surface-container-lowest': '#050505',
-              'surface-container-low': '#111111',
-              'outline-variant': '#2a2a2a',
-              'tomato': '#CD212A',
-              'emerald': '#008C45',
-            },
-            fontFamily: {
-              anton: ['Anton', 'sans-serif'],
-              hanken: ['Hanken Grotesk', 'sans-serif'],
-              mono: ['Space Mono', 'monospace'],
-            },
-            letterSpacing: {
-              'tighter': '-0.05em',
-              'widest': '0.3em',
-              'brutal': '0.6em',
-            },
-            boxShadow: {
-              'brutal': '10px 10px 0px 0px rgba(0,0,0,1)',
-              'brutal-gold': '5px 5px 0px 0px #e9c349',
-            }
-          }
-        }
+  <link rel="apple-touch-icon" href="assets/logo_premium.jpg">
+
+  <!-- ── Content Security Policy ───────────────────────────── -->
+  <!-- Incluye Supabase para imágenes del menú y Google Fonts -->
+  <meta http-equiv="Content-Security-Policy"
+        content="
+          default-src 'self';
+          script-src  'self' 'unsafe-inline';
+          style-src   'self' 'unsafe-inline' https://fonts.googleapis.com;
+          font-src    'self' https://fonts.gstatic.com;
+          img-src     'self' data: blob:
+                      https://pcmcfhhbpmbrrxpuodoh.supabase.co
+                      https://images.unsplash.com
+                      https://eclisse.vercel.app
+                      https://assets.mixkit.co;
+          connect-src 'self'
+                      https://pcmcfhhbpmbrrxpuodoh.supabase.co
+                      wss://realtime.supabase.co
+                      https://generativelanguage.googleapis.com
+                      https://elhornobotprueba1.onrender.com;
+          media-src   'self' https://assets.mixkit.co;
+        ">
+
+  <!-- ── Google Fonts (preconnect primero para velocidad) ───── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+  <!-- ── JSON-LD: Schema.org Restaurant ────────────────────── -->
+  <!-- Google usa esto para el panel de conocimiento, Google Maps y resultados enriquecidos -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "Eclisse Pizza Napoletana",
+    "alternateName": "Eclisse Pizza",
+    "description": "Cocina oculta especializada en pizza napoletana artesanal al horno de leña. Domicilios y recogida en Armenia, Quindío.",
+    "url": "https://eclisse.vercel.app",
+    "telephone": "+573004057195",
+    "email": "eclissepizza@gmail.com",
+    "image": "https://eclisse.vercel.app/assets/pizzas_group.jpg",
+    "logo": "https://eclisse.vercel.app/assets/logo_premium.jpg",
+    "priceRange": "$$",
+    "servesCuisine": ["Pizza", "Pizza Napoletana", "Comida Italiana"],
+    "hasMenu": "https://eclisse.vercel.app/menu",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Calle 2 Norte #18-144",
+      "addressLocality": "Armenia",
+      "addressRegion": "Quindío",
+      "postalCode": "630001",
+      "addressCountry": "CO"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 4.5339,
+      "longitude": -75.6811
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "opens": "17:00",
+        "closes": "23:00"
       }
-    </script>
-    <!-- Google Fonts: Anton, Hanken Grotesk, Space Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-    
-    <!-- Material Symbols -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
-    <script>window.addEventListener('DOMContentLoaded', () => { document.documentElement.classList.add('dark'); });</script>
+    ],
+    "orderAction": {
+      "@type": "OrderAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://wa.me/573004057195",
+        "actionPlatform": [
+          "http://schema.org/MobileWebPlatform",
+          "http://schema.org/DesktopWebPlatform"
+        ]
+      },
+      "deliveryMethod": ["http://purl.org/goodrelations/v1#DeliveryModeDirectDownload"]
+    },
+    "sameAs": [
+      "https://www.instagram.com/eclisse.pizza",
+      "https://www.rappi.com.co/restaurantes/900491852-eclisse"
+    ],
+    "paymentAccepted": "Cash, Nequi",
+    "currenciesAccepted": "COP",
+    "areaServed": {
+      "@type": "City",
+      "name": "Armenia",
+      "containedIn": "Quindío, Colombia"
+    }
+  }
+  </script>
+
+  <script>window.addEventListener('DOMContentLoaded', () => { document.documentElement.classList.add('dark'); });</script>
 </head>
-  <body>
-    <app-root></app-root>
-  </body>
+<body>
+  <app-root></app-root>
+</body>
 </html>

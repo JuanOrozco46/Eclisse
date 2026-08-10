@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /menu
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /el-secreto
+
+Sitemap: https://eclisse.vercel.app/sitemap.xml
