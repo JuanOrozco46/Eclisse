@@ -52,7 +52,7 @@
               }
             ],
             "styles": [
-              "src/tailwind.css",
+              "src/tailwind.compiled.css",
               "src/styles.scss"
             ]
           },

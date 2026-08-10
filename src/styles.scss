@@ -4,7 +4,6 @@
 $secondary: #e9c349;
 $primary: #c6c6c6;
 $background: #131313;
-
 /* === GLOBAL REFINEMENTS === */
 html {
     scroll-behavior: smooth;
@@ -15,8 +14,9 @@ html {
 body {
     background-color: #131313 !important;
     color: var(--color-on-surface);
-    @apply antialiased selection:bg-secondary selection:text-on-secondary;
     font-family: var(--font-body-md);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     margin: 0;
     padding: 0;
     overflow-x: hidden;

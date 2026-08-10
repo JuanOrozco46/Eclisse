@@ -1,6 +1,6 @@
 @import "tailwindcss";
-
-/* Build: 2026-08-10T03:20:30Z */
+@source "../src/app/**/*.{html,ts}";
+@source "../src/app/**/*.scss";
 
 @theme {
   --color-secondary: #e9c349;
@@ -36,5 +36,4 @@
   --spacing-margin-mobile: 20px;
   --spacing-gutter: 24px;
   --spacing-unit: 4px;
-  --cache-bust: 1;
 }
