@@ -142,38 +142,49 @@ async function fetchMenuItems() {
 function buildSystemPrompt(menuItems, customPrompt) {
   const hour = getBogoraHour();
   let timeNote = '';
-  if (hour < OPEN_HOUR) timeNote = `\nNOTA: Todavía no abrimos (abrimos a las 5 PM). Podés tomar el pedido de forma anticipada.`;
+  if (hour < OPEN_HOUR) timeNote = `\nNOTA: Aún no abrimos, abrimos a las 5 PM. Podés tomar el pedido anticipado.`;
 
   const catalog = menuItems
     .map(i => `• ${i.name} $${Number(i.price || 0).toLocaleString('es-CO')}`)
     .join('\n');
 
-  return `Sos Luisa, asistente de Eclisse Pizza Napoletana (Armenia, Quindío). Cocina oculta — solo domicilios y recogida en Calle 2 norte #18-144.
+  return `Sos Luisa, asistente de Eclisse Pizza (Armenia, Quindío). Solo domicilios y recogida — Calle 2 norte #18-144.
 ${timeNote}
-CÓMO HABLAR:
-- Mensajes cortos y naturales, como WhatsApp real. Máximo 2-3 líneas.
-- No repitas saludos ni info que ya diste en esta conversación.
-- Si te piden el menú, respondé solo "Aquí está nuestra carta 🍕" (el sistema manda la imagen automáticamente, vos no la mandás).
-- Emojis con moderación, no en cada mensaje.
-- Variá el tono para que no suene a robot.
-- No repitas el resumen del pedido si ya lo confirmaste antes.
 
-CUANDO EL CLIENTE CONFIRME EL PEDIDO:
-El cliente confirma cuando da su dirección Y su método de pago (o dice "confirmo", "listo", etc.).
-Respondé con UN mensaje corto de confirmación natural que incluya un estimado de tiempo (ej: "¡Perfecto! Pedido recibido, en unos 35-40 min está en tu puerta 🍕") y al FINAL de ese mensaje agregá este bloque exacto sin modificarlo:
+ESTILO:
+- Máximo 1-2 líneas por mensaje. Sé directa y natural como WhatsApp.
+- Emojis solo cuando aporten, no en cada mensaje.
+- No repitas info ya dada en la conversación.
+- Nunca mandes el menú en texto. Si te lo piden, respondé solo: "Aquí está 🍕" (la imagen la manda el sistema).
 
+FLUJO DEL PEDIDO (hacé UNA pregunta a la vez, en mensajes separados):
+1. Tomá el pedido.
+2. Preguntá la dirección.
+3. Preguntá el método de pago: Efectivo o Nequi.
+   - Si elige Nequi, respondé: "Perfecto, podés transferir al 3223119008 (Nequi) y mandame el comprobante 📸"
+4. Cuando tengas dirección y método de pago, confirmá el pedido con tiempo estimado (35-40 min domicilio, 20-25 min recogida).
+
+Al confirmar, agregá al FINAL del mensaje este bloque exacto (sin modificarlo):
 PEDIDO_CONFIRMADO:
-items: [describí los ítems, ej: 2x Bianca, 1x Coca-Cola Zero 250ml]
-direccion: [dirección completa que dio el cliente]
-total: [número, solo dígitos, sin puntos ni símbolo $]
+items: [ej: 2x Bianca, 1x Coca-Cola Zero 250ml]
+direccion: [dirección del cliente]
+total: [solo dígitos, sin puntos ni $]
 pago: [Efectivo o Nequi]
-telefono: [número del cliente sin @s.whatsapp.net ni @lid]
+telefono: [número del cliente]
 
-Si el cliente quiere CAMBIAR el pedido después de confirmarlo, incluí el bloque PEDIDO_CONFIRMADO: nuevamente con el pedido actualizado.
+Si el cliente cambia el pedido después, repetí el bloque PEDIDO_CONFIRMADO con los datos actualizados.
 
-HORARIO: 5 PM – 11 PM todos los días.
-DOMICILIO: Armenia $6.000 | Afueras $8.000–$12.000 | Recogida gratis.
-PAGO: Efectivo o Nequi al 3223119008.
+CUANDO RECIBAS UNA IMAGEN:
+Si el cliente manda una foto (comprobante de pago), analizá:
+1. ¿El destinatario es 3223119008?
+2. ¿El valor corresponde al total del pedido?
+3. ¿La fecha y hora del comprobante son recientes (hoy)?
+Respondé confirmando o señalando el problema puntualmente. Ejemplo: "✅ Comprobante recibido, todo en orden" o "El valor no coincide, el total es $X".
+
+DATOS:
+- Horario: 5 PM – 11 PM todos los días.
+- Domicilio: Armenia $6.000 | Afueras $8.000–$12.000 | Recogida: gratis.
+- Pago: Efectivo o Nequi al 3223119008.
 
 CARTA:
 ${catalog}
@@ -269,16 +280,22 @@ async function insertOrderToSupabase(order) {
 }
 
 // ─── Gemini ───────────────────────────────────────────────────
-async function callGemini(systemPrompt, userMessage, history, config) {
+// imagePart: { inlineData: { mimeType, data } } | null
+async function callGemini(systemPrompt, userMessage, history, config, imagePart = null) {
   const san = (m) => m ? m.toLowerCase().replace(/^gemini1-/, 'gemini-').trim() : '';
   const models = [...new Set([
     san(config.primaryModel), san(config.secondaryModel), san(config.tertiaryModel),
     'gemini-2.5-flash', 'gemini-1.5-flash',
   ].filter(Boolean))];
 
+  // Si hay imagen, el último mensaje del usuario lleva la imagen + texto
+  const userParts = imagePart
+    ? [imagePart, { text: userMessage || 'Verificá este comprobante de pago.' }]
+    : [{ text: userMessage }];
+
   const contents = [
     ...history.map(h => ({ role: h.role, parts: [{ text: h.text }] })),
-    { role: 'user', parts: [{ text: userMessage }] },
+    { role: 'user', parts: userParts },
   ];
 
   for (const model of models) {
@@ -291,7 +308,7 @@ async function callGemini(systemPrompt, userMessage, history, config) {
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemPrompt }] },
             contents,
-            generationConfig: { temperature: 0.75, maxOutputTokens: 400 },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 150 },
           }),
         }
       );
@@ -397,17 +414,28 @@ module.exports = async (req, res) => {
     const phone       = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
     const sendToJid   = remoteJid;
 
-    // ── Voz / audio ──
-    if (!messageText.trim()) {
+    // ── Extraer imagen si viene comprobante ──────────────────────────────────
+    let imagePart = null;
+    const imgMsg = data.message?.imageMessage;
+    if (imgMsg) {
+      // Evolution API adjunta base64 en jpegThumbnail o en data field
+      const b64 = imgMsg.jpegThumbnail || imgMsg.base64 || null;
+      if (b64) {
+        imagePart = { inlineData: { mimeType: imgMsg.mimetype || 'image/jpeg', data: b64 } };
+      }
+    }
+
+    // ── Sin texto ni imagen → ignorar (excepto audio) ─────────────────────
+    if (!messageText.trim() && !imagePart) {
       if (messageType === 'audioMessage' || messageType === 'pttMessage') {
         await sendWhatsAppMessage(sendToJid, 'Solo puedo leer texto 😊 ¿Me escribís el pedido?');
         return res.status(200).json({ status: 'audio_handled' });
       }
-      return res.status(200).json({ status: 'no_text' });
+      return res.status(200).json({ status: 'no_content' });
     }
 
-    // ── Saludos cortos → silencio ──
-    if (isCurtMessage(messageText)) return res.status(200).json({ status: 'curt_ignored' });
+    // ── Saludos cortos → silencio (solo si no hay imagen) ──
+    if (!imagePart && isCurtMessage(messageText)) return res.status(200).json({ status: 'curt_ignored' });
 
     // ── CIERRE: si el restaurante está cerrado, respuesta fija sin Gemini ──
     if (!isOpen()) {
@@ -419,8 +447,8 @@ module.exports = async (req, res) => {
       return res.status(200).json({ status: 'closed_reply' });
     }
 
-    // ── Menú → imagen directa ──
-    if (isMenuRequest(messageText)) {
+    // ── Menú → imagen directa (solo si no viene imagen del cliente) ──
+    if (!imagePart && isMenuRequest(messageText)) {
       await addToConversation(phone, 'user', messageText);
       await sendWhatsAppImage(sendToJid, MENU_IMAGE_URL, '');
       await addToConversation(phone, 'model', '[Menú enviado]');
@@ -428,42 +456,45 @@ module.exports = async (req, res) => {
     }
 
     // ── Modificación de pedido ──
-    if (MOD_KEYWORDS.some(k => messageText.toLowerCase().includes(k))) resetOrderState(phone);
+    if (messageText && MOD_KEYWORDS.some(k => messageText.toLowerCase().includes(k))) resetOrderState(phone);
 
     // ── Gemini ──
-    await addToConversation(phone, 'user', messageText);
+    const userContent = imagePart
+      ? (messageText.trim() || 'El cliente mandó un comprobante de pago.')
+      : messageText;
+
+    await addToConversation(phone, 'user', userContent);
     const history = await getConversation(phone);
 
     const [botConfig, menuItems] = await Promise.all([fetchBotConfig(), fetchMenuItems()]);
     const systemPrompt = buildSystemPrompt(menuItems, botConfig.systemPrompt);
-    const aiResponse   = await callGemini(systemPrompt, messageText, history.slice(0, -1), botConfig);
+    const aiResponse   = await callGemini(systemPrompt, userContent, history.slice(0, -1), botConfig, imagePart);
 
     // ── Fallback si todos los modelos fallan ──
     if (!aiResponse) {
-      const fallback = 'Perdón, tuve un problema técnico 🙏 Intentá de nuevo en un momento o escribinos directo.';
+      const fallback = 'Perdón, tuve un problema técnico 🙏 Intentá de nuevo en un momento.';
       await sendWhatsAppMessage(sendToJid, fallback);
       return res.status(200).json({ status: 'gemini_fallback' });
     }
 
     await addToConversation(phone, 'model', aiResponse);
 
-    // ── Detectar pedido confirmado ──
+    // ── Detectar pedido confirmado y enviar a cocina ────────────────────────
+    // Se verifica en DB para evitar duplicados entre cold starts (el cache en memoria
+    // no es suficiente en serverless). Si ya existe un pedido PENDING reciente del
+    // mismo teléfono, no se inserta otro.
     if (aiResponse.includes('PEDIDO_CONFIRMADO:')) {
-      const state = getOrderState(phone);
-      if (!state.inserted) {
-        const alreadyInDB = await hasRecentOrderInDB(phone);
-        if (!alreadyInDB) {
-          const order = parseConfirmedOrder(aiResponse, menuItems, phone, pushName);
-          if (order) {
-            const insertedId = await insertOrderToSupabase(order);
-            if (insertedId) {
-              markOrderInserted(phone);
-              console.log(`✅ Pedido #${insertedId.slice(-4).toUpperCase()} de ${pushName || phone} → cocina`);
-            }
+      const alreadyInDB = await hasRecentOrderInDB(phone);
+      if (!alreadyInDB) {
+        const order = parseConfirmedOrder(aiResponse, menuItems, phone, pushName);
+        if (order) {
+          const insertedId = await insertOrderToSupabase(order);
+          if (insertedId) {
+            console.log(`✅ Pedido #${String(insertedId).slice(-4).toUpperCase()} de ${pushName || phone} → cocina`);
           }
-        } else {
-          markOrderInserted(phone);
         }
+      } else {
+        console.log(`⚠️ Pedido de ${phone} ya existe en DB, no se duplica`);
       }
     }
 
