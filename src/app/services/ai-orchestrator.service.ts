@@ -1,8 +1,9 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { DataService } from './data.service';
 import { SupabaseService } from './supabase.service';
+import { ToastService } from './toast.service';
 import { environment } from '../../environments/environment';
 
 export interface AIConfig {
@@ -13,6 +14,59 @@ export interface AIConfig {
   antiBlockDelay: number; // in ms
   geminiApiKey: string;
   menuImageUrl?: string;
+  openHour?: number;
+  closeHour?: number;
+  armeniaFee?: number;
+  outskirtsFee?: number;
+  nequiPhone?: string;
+  whatsappOrderPhone?: string;
+  deliveryGroupNumber?: string;
+}
+
+export interface PlaygroundTurnResponse {
+  reply: string;
+  usedModel: string;
+  intent: string;
+}
+
+export interface GeminiModelOption {
+  id: string;
+  label: string;
+  badge: string;
+}
+
+export const AVAILABLE_GEMINI_MODELS: GeminiModelOption[] = [
+  { id: 'gemini-2.5-flash',      label: 'Gemini 2.5 Flash (Recomendado — Rápido y Preciso)', badge: 'Recomendado' },
+  { id: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite (Ultra rápido / Alto volumen)', badge: 'Ultra Rápido' },
+  { id: 'gemini-2.5-pro',        label: 'Gemini 2.5 Pro (Máximo razonamiento)',              badge: 'Alta Capacidad' },
+  { id: 'gemini-2.0-flash',      label: 'Gemini 2.0 Flash (Estable generación previa)',      badge: 'Estable' },
+  { id: 'gemini-1.5-flash',      label: 'Gemini 1.5 Flash (Respaldo de emergencia)',         badge: 'Legacy' },
+];
+
+export const DEFAULT_BOT_RULES = `Sos Luisa, la anfitriona virtual de Eclisse Pizza Napoletana en Armenia, Quindío (Calle 2 norte #18-144). Solo atendemos domicilios y recogida en el local (no tenemos mesas en salón).
+
+ESTILO Y PERSONALIDAD:
+- Hablá con calidez, naturalidad colombiana/quindiana y agilidad de WhatsApp.
+- Mensajes cortos y directos (máximo 1 a 2 líneas por turno).
+- Usá emojis con moderación solo cuando aporten calidez (🍕, 😊, 📸).
+- No repitas información que ya diste en la conversación.
+- Si el cliente pide ver la carta, el menú o fotos, usá intent = "SEND_MENU" y respondé "Aquí está nuestra carta 🍕" (nunca envíes el menú completo en texto).
+
+FLUJO PARA TOMAR PEDIDOS (hacé UNA pregunta a la vez):
+1. Confirmá qué pizzas y bebidas desea pedir (cantidades y nombres del menú).
+2. Preguntá la dirección exacta de entrega en Armenia/alrededores, o si pasa a recoger al local.
+3. Preguntá el medio de pago: Efectivo o Nequi.
+   - Si elige Nequi, indicale el número Nequi oficial y pedile foto del comprobante 📸.
+4. Cuando tengas los 3 datos completos (productos, dirección/recogida y método de pago), emití intent = "CONFIRM_ORDER" (o "UPDATE_ORDER" si modifica un pedido activo) y confirmale el tiempo estimado (35-40 min domicilio, 20-25 min recogida).`;
+
+const LEGACY_PLACEHOLDER_PREFIX = 'Tu nombre es Luisa y eres la anfitriona virtual de Eclisse Pizza Napoletana. Tu tono es profesional pero muy acogedor';
+
+export function normalizeBotRules(rawPrompt?: string): string {
+  const clean = String(rawPrompt || '').trim();
+  if (!clean || clean.startsWith(LEGACY_PLACEHOLDER_PREFIX)) {
+    return DEFAULT_BOT_RULES;
+  }
+  return clean;
 }
 
 @Injectable({
@@ -22,173 +76,261 @@ export class AIOrchestratorService {
   private http = inject(HttpClient);
   private sb = inject(SupabaseService);
   private dataService = inject(DataService);
+  private toast = inject(ToastService);
 
-  // Default configuration (using the order you suggested)
+  // Configuración sincronizada con api/_lib/gemini.js y api/_lib/menu.js
   config = signal<AIConfig>({
-    primaryModel: 'gemini-1.5-flash',
-    secondaryModel: 'gemini-2.0-flash-exp', // Using experimental/latest for your "3.0" reference
-    tertiaryModel: 'gemini-1.5-pro',
-    systemPrompt: 'Tu nombre es Luisa y eres la anfitriona virtual de Eclisse Pizza Napoletana. Tu tono es profesional pero muy acogedor y sofisticado. Tu objetivo es guiar a los clientes a través de nuestra carta artesanal, ayudarles con sus pedidos y transmitir la pasión por la pizza auténtica. Siempre respondes con cortesía y usas un lenguaje que refleja la calidad premium de Eclisse.',
+    primaryModel: 'gemini-2.5-flash',
+    secondaryModel: 'gemini-2.5-flash-lite',
+    tertiaryModel: 'gemini-2.5-pro',
+    systemPrompt: DEFAULT_BOT_RULES,
     antiBlockDelay: 2000,
     geminiApiKey: '',
-    menuImageUrl: environment.menuImageUrl
+    menuImageUrl: environment.menuImageUrl,
+    openHour: 17,
+    closeHour: 23,
+    armeniaFee: 6000,
+    outskirtsFee: 10000,
+    nequiPhone: '3223119008',
+    whatsappOrderPhone: '573004057195',
   });
 
-  private get geminiApiKey() { return this.config().geminiApiKey; }
+  /**
+   * Construye exactamente el mismo System Prompt autoritativo que usa el backend (api/_lib/gemini.js)
+   * colocando las reglas editadas por el administrador como directriz principal.
+   */
+  buildFullSystemPrompt(overrideConfig?: Partial<AIConfig>): string {
+    const cfg = { ...this.config(), ...(overrideConfig || {}) };
+    const openH = Number.isFinite(Number(cfg.openHour)) ? Number(cfg.openHour) : 17;
+    const closeH = Number.isFinite(Number(cfg.closeHour)) ? Number(cfg.closeHour) : 23;
+    const armeniaFee = Number.isFinite(Number(cfg.armeniaFee)) ? Number(cfg.armeniaFee) : 6000;
+    const outskirtsFee = Number.isFinite(Number(cfg.outskirtsFee)) ? Number(cfg.outskirtsFee) : 10000;
+    const nequiPhone = cfg.nequiPhone || '3223119008';
 
-  private buildFullSystemPrompt(): string {
-    const basePrompt = this.config().systemPrompt;
-    const menuImage = this.config().menuImageUrl || environment.menuImageUrl;
-    const now = new Date();
-    const currentDate = now.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const currentHour = now.getHours();
-    const currentMinutes = now.getMinutes();
+    const formatHour12 = (h: number) => {
+      if (h === 0) return '12 AM';
+      if (h < 12) return `${h} AM`;
+      if (h === 12) return '12 PM';
+      return `${h - 12} PM`;
+    };
+    const openLabel = formatHour12(openH);
+    const closeLabel = formatHour12(closeH);
 
-    let timeStatus = '';
-    if (currentHour < 12) {
-      timeStatus = `\n⚠️ ESTADO ACTUAL: PRE-APERTURA (Son las ${currentHour}:${currentMinutes < 10 ? '0' : ''}${currentMinutes} AM). Atiende amablemente y aclara que nuestro horno abre a las 12:00 PM, pero puedes tomar el pedido de forma anticipada.`;
-    } else if (currentHour >= 22) {
-      timeStatus = `\n⚠️ ESTADO ACTUAL: CERRADO (Son las ${currentHour}:${currentMinutes < 10 ? '0' : ''}${currentMinutes}). Ya cerramos por hoy. Dile amablemente al cliente que abrimos de nuevo mañana a las 12:00 PM.`;
-    } else if (currentHour >= 21.5) {
-      timeStatus = `\n⚠️ ESTADO ACTUAL: ÚLTIMAS ÓRDENES / SOLO RECOGER. No hay domicilios disponibles a esta hora, solo para recoger en el local.`;
+    const bogotaHour = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' })).getHours();
+    let timeNote = '';
+    if (bogotaHour < openH) {
+      timeNote = `\nNOTA HORARIA ACTUAL: Aún no abrimos (abrimos a las ${openLabel}). Podés tomar el pedido anticipado desde ya.`;
     }
 
     const menuItems = this.dataService.menuItems().filter(i => i.available);
-    let catalogText = 'Actualmente no hay productos registrados.';
-    if (menuItems.length > 0) {
-      catalogText = menuItems.map(item => {
-        const priceFormatted = item.price.toLocaleString('es-CO');
-        const ingr = item.ingredients && item.ingredients.length > 0 ? ` (Ingredientes: ${item.ingredients.join(', ')})` : '';
-        return `• ${item.name} - $${priceFormatted} COP [Categoría: ${item.category}]: ${item.description}${ingr}`;
-      }).join('\n');
+    const catalog = menuItems
+      .map(i => {
+        const desc = i.description ? ` (${i.description})` : '';
+        return `• [id: "${i.id}"] ${i.name} — $${Number(i.price || 0).toLocaleString('es-CO')}${desc}`;
+      })
+      .join('\n');
+
+    const activeRules = normalizeBotRules(cfg.systemPrompt);
+
+    return `=== REGLAS PRINCIPALES Y PERSONALIDAD DE LUISA (CONFIGURADAS EN EL ADMIN) ===
+${activeRules}
+${timeNote}
+
+=== PARÁMETROS OPERATIVOS DEL NEGOCIO (AUTORITATIVOS) ===
+- Ubicación: Armenia, Quindío — Calle 2 norte #18-144 (solo domicilios y recogida en local).
+- Horario de atención: ${openLabel} a ${closeLabel} todos los días.
+- Tarifas de domicilio:
+  * "ARMENIA" (barrios dentro de Armenia): $${armeniaFee.toLocaleString('es-CO')}
+  * "OUTSKIRTS" (afueras/alrededores como Circasia, Calarcá, El Caimo, Club Campestre): $${outskirtsFee.toLocaleString('es-CO')}
+  * "PICKUP" (recoge en el local Calle 2 norte #18-144): $0 (gratis)
+- Medios de pago: Efectivo o transferencia Nequi al número ${nequiPhone}.
+
+=== MENÚ OFICIAL DISPONIBLE HOY (USA ESTOS menuItemId Y NOMBRES EXACTOS) ===
+${catalog}
+
+=== CONTRATO TÉCNICO DE RESPUESTA (OBLIGATORIO PARA EL SERVIDOR) ===
+- Respondé siempre con el JSON estructurado requerido por el esquema (intent, reply, order).
+- En "reply" escribí únicamente el mensaje para el cliente en WhatsApp (NUNCA incluyas bloques técnicos como PEDIDO_CONFIRMADO ni JSON crudo dentro de "reply").
+- Si el cliente pide ver la carta o el menú, usá intent = "SEND_MENU".
+- Mientras estés conversando o faltan datos del pedido, usá intent = "CHAT" y order = null.
+- Cuando el cliente confirme productos, dirección/recogida y método de pago, usá intent = "CONFIRM_ORDER" (o "UPDATE_ORDER" si modifica un pedido activo) y completá el objeto "order" con los menuItemId de la carta. El servidor calculará y adjuntará el recibo con el total exacto automáticamente.`.trim();
+  }
+
+  async generatePlaygroundTurn(
+    userMessage: string,
+    history: { role: 'user' | 'model'; text: string }[] = [],
+    overrideConfig?: Partial<AIConfig>
+  ): Promise<PlaygroundTurnResponse> {
+    const activeCfg: AIConfig = {
+      ...this.config(),
+      ...(overrideConfig || {}),
+      systemPrompt: normalizeBotRules(overrideConfig?.systemPrompt ?? this.config().systemPrompt),
+    };
+
+    // 1. Intentar primero el endpoint backend (/api?action=playground) que ejecuta
+    // exactamente el mismo contrato Zod + cálculo de pedido del servidor
+    try {
+      const { data: { session } } = await this.sb.client.auth.getSession();
+      const token = session?.access_token;
+      if (token) {
+        const headers = new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        });
+        const res: any = await firstValueFrom(
+          this.http.post('/api?action=playground', {
+            action: 'playground',
+            message: userMessage,
+            history,
+            config: activeCfg,
+          }, { headers })
+        );
+        if (res?.reply) {
+          return {
+            reply: res.reply,
+            usedModel: res.usedModel || activeCfg.primaryModel,
+            intent: res.intent || 'CHAT',
+          };
+        }
+      }
+    } catch {
+      // Si se está ejecutando ng serve local sin funciones serverless, usar fallback directo si hay key
     }
 
-    return `
-REGLA DE ORO ANTI-SPAM DE WHATSAPP:
-- NUNCA RESPONDAS EXACTAMENTE IGUAL A DOS CLIENTES SEGUIDOS.
-- VARÍA SIEMPRE LA ESTRUCTURA, EL TONO, LAS PALABRAS Y EL USO DE EMOJIS.
-- Ejemplos de variaciones (Inspírate en ellos, NO los copies al pie de la letra):
-  * Estilo directo: "¡Hola! Con gusto te tomo el pedido. ¿A qué dirección lo enviamos?"
-  * Estilo acogedor: "¡Buenas tardes! 🍕 Qué gusto saludarte. ¿Qué pizza se te antoja hoy?"
-  * Estilo breve: "Dale, perfecto. ¿Me confirmas tu nombre y barrio en Armenia?"
-  * Estilo explicativo: "Con todo gusto. Te confirmo que el domicilio dentro de Armenia es de $6.000 COP."
+    // 2. Fallback directo (desarrollo local con API key configurada en el panel)
+    if (!activeCfg.geminiApiKey) {
+      throw new Error('No se pudo conectar con /api?action=playground y no hay Gemini API Key local configurada en el panel.');
+    }
 
-INFORMACIÓN DEL RESTAURANTE Y CONCEPTO:
-- Nombre: Eclisse Pizza Napoletana (Artesanal y de Fuego)
-- Modelo de Negocio: COCINA OCULTA (Dark Kitchen). No atendemos mesas en el sitio ni contamos con salón comedor.
-- Dirección Única de Recogida: Calle 2 norte #18-144, Armenia, Quindío.
-- Si el cliente pregunta dónde están ubicados o desea RECOGER su pedido en persona, aclárale amablemente que somos una cocina oculta y dale la dirección exacta: Calle 2 norte #18-144, Armenia.
-- Ubicación General: Armenia, Quindío
-- Fecha y Hora Actual: ${currentDate} (${currentHour}:${currentMinutes < 10 ? '0' : ''}${currentMinutes}) ${timeStatus}
-
-IMAGEN DE LA CARTA / MENÚ DIGITAL:
-- Enlace de la Carta/Menú: ${menuImage}
-- Si el cliente solicita el menú, la carta o fotos de las pizzas (intent "send_menu" o texto pidiendo el menú), incluye o comparte el enlace de la carta (${menuImage}) con una frase acogedora.
-
-TARIFAS DE DOMICILIO (ARMENIA, QUINDÍO):
-- Domicilio estándar a cualquier barrio dentro de Armenia: $6.000 COP.
-- Afueras o Alrededores de Armenia (ej. Circasia, Calarcá, Tébaras, El Caimo, Club Campestre): $8.000 - $12.000 COP.
-- Recoger en el local (Calle 2 norte #18-144): $0 (Gratis).
-
-MÉTODOS DE PAGO Y TRANSFERENCIA:
-- Aceptamos Efectivo (Contraentrega) y Nequi / Bancolombia / Transferencia.
-- Datos de Nequi: Nequi al 3223119008 o Llave Nequi @3223119008.
-- Para pagos por Transferencia/Nequi: Solicita siempre la foto del comprobante de pago ANTES de confirmar la orden.
-- Revisa en el comprobante que la fecha sea de hoy y el valor coincida con el total.
-
-NOTAS Y OBSERVACIONES DE CLIENTES PARA COCINA:
-- Si el cliente solicita cualquier cambio o especificación (ej: "Sin cebolla", "Masa bien tostada", "Salsa aparte", "Pide cubiertos o vasos"), DEBES registrarlo en el campo 'notes' de la orden o de los ítems. Este dato irá directo al Monitor de Cocina.
-
-INVENTARIO Y CARTA VIGENTE EN TIEMPO REAL:
-${catalogText}
-
-${basePrompt}
-
-FORMATO DE SALIDA (ESTRICTO JSON):
-Si el cliente solo está saludando o preguntando, puedes responder con JSON simple:
-{
-  "intent": "chat" | "order" | "send_menu",
-  "replyText": "Tu respuesta amable y única aquí."
-}
-
-Si el cliente está realizando o confirmando un pedido, incluye el objeto 'orderData':
-{
-  "intent": "chat" | "order",
-  "replyText": "Respuesta al cliente confirmando o solicitando datos.",
-  "orderData": {
-    "customerName": "Nombre del cliente",
-    "customerAddress": "Dirección completa y barrio en Armenia",
-    "customerPhone": "Teléfono",
-    "paymentMethod": "CASH" | "TRANSFER",
-    "deliveryFee": 6000,
-    "notes": "Notas generales para cocina (ej: Sin cebolla, extra servilletas)",
-    "items": [
-      { "productName": "Nombre exacto de la pizza o producto", "quantity": 1, "notes": "Notas del producto" }
-    ]
-  }
-}
-`;
-  }
-
-  async generateResponse(userMessage: string): Promise<string> {
     const models = [
-      this.config().primaryModel,
-      this.config().secondaryModel,
-      this.config().tertiaryModel
-    ];
+      activeCfg.primaryModel,
+      activeCfg.secondaryModel,
+      activeCfg.tertiaryModel,
+    ].filter(Boolean);
 
+    const errors: string[] = [];
     for (const model of models) {
       try {
-        const response = await this.callGemini(model, userMessage);
-        return response;
-      } catch (error) {
-        // Fallback to next model if current one fails
-        continue; 
+        const localResult = await this.callGeminiLocalFallback(model, userMessage, history, activeCfg);
+        return {
+          reply: localResult.reply,
+          usedModel: model,
+          intent: localResult.intent,
+        };
+      } catch (err: any) {
+        errors.push(`${model}: ${err?.message || 'Error'}`);
+        continue;
       }
     }
 
-    throw new Error('Todos los modelos de IA están saturados en este momento.');
+    throw new Error(`Todos los modelos fallaron (${errors.join(' | ')}). Verificá tu API Key o los modelos seleccionados.`);
   }
 
-  private async callGemini(model: string, prompt: string): Promise<string> {
-    // Implementación real de la llamada a Gemini API
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.geminiApiKey}`;
-    
-    const fullSystemPrompt = this.buildFullSystemPrompt();
+  async generateResponse(
+    userMessage: string,
+    history: { role: 'user' | 'model'; text: string }[] = []
+  ): Promise<string> {
+    const turn = await this.generatePlaygroundTurn(userMessage, history);
+    return turn.reply;
+  }
+
+  private async callGeminiLocalFallback(
+    model: string,
+    prompt: string,
+    history: { role: 'user' | 'model'; text: string }[],
+    activeCfg: AIConfig
+  ): Promise<{ reply: string; intent: string }> {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeCfg.geminiApiKey}`;
+    const fullSystemPrompt = this.buildFullSystemPrompt(activeCfg);
+
+    const contents = [
+      ...history.map(h => ({ role: h.role, parts: [{ text: h.text }] })),
+      { role: 'user', parts: [{ text: prompt }] },
+    ];
 
     const body = {
-      contents: [{
-        parts: [{ text: `${fullSystemPrompt}\n\nCliente: ${prompt}` }]
-      }]
+      system_instruction: { parts: [{ text: fullSystemPrompt }] },
+      contents,
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 500,
+        responseMimeType: 'application/json',
+      },
     };
 
     const res: any = await firstValueFrom(this.http.post(url, body));
-    
-    if (res.candidates && res.candidates[0].content.parts[0].text) {
-      return res.candidates[0].content.parts[0].text;
+    const rawText = res?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) {
+      throw new Error('Respuesta vacía de Gemini');
     }
-    
-    throw new Error('Invalid response from Gemini');
+
+    try {
+      const parsed = JSON.parse(rawText.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim());
+      return {
+        reply: parsed.reply || parsed.replyText || rawText,
+        intent: parsed.intent || 'CHAT',
+      };
+    } catch {
+      return { reply: rawText, intent: 'CHAT' };
+    }
   }
 
-  async saveConfig(newConfig: AIConfig) {
-    this.config.set(newConfig);
-    localStorage.setItem('bot_ai_config', JSON.stringify(newConfig));
+  async saveConfig(newConfig: AIConfig): Promise<boolean> {
+    const normalizedPrompt = normalizeBotRules(newConfig.systemPrompt);
+    const merged: AIConfig = {
+      ...this.config(),
+      ...newConfig,
+      systemPrompt: normalizedPrompt,
+      deliveryGroupNumber: newConfig.deliveryGroupNumber ?? this.dataService.businessConfig().deliveryGroupNumber,
+    };
+    this.config.set(merged);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('bot_ai_config', JSON.stringify(merged));
+    }
+
+    this.dataService.businessConfig.update(curr => ({
+      openHour:            Number.isFinite(Number(merged.openHour))     ? Number(merged.openHour)     : curr.openHour,
+      closeHour:           Number.isFinite(Number(merged.closeHour))    ? Number(merged.closeHour)    : curr.closeHour,
+      armeniaFee:          Number.isFinite(Number(merged.armeniaFee))   ? Number(merged.armeniaFee)   : curr.armeniaFee,
+      outskirtsFee:        Number.isFinite(Number(merged.outskirtsFee)) ? Number(merged.outskirtsFee) : curr.outskirtsFee,
+      whatsappOrderPhone:  merged.whatsappOrderPhone  || curr.whatsappOrderPhone,
+      nequiPhone:          merged.nequiPhone          || curr.nequiPhone,
+      deliveryGroupNumber: merged.deliveryGroupNumber ?? curr.deliveryGroupNumber,
+    }));
+
     try {
-      await this.sb.client.from('rappi_config').upsert({
+      const { error } = await this.sb.client.from('rappi_config').upsert({
         id: 'bot_config',
         connected: true,
-        api_key: JSON.stringify(newConfig)
+        api_key: JSON.stringify(merged),
       });
+      if (error) {
+        this.toast.showError('Error al guardar configuración en Supabase: ' + error.message);
+        return false;
+      }
+      await this.dataService.invalidateMenuCache();
+      this.toast.showSuccess('Reglas de Luisa, horarios y modelos guardados y activos en WhatsApp');
+      return true;
     } catch (e) {
       console.error('Error saving bot config to Supabase:', e);
+      this.toast.showError('No se pudo guardar la configuración en la base de datos.');
+      return false;
     }
   }
 
-  async loadConfig() {
-    const saved = localStorage.getItem('bot_ai_config');
-    if (saved) {
-      this.config.set(JSON.parse(saved));
+  async loadConfig(): Promise<AIConfig> {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('bot_ai_config');
+      if (saved) {
+        try {
+          const parsedLocal = JSON.parse(saved) as AIConfig;
+          this.config.set({
+            ...this.config(),
+            ...parsedLocal,
+            systemPrompt: normalizeBotRules(parsedLocal.systemPrompt),
+          });
+        } catch {}
+      }
     }
     try {
       const { data } = await this.sb.client
@@ -196,14 +338,26 @@ Si el cliente está realizando o confirmando un pedido, incluye el objeto 'order
         .select('*')
         .eq('id', 'bot_config')
         .maybeSingle();
-      
+
       if (data && data.api_key) {
         const parsed = JSON.parse(data.api_key) as AIConfig;
-        this.config.set(parsed);
-        localStorage.setItem('bot_ai_config', JSON.stringify(parsed));
+        const validIds = AVAILABLE_GEMINI_MODELS.map(m => m.id);
+        const next: AIConfig = {
+          ...this.config(),
+          ...parsed,
+          primaryModel:   validIds.includes(parsed.primaryModel)   ? parsed.primaryModel   : 'gemini-2.5-flash',
+          secondaryModel: validIds.includes(parsed.secondaryModel) ? parsed.secondaryModel : 'gemini-2.5-flash-lite',
+          tertiaryModel:  validIds.includes(parsed.tertiaryModel)  ? parsed.tertiaryModel  : 'gemini-2.5-pro',
+          systemPrompt:   normalizeBotRules(parsed.systemPrompt),
+        };
+        this.config.set(next);
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('bot_ai_config', JSON.stringify(next));
+        }
       }
     } catch (e) {
       console.warn('Could not load bot config from Supabase, using local instead:', e);
     }
+    return this.config();
   }
 }

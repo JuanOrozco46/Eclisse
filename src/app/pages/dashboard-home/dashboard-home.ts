@@ -2,7 +2,7 @@ import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../services/data.service';
+import { DataService, getBogotaDateString } from '../../services/data.service';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -28,7 +28,7 @@ export class DashboardHome {
 
   // Date filter
   selectedFilter = signal<'hoy' | 'ayer' | 'semana'>('hoy');
-  currentDate = new Date().toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  currentDate = new Date().toLocaleDateString('es-CO', { timeZone: 'America/Bogota', day: '2-digit', month: '2-digit', year: 'numeric' });
 
   // Quick expense modal
   showExpenseModal = signal(false);
@@ -68,13 +68,13 @@ export class DashboardHome {
         amount: this.newExpense.amount,
         method: 'Efectivo',
         description: this.newExpense.description,
-        date: new Date().toISOString().split('T')[0],
+        date: getBogotaDateString(),
       });
       this.closeExpenseModal();
     }
   }
 
-  viewStatDetail(stat: string) {
+  viewStatDetail(_stat: string) {
     // Could navigate to detail view
   }
 }

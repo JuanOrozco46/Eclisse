@@ -7,7 +7,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pcmcfhhbpmbrrxpuodoh.supabase.co https://images.unsplash.com https://eclisse.vercel.app https://assets.mixkit.co; connect-src 'self' https://pcmcfhhbpmbrrxpuodoh.supabase.co wss://realtime.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://elhornobotprueba1.onrender.com; media-src 'self' https://assets.mixkit.co;"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://pcmcfhhbpmbrrxpuodoh.supabase.co https://images.unsplash.com https://eclisse.vercel.app https://assets.mixkit.co; connect-src 'self' https://pcmcfhhbpmbrrxpuodoh.supabase.co wss://realtime.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com; media-src 'self' https://assets.mixkit.co;"
         },
         {
           "key": "X-Content-Type-Options",
@@ -25,7 +25,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/evolution/:path*", "destination": "https://elhornobotprueba1.onrender.com/:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

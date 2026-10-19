@@ -1,14 +1,16 @@
 {
-  "name": "web-app",
+  "name": "eclisse",
   "version": "0.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start-bot": "node bot-server.js",
+    "start-bot": "node scripts/bot-server.js",
     "build:tailwind": "postcss src/tailwind.css -o src/tailwind.compiled.css",
     "build": "npm run build:tailwind && ng build && node fix-css-loading.js",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src api tests"
   },
   "private": true,
   "packageManager": "npm@11.6.2",
@@ -23,18 +25,24 @@
     "express": "^4.21.2",
     "pg": "^8.23.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@angular/build": "^21.2.11",
     "@angular/cli": "^21.2.11",
     "@angular/compiler-cli": "^21.2.0",
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.3.0",
     "autoprefixer": "^10.5.0",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
     "postcss": "^8.5.15",
     "postcss-cli": "^11.0.1",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.3.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^4.1.11"
   }
 }

@@ -1,12 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-floating-wa',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed bottom-10 right-10 z-[100] flex flex-col items-end gap-4 pointer-events-none">
+    <div *ngIf="!data.showPublicCart()"
+         class="fixed right-6 md:right-10 z-[85] flex flex-col items-end gap-4 pointer-events-none transition-all duration-300"
+         [ngClass]="data.cartCount() > 0 ? 'bottom-28' : 'bottom-8'">
       <!-- Tooltip / Label -->
       <div 
         class="bg-white px-6 py-3 rounded-full shadow-brutal translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-auto cursor-pointer"
@@ -18,10 +21,11 @@ import { CommonModule } from '@angular/common';
 
       <!-- Main Button -->
       <a 
-        href="https://wa.me/573004057195" 
+        [href]="waLink()" 
         target="_blank"
         (mouseenter)="showLabel = true"
         (mouseleave)="showLabel = false"
+        aria-label="Hablar con Luisa por WhatsApp"
         class="w-16 h-16 bg-emerald rounded-full shadow-brutal-gold flex items-center justify-center pointer-events-auto transition-all hover:scale-110 active:scale-95 group relative no-underline"
       >
         <!-- Pulse effect -->
@@ -49,5 +53,11 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class FloatingWA {
+  data = inject(DataService);
   showLabel = false;
+
+  waLink = computed(() => {
+    const phone = (this.data.businessConfig().whatsappOrderPhone || '573004057195').replace(/\D/g, '');
+    return `https://wa.me/${phone}`;
+  });
 }

@@ -2,8 +2,22 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EvolutionService } from '../../services/evolution.service';
-import { AIOrchestratorService } from '../../services/ai-orchestrator.service';
-import { DataService, RappiConfig } from '../../services/data.service';
+import {
+  AIOrchestratorService,
+  AIConfig,
+  AVAILABLE_GEMINI_MODELS,
+  DEFAULT_BOT_RULES,
+} from '../../services/ai-orchestrator.service';
+import { DataService } from '../../services/data.service';
+import { ToastService } from '../../services/toast.service';
+
+interface PlaygroundMessage {
+  sender: 'user' | 'bot';
+  text: string;
+  time: string;
+  usedModel?: string;
+  intent?: string;
+}
 
 @Component({
   selector: 'app-dashboard-evolution',
@@ -16,32 +30,131 @@ export class DashboardEvolution implements OnInit {
   private evolution = inject(EvolutionService);
   private aiOrchestrator = inject(AIOrchestratorService);
   private dataService = inject(DataService);
-  
+  private toast = inject(ToastService);
+
   instance = this.evolution.instanceStatus;
   loading = this.evolution.loading;
   error = this.evolution.error;
+  botEvents = this.dataService.botEvents;
 
-  // AI Configuration
+  // Modelos oficiales válidos de Gemini
+  availableModels = AVAILABLE_GEMINI_MODELS;
+
+  // Estado reactivo del formulario unificado (sincronizado con Supabase)
   aiConfig = this.aiOrchestrator.config;
-  showAiSettings = false;
+  form: AIConfig = { ...this.aiOrchestrator.config() };
 
-  // Rappi integration
-  rappiConfig = this.dataService.rappiConfig;
-  showRappiWizard = false;
-  rappiWizardStep = signal(1); // 1=credentials, 2=webhook, 3=done
-  rappiForm = { storeId: '', apiKey: '', webhookSecret: '' };
-  rappiSaving = signal(false);
+  savingConfig = signal<boolean>(false);
+  showPromptPreview = false;
+  showApiKey = false;
 
   // AI Live Playground
   testMessageText = '';
   testLoading = signal<boolean>(false);
-  testMessages = signal<{ sender: 'user' | 'bot'; text: string; time: string }[]>([
-    { sender: 'bot', text: '¡Hola! Escribe un mensaje aquí para probar mis respuestas con la configuración actual.', time: 'Ahora' }
+  testMessages = signal<PlaygroundMessage[]>([
+    {
+      sender: 'bot',
+      text: '¡Hola! Soy Luisa 🍕 Escribime aquí para probar en vivo mis reglas, horarios, precios del menú y modelos de IA.',
+      time: 'Ahora',
+      usedModel: this.form.primaryModel,
+      intent: 'CHAT',
+    },
   ]);
+
+  async ngOnInit() {
+    this.evolution.checkStatus();
+    this.dataService.refreshBotEvents();
+    const loaded = await this.aiOrchestrator.loadConfig();
+    this.form = { ...loaded };
+  }
+
+  formatHourLabel(hour?: number): string {
+    const h = Number.isFinite(Number(hour)) ? Number(hour) : 17;
+    if (h === 0 || h === 24) return '12:00 AM';
+    if (h < 12) return `${h}:00 AM`;
+    if (h === 12) return '12:00 PM';
+    return `${h - 12}:00 PM`;
+  }
+
+  get fullSystemPromptPreview(): string {
+    return this.aiOrchestrator.buildFullSystemPrompt(this.form);
+  }
+
+  hasUnsavedChanges(): boolean {
+    const saved = this.aiConfig();
+    return (
+      this.form.systemPrompt.trim() !== (saved.systemPrompt || '').trim() ||
+      this.form.primaryModel !== saved.primaryModel ||
+      this.form.secondaryModel !== saved.secondaryModel ||
+      this.form.tertiaryModel !== saved.tertiaryModel ||
+      (this.form.geminiApiKey || '') !== (saved.geminiApiKey || '') ||
+      Number(this.form.openHour) !== Number(saved.openHour) ||
+      Number(this.form.closeHour) !== Number(saved.closeHour) ||
+      Number(this.form.armeniaFee) !== Number(saved.armeniaFee) ||
+      Number(this.form.outskirtsFee) !== Number(saved.outskirtsFee) ||
+      (this.form.nequiPhone || '').trim() !== (saved.nequiPhone || '').trim() ||
+      (this.form.whatsappOrderPhone || '').trim() !== (saved.whatsappOrderPhone || '').trim()
+    );
+  }
+
+  restoreDefaultRules() {
+    this.form.systemPrompt = DEFAULT_BOT_RULES;
+    this.toast.showInfo('Reglas base de Luisa cargadas en el editor. Pulsa Guardar para aplicarlas.');
+  }
+
+  async saveAllConfig() {
+    if (this.savingConfig()) return;
+    this.savingConfig.set(true);
+    try {
+      const cleanConfig: AIConfig = {
+        ...this.aiConfig(),
+        ...this.form,
+        primaryModel: this.form.primaryModel || 'gemini-2.5-flash',
+        secondaryModel: this.form.secondaryModel || 'gemini-2.5-flash-lite',
+        tertiaryModel: this.form.tertiaryModel || 'gemini-2.5-pro',
+        systemPrompt: this.form.systemPrompt,
+        geminiApiKey: (this.form.geminiApiKey || '').trim(),
+        openHour: Number.isFinite(Number(this.form.openHour)) ? Number(this.form.openHour) : 17,
+        closeHour: Number.isFinite(Number(this.form.closeHour)) ? Number(this.form.closeHour) : 23,
+        armeniaFee: Number.isFinite(Number(this.form.armeniaFee)) ? Number(this.form.armeniaFee) : 6000,
+        outskirtsFee: Number.isFinite(Number(this.form.outskirtsFee)) ? Number(this.form.outskirtsFee) : 10000,
+        nequiPhone: (this.form.nequiPhone || '3223119008').trim(),
+        whatsappOrderPhone: (this.form.whatsappOrderPhone || '573004057195').trim(),
+      };
+      await this.aiOrchestrator.saveConfig(cleanConfig);
+      this.form = { ...this.aiOrchestrator.config() };
+    } finally {
+      this.savingConfig.set(false);
+    }
+  }
+
+  sendQuickPrompt(promptText: string) {
+    this.testMessageText = promptText;
+    this.sendTestMessage();
+  }
+
+  clearPlayground() {
+    this.testMessages.set([
+      {
+        sender: 'bot',
+        text: 'Conversación reiniciada 🔄 Escribime para probar las reglas e instrucciones actuales de Luisa.',
+        time: 'Ahora',
+        usedModel: this.form.primaryModel,
+        intent: 'CHAT',
+      },
+    ]);
+  }
 
   async sendTestMessage() {
     const text = this.testMessageText.trim();
     if (!text || this.testLoading()) return;
+
+    const history = this.testMessages()
+      .slice(1) // omit initial greeting placeholder
+      .map(m => ({
+        role: (m.sender === 'user' ? 'user' : 'model') as 'user' | 'model',
+        text: m.text,
+      }));
 
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     this.testMessages.update(m => [...m, { sender: 'user', text, time }]);
@@ -49,92 +162,36 @@ export class DashboardEvolution implements OnInit {
     this.testLoading.set(true);
 
     try {
-      const response = await this.aiOrchestrator.generateResponse(text);
+      const turn = await this.aiOrchestrator.generatePlaygroundTurn(text, history, this.form);
       const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      this.testMessages.update(m => [...m, { sender: 'bot', text: response, time: botTime }]);
+      this.testMessages.update(m => [
+        ...m,
+        {
+          sender: 'bot',
+          text: turn.reply,
+          time: botTime,
+          usedModel: turn.usedModel,
+          intent: turn.intent,
+        },
+      ]);
     } catch (err: any) {
       const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      this.testMessages.update(m => [...m, { sender: 'bot', text: `⚠️ Error: ${err.message || 'No se pudo conectar con la API. Verifica que la API Key esté colocada.'}`, time: botTime }]);
+      this.testMessages.update(m => [
+        ...m,
+        {
+          sender: 'bot',
+          text: `⚠️ Error: ${err.message || 'No se pudo conectar con la API. Verifica que la API Key esté configurada en Vercel o en el panel.'}`,
+          time: botTime,
+          intent: 'ERROR',
+        },
+      ]);
     } finally {
       this.testLoading.set(false);
     }
   }
 
-  recentLogs = [
-    { time: '19:42:01', event: 'Gemini 1.5 Flash', details: 'Respuesta generada exitosamente', status: 'Success' },
-    { time: '19:40:15', event: 'Gemini 2.0 Flash', details: 'Fallback activado por saturación', status: 'Warning' },
-    { time: '19:35:50', event: 'Ritual Bot', details: 'Prompt actualizado desde dashboard', status: 'Success' },
-    { time: '19:30:12', event: 'WhatsApp', details: 'Delay humano activado (2s)', status: 'Success' },
-  ];
-
-  ngOnInit() {
-    this.evolution.checkStatus();
-    this.aiOrchestrator.loadConfig();
-    // Pre-fill form if already configured
-    const existing = this.rappiConfig();
-    if (existing.storeId) {
-      this.rappiForm = { storeId: existing.storeId, apiKey: existing.apiKey, webhookSecret: existing.webhookSecret };
-    }
-  }
-
-  saveAiPrompt(prompt: string) {
-    this.aiOrchestrator.saveConfig({
-      ...this.aiConfig(),
-      systemPrompt: prompt
-    });
-  }
-
-  updateFallbackWithKey(p: string, s: string, t: string, key: string) {
-    this.aiOrchestrator.saveConfig({
-      ...this.aiConfig(),
-      primaryModel: p,
-      secondaryModel: s,
-      tertiaryModel: t,
-      geminiApiKey: key
-    });
-    this.showAiSettings = false;
-  }
-
-  // ── Rappi Wizard ──
-  openRappiWizard() {
-    this.rappiWizardStep.set(1);
-    this.showRappiWizard = true;
-  }
-
-  rappiNextStep() {
-    if (this.rappiWizardStep() < 3) {
-      this.rappiWizardStep.update(s => s + 1);
-    }
-  }
-
-  rappiPrevStep() {
-    if (this.rappiWizardStep() > 1) {
-      this.rappiWizardStep.update(s => s - 1);
-    }
-  }
-
-  connectRappi() {
-    if (!this.rappiForm.storeId || !this.rappiForm.apiKey) return;
-    this.rappiSaving.set(true);
-    // Simulate API validation delay
-    setTimeout(() => {
-      const config: RappiConfig = {
-        connected: true,
-        storeId: this.rappiForm.storeId,
-        apiKey: this.rappiForm.apiKey,
-        webhookSecret: this.rappiForm.webhookSecret,
-        connectedAt: new Date().toISOString()
-      };
-      this.dataService.saveRappiConfig(config);
-      this.rappiSaving.set(false);
-      this.rappiWizardStep.set(3);
-    }, 1500);
-  }
-
-  disconnectRappi() {
-    this.dataService.disconnectRappi();
-    this.rappiForm = { storeId: '', apiKey: '', webhookSecret: '' };
-    this.showRappiWizard = false;
+  refreshBotEvents() {
+    this.dataService.refreshBotEvents();
   }
 
   reconnect() {

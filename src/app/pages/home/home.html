@@ -1,140 +1,229 @@
-<div class="relative">
+<div class="relative pb-24">
     <app-hero [heroImage]="photos().hero_main"></app-hero>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- SECCIÓN 1: NUESTRAS PIZZAS                  -->
+    <!-- SECCIÓN 1: LA CARTA COMPLETA (PEDIDO DIRECTO)-->
     <!-- ═══════════════════════════════════════════ -->
-    <section id="carta" aria-label="Nuestras pizzas"
-             class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
-        <div class="absolute inset-0 texture-overlay opacity-20"></div>
+    <section id="carta" aria-label="La Carta de Eclisse"
+             class="w-full px-margin-mobile md:px-margin-desktop py-24 bg-surface-container-lowest relative overflow-hidden scroll-mt-20">
+        <div class="absolute inset-0 texture-overlay opacity-20 pointer-events-none"></div>
         <div class="max-w-7xl mx-auto relative z-10">
 
             <!-- Section Header -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-20">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-12 border-b border-outline-variant pb-10">
                 <div>
-                    <div class="flex items-center gap-4 mb-6">
+                    <div class="flex items-center gap-4 mb-4">
                         <span class="font-anton text-secondary text-xl">01</span>
                         <div class="h-px w-24 bg-outline-variant"></div>
+                        <span class="font-label-caps text-[10px] text-emerald tracking-widest uppercase">PIDE DIRECTO AQUÍ</span>
                     </div>
-                    <h2 class="font-anton text-7xl md:text-9xl text-white uppercase leading-none tracking-tighter">NUESTRAS<br/>PIZZAS</h2>
-                    <p class="font-label-caps text-[12px] text-secondary mt-6 tracking-[0.3em] uppercase">TAMAÑO MEDIANO · PRECIO ÚNICO</p>
+                    <h2 class="font-anton text-6xl md:text-8xl text-white uppercase leading-none tracking-tighter">LA CARTA</h2>
+                    <p class="font-label-caps text-[11px] text-secondary mt-4 tracking-[0.25em] uppercase">
+                        {{ photos().carta_subtitle }}
+                    </p>
                 </div>
-                <div class="flex flex-col items-end gap-2">
-                    <span class="font-label-caps text-[10px] text-stark-gray opacity-40 tracking-widest uppercase">TODAS A</span>
-                    <span class="font-anton text-7xl text-secondary">$25.000</span>
+
+                <!-- Category Filter Pills -->
+                <div class="flex flex-wrap gap-3">
+                    <button *ngFor="let cat of categories()"
+                            (click)="selectedCategory.set(cat)"
+                            class="px-5 py-3 font-anton text-sm uppercase tracking-widest border transition-all cursor-pointer"
+                            [ngClass]="selectedCategory() === cat
+                              ? 'bg-secondary text-on-secondary border-secondary shadow-brutal-gold'
+                              : 'bg-background text-stark-gray border-outline-variant hover:border-secondary hover:text-white'">
+                        {{ cat }}
+                    </button>
                 </div>
             </div>
 
-            <!-- Pizza Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-8">
-                <article *ngFor="let item of featuredItems()"
-                     class="group border border-outline-variant bg-background p-5 relative overflow-hidden hover:border-secondary transition-all duration-500">
-                    <div class="aspect-square mb-6 overflow-hidden border border-outline-variant relative bg-surface-container-low flex items-center justify-center">
-                        <img *ngIf="item.image" [src]="item.image"
-                             [alt]="item.name + ' — pizza napoletana artesanal Eclisse Armenia'"
-                             width="400" height="400"
-                             loading="lazy"
+            <!-- Featured Best Seller Banner (Shown when TODAS is selected) -->
+            <article *ngIf="selectedCategory() === 'TODAS' && bestSeller() as star"
+                     class="mb-14 border-2 border-secondary/60 bg-background p-6 md:p-10 relative overflow-hidden group hover:border-secondary transition-all duration-500 shadow-brutal">
+                <div class="absolute top-0 right-0 w-2 h-full flex flex-col">
+                    <div class="flex-1 bg-emerald"></div>
+                    <div class="flex-1 bg-white"></div>
+                    <div class="flex-1 bg-tomato"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+                    <div class="md:col-span-5 relative aspect-[4/3] bg-surface-container-low overflow-hidden border border-outline-variant flex items-center justify-center">
+                        <img *ngIf="star.image" [src]="star.image" [alt]="star.name"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
-                        <span *ngIf="!item.image" class="material-symbols-outlined text-stark-gray opacity-20 text-6xl" aria-hidden="true">restaurant</span>
+                        <span *ngIf="!star.image" class="material-symbols-outlined text-stark-gray opacity-15 text-8xl">local_pizza</span>
+                        <span class="absolute top-4 left-4 bg-secondary text-on-secondary px-4 py-1.5 font-anton text-xs tracking-widest uppercase shadow-brutal-gold">
+                            ★ RECOMENDADA DEL CHEF 🔥
+                        </span>
                     </div>
-                    <h3 class="font-anton text-3xl text-white uppercase tracking-tighter mb-2 group-hover:text-secondary transition-colors">{{item.name}}</h3>
-                    <p class="font-hanken text-[12px] text-stark-gray opacity-50 leading-relaxed mb-4">{{item.description}}</p>
-                    <div class="flex justify-between items-center pt-4 border-t border-outline-variant">
-                        <span class="font-anton text-xl text-secondary">${{item.price.toLocaleString('es-CO')}}</span>
-                        <button (click)="addToCart(item)"
-                                [attr.aria-label]="'Agregar ' + item.name + ' al carrito'"
-                                class="text-secondary hover:scale-110 transition-transform">
-                            <span class="material-symbols-outlined text-2xl" aria-hidden="true">add_shopping_cart</span>
+                    <div class="md:col-span-7 flex flex-col justify-between">
+                        <div>
+                            <span class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">{{ star.category }}</span>
+                            <h3 class="font-anton text-5xl md:text-6xl text-white uppercase tracking-tighter mt-1 mb-4">{{ star.name }}</h3>
+                            <p class="font-hanken text-base md:text-lg text-stark-gray opacity-80 leading-relaxed mb-5">{{ star.description }}</p>
+
+                            <div *ngIf="star.ingredients && star.ingredients.length > 0" class="flex flex-wrap gap-2 mb-6">
+                                <span *ngFor="let ing of star.ingredients"
+                                      class="font-label-caps text-[9px] text-stark-gray border border-outline-variant px-2.5 py-1 uppercase tracking-widest bg-surface-container-low">
+                                    {{ ing }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-6 pt-6 border-t border-outline-variant">
+                            <div class="flex flex-col">
+                                <span class="font-label-caps text-[9px] text-stark-gray opacity-40 uppercase tracking-widest">PRECIO</span>
+                                <span class="font-anton text-4xl md:text-5xl text-secondary">${{ star.price.toLocaleString('es-CO') }}</span>
+                            </div>
+
+                            <!-- Add or Quantity Control -->
+                            <button *ngIf="getItemQty(star.id) === 0"
+                                    (click)="addToCart(star)"
+                                    class="bg-secondary text-on-secondary font-anton px-8 py-4 text-lg tracking-widest uppercase hover:bg-white hover:text-black transition-all shadow-brutal-gold flex items-center gap-3 cursor-pointer">
+                                <span class="material-symbols-outlined">add_shopping_cart</span>
+                                AGREGAR AL PEDIDO
+                            </button>
+
+                            <div *ngIf="getItemQty(star.id) > 0"
+                                 class="flex items-center gap-4 bg-surface-container-low border-2 border-secondary px-4 py-2">
+                                <button (click)="updateQty(star.id, -1)"
+                                        class="w-10 h-10 font-anton text-2xl text-white hover:text-secondary cursor-pointer">−</button>
+                                <span class="font-anton text-2xl text-secondary min-w-[2ch] text-center">{{ getItemQty(star.id) }}</span>
+                                <button (click)="updateQty(star.id, 1)"
+                                        class="w-10 h-10 font-anton text-2xl text-white hover:text-secondary cursor-pointer">+</button>
+                                <button (click)="openCart()"
+                                        class="ml-2 bg-emerald text-black font-anton text-xs px-4 py-2.5 uppercase tracking-widest hover:brightness-110 cursor-pointer">
+                                    VER CARRITO →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Full Menu Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <article *ngFor="let item of filteredMenuItems()"
+                     class="group border bg-background p-6 relative overflow-hidden transition-all duration-300 flex flex-col justify-between"
+                     [ngClass]="getItemQty(item.id) > 0
+                       ? 'border-2 border-secondary shadow-brutal-gold'
+                       : 'border-outline-variant hover:border-secondary'">
+
+                    <!-- Top Badge if in cart -->
+                    <div *ngIf="getItemQty(item.id) > 0"
+                         class="absolute top-4 right-4 z-20 bg-secondary text-on-secondary font-anton text-xs px-3 py-1 uppercase tracking-widest">
+                        EN TU PEDIDO: {{ getItemQty(item.id) }}
+                    </div>
+
+                    <div>
+                        <div class="aspect-[4/3] mb-5 overflow-hidden border border-outline-variant relative bg-surface-container-low flex items-center justify-center">
+                            <img *ngIf="item.image" [src]="item.image"
+                                 [alt]="item.name + ' — Eclisse Armenia'"
+                                 width="400" height="300"
+                                 loading="lazy"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                            <span *ngIf="!item.image" class="material-symbols-outlined text-stark-gray opacity-20 text-6xl" aria-hidden="true">
+                                {{ item.category === 'Bebidas' ? 'local_drink' : 'local_pizza' }}
+                            </span>
+                            <span class="absolute bottom-2 left-2 bg-background/90 border border-outline-variant px-2.5 py-0.5 font-label-caps text-[8px] text-secondary uppercase tracking-widest">
+                                {{ item.category }}
+                            </span>
+                        </div>
+
+                        <h3 class="font-anton text-3xl text-white uppercase tracking-tighter mb-2 group-hover:text-secondary transition-colors">
+                            {{ item.name }}
+                        </h3>
+                        <p class="font-hanken text-sm text-stark-gray opacity-70 leading-relaxed mb-4">
+                            {{ item.description }}
+                        </p>
+
+                        <div *ngIf="item.ingredients && item.ingredients.length > 0" class="flex flex-wrap gap-1.5 mb-5">
+                            <span *ngFor="let ing of item.ingredients"
+                                  class="font-label-caps text-[8px] text-stark-gray/80 border border-outline-variant/60 px-2 py-0.5 uppercase tracking-wider">
+                                {{ ing }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4 border-t border-outline-variant mt-2">
+                        <span class="font-anton text-2xl text-secondary">${{ item.price.toLocaleString('es-CO') }}</span>
+
+                        <!-- Add Button -->
+                        <button *ngIf="getItemQty(item.id) === 0"
+                                (click)="addToCart(item)"
+                                [attr.aria-label]="'Agregar ' + item.name + ' al pedido'"
+                                class="border-2 border-secondary text-secondary hover:bg-secondary hover:text-on-secondary font-anton text-sm px-5 py-2.5 uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer">
+                            <span class="material-symbols-outlined text-lg" aria-hidden="true">add_shopping_cart</span>
+                            AGREGAR
                         </button>
+
+                        <!-- Inline Quantity Stepper -->
+                        <div *ngIf="getItemQty(item.id) > 0"
+                             class="flex items-center gap-3 bg-surface-container-low border border-secondary px-3 py-1.5">
+                            <button (click)="updateQty(item.id, -1)"
+                                    class="w-7 h-7 font-anton text-lg text-white hover:text-secondary cursor-pointer">−</button>
+                            <span class="font-anton text-lg text-secondary min-w-[1.5ch] text-center">{{ getItemQty(item.id) }}</span>
+                            <button (click)="updateQty(item.id, 1)"
+                                    class="w-7 h-7 font-anton text-lg text-white hover:text-secondary cursor-pointer">+</button>
+                        </div>
                     </div>
                 </article>
 
                 <!-- Empty State -->
-                <div *ngIf="featuredItems().length === 0" class="col-span-full py-20 border border-outline-variant border-dashed flex flex-col items-center" role="status" aria-label="Cargando carta">
+                <div *ngIf="filteredMenuItems().length === 0" class="col-span-full py-20 border border-outline-variant border-dashed flex flex-col items-center" role="status">
                     <span class="material-symbols-outlined text-stark-gray opacity-20 text-6xl mb-4" aria-hidden="true">restaurant</span>
                     <p class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest">ACTUALIZANDO CARTA...</p>
                 </div>
-            </div>
-
-            <!-- CTAs -->
-            <div class="mt-20 flex flex-col sm:flex-row gap-6 items-center justify-center">
-                <a routerLink="/menu" class="inline-block border-2 border-secondary text-secondary font-anton text-2xl px-16 py-6 uppercase tracking-widest hover:bg-secondary hover:text-on-secondary transition-all shadow-brutal-gold hover:shadow-none no-underline">
-                    VER CARTA COMPLETA
-                </a>
-                <a href="https://wa.me/573004057195" target="_blank" class="inline-block border-2 border-emerald text-emerald font-anton text-2xl px-16 py-6 uppercase tracking-widest hover:bg-emerald hover:text-on-secondary transition-all no-underline">
-                    💬 PEDIR POR WHATSAPP
-                </a>
             </div>
         </div>
     </section>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- SECCIÓN 2: CÓMO PEDIR                       -->
+    <!-- SECCIÓN 2: CÓMO PEDIR (3 PASOS CLAROS)      -->
     <!-- ═══════════════════════════════════════════ -->
-    <section aria-label="Cómo hacer tu pedido"
-             class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative">
+    <section id="como-pedir" aria-label="Cómo hacer tu pedido"
+             class="w-full px-margin-mobile md:px-margin-desktop py-24 bg-background relative scroll-mt-20 border-t border-outline-variant">
         <div class="max-w-7xl mx-auto">
             <div class="flex items-center gap-4 mb-8">
                 <span class="font-anton text-secondary text-xl">02</span>
                 <div class="h-px flex-1 bg-outline-variant"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-                <!-- Pasos -->
-                <div class="flex flex-col gap-10">
-                    <h2 class="font-anton text-6xl md:text-8xl text-white uppercase leading-none tracking-tighter">
-                        PIDE EN<br/><span class="text-secondary">3 PASOS</span>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-7 flex flex-col gap-8">
+                    <h2 class="font-anton text-5xl md:text-7xl text-white uppercase leading-none tracking-tighter">
+                        PIDE EN <span class="text-secondary">3 PASOS</span>
                     </h2>
-                    <p class="font-hanken text-lg text-stark-gray opacity-60 max-w-md leading-relaxed">
-                        Sin apps complicadas. Escríbenos por WhatsApp, elige tu pizza y la llevamos a tu puerta.
-                    </p>
-                    <div class="flex flex-col gap-8 mt-4">
-                        <div class="flex gap-8 items-start group">
-                            <div class="w-16 h-16 border-2 border-secondary flex items-center justify-center font-anton text-2xl text-secondary shrink-0 group-hover:bg-secondary group-hover:text-on-secondary transition-all">01</div>
-                            <div>
-                                <h4 class="font-anton text-2xl text-white uppercase tracking-tighter mb-2">ESCRÍBENOS</h4>
-                                <p class="font-hanken text-sm text-stark-gray opacity-60">Envía un mensaje a nuestro WhatsApp y Luisa te guiará por la carta.</p>
-                            </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div class="border border-outline-variant bg-surface-container-low p-6 flex flex-col gap-3">
+                            <span class="font-anton text-3xl text-secondary">01 · ELIGE</span>
+                            <p class="font-hanken text-sm text-stark-gray opacity-70 leading-relaxed">
+                                Selecciona tus pizzas y bebidas arriba en la carta interactiva.
+                            </p>
                         </div>
-                        <div class="flex gap-8 items-start group">
-                            <div class="w-16 h-16 border-2 border-secondary flex items-center justify-center font-anton text-2xl text-secondary shrink-0 group-hover:bg-secondary group-hover:text-on-secondary transition-all">02</div>
-                            <div>
-                                <h4 class="font-anton text-2xl text-white uppercase tracking-tighter mb-2">ELIGE TU PIZZA</h4>
-                                <p class="font-hanken text-sm text-stark-gray opacity-60">Todas a $25.000. Tamaño mediano, calidad máxima. Sin complicaciones.</p>
-                            </div>
+                        <div class="border border-outline-variant bg-surface-container-low p-6 flex flex-col gap-3">
+                            <span class="font-anton text-3xl text-secondary">02 · CONFIRMA</span>
+                            <p class="font-hanken text-sm text-stark-gray opacity-70 leading-relaxed">
+                                Revisa tu carrito, indica tu dirección en Armenia y elige Efectivo o Nequi.
+                            </p>
                         </div>
-                        <div class="flex gap-8 items-start group">
-                            <div class="w-16 h-16 border-2 border-secondary flex items-center justify-center font-anton text-2xl text-secondary shrink-0 group-hover:bg-secondary group-hover:text-on-secondary transition-all">03</div>
-                            <div>
-                                <h4 class="font-anton text-2xl text-white uppercase tracking-tighter mb-2">RECIBE EN CASA</h4>
-                                <p class="font-hanken text-sm text-stark-gray opacity-60">Domicilio directo desde nuestro atelier. Fresca y recién horneada.</p>
-                            </div>
+                        <div class="border border-outline-variant bg-surface-container-low p-6 flex flex-col gap-3">
+                            <span class="font-anton text-3xl text-secondary">03 · RECIBE</span>
+                            <p class="font-hanken text-sm text-stark-gray opacity-70 leading-relaxed">
+                                Tu pedido llega directo a nuestro WhatsApp y sale recién horneado a tu puerta.
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Cards de contacto -->
-                <div class="flex flex-col gap-8">
-                    <a href="https://wa.me/573004057195" target="_blank"
-                       class="border-2 border-emerald bg-emerald/5 p-10 flex items-center gap-8 group hover:bg-emerald/10 transition-all duration-500 no-underline relative overflow-hidden">
+                <!-- Card de contacto directo -->
+                <div class="lg:col-span-5">
+                    <a [href]="waLink()" target="_blank"
+                       class="border-2 border-emerald bg-emerald/5 p-8 md:p-10 flex items-center gap-6 group hover:bg-emerald/10 transition-all duration-500 no-underline relative overflow-hidden">
                         <div class="absolute -right-6 -bottom-6 font-anton text-emerald opacity-10 text-8xl select-none">WA</div>
-                        <div class="w-20 h-20 border-2 border-emerald flex items-center justify-center text-4xl group-hover:bg-emerald transition-all shrink-0">💬</div>
+                        <div class="w-16 h-16 border-2 border-emerald flex items-center justify-center text-3xl group-hover:bg-emerald transition-all shrink-0">💬</div>
                         <div class="flex-1 relative z-10">
-                            <h4 class="font-anton text-3xl text-white uppercase tracking-tighter group-hover:text-emerald transition-colors">WHATSAPP DIRECTO</h4>
-                            <p class="font-label-caps text-[10px] text-stark-gray tracking-widest uppercase mt-2">HABLA CON LUISA · ATENCIÓN PERSONALIZADA</p>
+                            <h4 class="font-anton text-2xl md:text-3xl text-white uppercase tracking-tighter group-hover:text-emerald transition-colors">¿PREFIERES CHATEAR?</h4>
+                            <p class="font-label-caps text-[10px] text-stark-gray tracking-widest uppercase mt-2">ESCRÍBELE DIRECTO A LUISA EN WHATSAPP</p>
                         </div>
                         <span class="text-emerald group-hover:translate-x-2 transition-transform text-3xl">→</span>
-                    </a>
-
-                    <a href="https://www.rappi.com.co/restaurantes/900491852-eclisse" target="_blank"
-                       class="border border-outline-variant bg-surface-container-low p-10 flex items-center gap-8 group hover:border-secondary transition-all duration-500 no-underline relative overflow-hidden">
-                        <div class="absolute -right-6 -bottom-6 font-anton text-stark-gray opacity-5 text-8xl select-none">RAPPI</div>
-                        <div class="w-20 h-20 border border-outline-variant flex items-center justify-center text-4xl group-hover:border-secondary transition-all shrink-0">🛵</div>
-                        <div class="flex-1 relative z-10">
-                            <h4 class="font-anton text-3xl text-white uppercase tracking-tighter group-hover:text-secondary transition-colors">PIDE POR RAPPI</h4>
-                            <p class="font-label-caps text-[10px] text-stark-gray tracking-widest uppercase mt-2">DELIVERY PREMIUM</p>
-                        </div>
-                        <span class="text-secondary group-hover:translate-x-2 transition-transform text-3xl">→</span>
                     </a>
                 </div>
             </div>
@@ -142,21 +231,26 @@
     </section>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- SECCIÓN 3: GALERÍA                          -->
+    <!-- SECCIÓN 3: EL RITUAL / GALERÍA (OPCIONAL)   -->
     <!-- ═══════════════════════════════════════════ -->
-    <section aria-label="Galería de Eclisse Pizza"
-             class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-surface-container-lowest relative overflow-hidden">
-        <div class="max-w-7xl mx-auto flex flex-col gap-16">
+    <section *ngIf="photos().show_gallery"
+             id="ritual" aria-label="Galería de Eclisse Pizza"
+             class="w-full px-margin-mobile md:px-margin-desktop py-24 bg-surface-container-lowest relative overflow-hidden border-t border-outline-variant scroll-mt-20">
+        <div class="max-w-7xl mx-auto flex flex-col gap-14">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
                 <div>
-                    <div class="flex items-center gap-4 mb-6">
+                    <div class="flex items-center gap-4 mb-4">
                         <span class="font-anton text-secondary text-xl">03</span>
                         <div class="h-px w-24 bg-outline-variant"></div>
                     </div>
-                    <h2 class="font-anton text-6xl md:text-8xl text-white uppercase leading-none tracking-tighter">SIGUE EL<br/><span class="text-secondary">RITUAL</span></h2>
+                    <h2 class="font-anton text-5xl md:text-7xl text-white uppercase leading-none tracking-tighter">EL <span class="text-secondary">RITUAL</span></h2>
+                    <p class="font-hanken text-sm text-stark-gray opacity-60 mt-3 max-w-xl">
+                        Harina "00" italiana, 48 horas de fermentación en frío y 90 segundos a fuego vivo.
+                    </p>
                 </div>
-                <a href="https://instagram.com/eclisse.pizza" target="_blank" class="font-anton text-xl text-white border-b-2 border-white pb-2 hover:text-secondary hover:border-secondary transition-all no-underline">
-                    @ECLISSE.PIZZA ➔
+                <a [href]="photos().instagram_url" target="_blank"
+                   class="font-anton text-xl text-white border-b-2 border-white pb-2 hover:text-secondary hover:border-secondary transition-all no-underline">
+                    {{ photos().instagram_handle }} ➔
                 </a>
             </div>
 
@@ -165,24 +259,24 @@
                     <img [src]="photos().gallery_1" width="600" height="600" loading="lazy"
                          class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
                          alt="Masa de pizza napoletana Eclisse — fermentación 48 horas, Armenia Quindío">
-                    <figcaption class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
-                        <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"La paciencia es el ingrediente principal. 48 horas de espera para 90 segundos de fuego."</p>
+                    <figcaption class="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
+                        <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"{{ photos().gallery_quote_1 }}"</p>
                     </figcaption>
                 </figure>
                 <figure class="aspect-square relative group overflow-hidden border border-outline-variant">
                     <img [src]="photos().gallery_2" width="600" height="600" loading="lazy"
                          class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
-                         alt="Ingredientes artesanales seleccionados para pizza Eclisse — mozzarella y pesto">
-                    <figcaption class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
-                        <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"Obsesión por el detalle. Solo ingredientes que nos emocionen."</p>
+                         alt="Ingredientes artesanales seleccionados para pizza Eclisse">
+                    <figcaption class="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
+                        <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"{{ photos().gallery_quote_2 }}"</p>
                     </figcaption>
                 </figure>
                 <figure class="aspect-square relative group overflow-hidden border border-outline-variant">
                     <img [src]="photos().gallery_3" width="600" height="600" loading="lazy"
                          class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-1000"
-                         alt="Pizza Dolce Fiamma con miel picante artesanal — Eclisse Pizza Armenia">
-                    <figcaption class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
-                        <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"Miel picante artesanal. El equilibrio perfecto entre el dulce y la llama."</p>
+                         alt="Pizza artesanal al horno — Eclisse Pizza Armenia">
+                    <figcaption class="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-10 text-center">
+                        <p class="font-hanken text-white text-sm uppercase tracking-widest leading-relaxed">"{{ photos().gallery_quote_3 }}"</p>
                     </figcaption>
                 </figure>
             </div>
@@ -190,34 +284,157 @@
     </section>
 
     <!-- ═══════════════════════════════════════════ -->
-    <!-- SECCIÓN 4: UBICACIÓN                        -->
+    <!-- SECCIÓN 4: UBICACIÓN Y CIERRE               -->
     <!-- ═══════════════════════════════════════════ -->
     <section aria-label="Ubicación y contacto"
-             class="w-full px-margin-mobile md:px-margin-desktop py-32 bg-background relative overflow-hidden">
-        <div class="absolute inset-0 texture-overlay opacity-10"></div>
-        <div class="max-w-5xl mx-auto relative z-10 text-center flex flex-col items-center gap-10">
-            <div class="flex items-center gap-4 w-full max-w-xs mx-auto">
-                <div class="h-px flex-1 bg-outline-variant"></div>
-                <span class="font-anton text-secondary text-xl">04</span>
-                <div class="h-px flex-1 bg-outline-variant"></div>
-            </div>
-            <span class="material-symbols-outlined text-secondary text-7xl">location_on</span>
-            <h2 class="font-anton text-6xl md:text-8xl text-white uppercase tracking-tighter leading-none">
-                ARMENIA,<br/>QUINDÍO
+             class="w-full px-margin-mobile md:px-margin-desktop py-24 bg-background relative overflow-hidden border-t border-outline-variant">
+        <div class="absolute inset-0 texture-overlay opacity-10 pointer-events-none"></div>
+        <div class="max-w-4xl mx-auto relative z-10 text-center flex flex-col items-center gap-6">
+            <span class="material-symbols-outlined text-secondary text-6xl">location_on</span>
+            <h2 class="font-anton text-5xl md:text-7xl text-white uppercase tracking-tighter leading-none">
+                {{ photos().location_city }}
             </h2>
-            <p class="font-hanken text-xl text-stark-gray opacity-60 max-w-md leading-relaxed">
-                Calle 2N 18-144 · Solo domicilios. Cobertura rápida en toda la ciudad.
+            <p class="font-hanken text-lg text-stark-gray opacity-70 max-w-md leading-relaxed">
+                {{ photos().location_address }}
             </p>
-            <div class="flex flex-col sm:flex-row gap-6">
-                <a href="https://wa.me/573004057195" target="_blank"
-                   class="border-2 border-emerald text-emerald font-anton text-xl px-14 py-5 uppercase tracking-widest hover:bg-emerald hover:text-on-secondary transition-all no-underline">
-                    💬 HACER UN PEDIDO
-                </a>
-                <a routerLink="/eventos"
-                   class="border border-outline-variant text-white font-anton text-xl px-14 py-5 uppercase tracking-widest hover:border-secondary hover:text-secondary transition-all no-underline">
-                    VER UBICACIÓN
+            <div class="flex flex-col sm:flex-row gap-4 mt-4">
+                <button (click)="scrollToCarta()"
+                        class="bg-secondary text-on-secondary border-2 border-secondary font-anton text-xl px-12 py-5 uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-brutal-gold cursor-pointer">
+                    🍕 IR A LA CARTA
+                </button>
+                <a [href]="waLink()" target="_blank"
+                   class="border-2 border-emerald text-emerald font-anton text-xl px-12 py-5 uppercase tracking-widest hover:bg-emerald hover:text-black transition-all no-underline">
+                    💬 WHATSAPP DIRECTO
                 </a>
             </div>
         </div>
     </section>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- BARRA FLOTANTE INFERIOR DE CARRITO ACTIVO   -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div *ngIf="data.cartCount() > 0 && !data.showPublicCart()"
+         class="fixed bottom-0 left-0 right-0 z-[90] p-4 md:px-12 bg-background/95 backdrop-blur-md border-t-2 border-secondary shadow-2xl animate-in slide-in-from-bottom-6 duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-secondary text-on-secondary font-anton text-xl flex items-center justify-center">
+                    {{ data.cartCount() }}
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-label-caps text-[9px] text-secondary uppercase tracking-widest">TU PEDIDO EN CURSO</span>
+                    <span class="font-anton text-2xl md:text-3xl text-white">
+                        ${{ data.cartTotal().toLocaleString('es-CO') }} COP
+                    </span>
+                </div>
+            </div>
+
+            <button (click)="openCart()"
+                    class="bg-emerald text-black font-anton text-base md:text-xl px-6 md:px-10 py-4 uppercase tracking-widest hover:brightness-110 transition-all shadow-brutal flex items-center gap-3 cursor-pointer">
+                <span>FINALIZAR PEDIDO</span>
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- DRAWER LATERAL DE CARRITO / CHECKOUT DIRECTO-->
+    <!-- ═══════════════════════════════════════════ -->
+    <div *ngIf="data.showPublicCart()"
+         (click)="closeCart()"
+         class="fixed inset-0 z-[110] flex justify-end bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+        <div (click)="$event.stopPropagation()"
+             class="w-full max-w-md bg-background border-l-2 border-secondary h-full flex flex-col justify-between overflow-hidden shadow-2xl">
+
+            <!-- Cart Header -->
+            <div class="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                <div>
+                    <span class="font-label-caps text-[9px] text-secondary uppercase tracking-widest">RESUMEN DIRECTO</span>
+                    <h2 class="font-anton text-3xl text-white uppercase tracking-tighter">TU PEDIDO</h2>
+                </div>
+                <button (click)="closeCart()"
+                        class="text-stark-gray hover:text-white p-2 cursor-pointer"
+                        aria-label="Cerrar carrito">
+                    <span class="material-symbols-outlined text-2xl">close</span>
+                </button>
+            </div>
+
+            <!-- Cart Items + Quick Details -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+                <div *ngFor="let item of data.publicCart()"
+                     class="flex flex-col gap-3 border-b border-outline-variant/40 pb-4">
+                    <div class="flex justify-between items-start gap-2">
+                        <span class="font-anton text-xl text-white uppercase tracking-tight">{{ item.name }}</span>
+                        <span class="font-anton text-secondary text-xl">${{ (item.price * item.quantity).toLocaleString('es-CO') }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-3 bg-surface-container-low border border-outline-variant px-2 py-1">
+                            <button (click)="updateQty(item.menuItemId, -1)" class="w-7 h-7 font-anton text-white hover:text-secondary cursor-pointer">−</button>
+                            <span class="font-anton text-base text-white w-5 text-center">{{ item.quantity }}</span>
+                            <button (click)="updateQty(item.menuItemId, 1)" class="w-7 h-7 font-anton text-white hover:text-secondary cursor-pointer">+</button>
+                        </div>
+                        <button (click)="data.removeFromPublicCart(item.menuItemId)"
+                                class="text-[9px] font-label-caps text-tomato tracking-widest uppercase hover:underline cursor-pointer">
+                            QUITAR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Datos rápidos para WhatsApp -->
+                <div *ngIf="data.cartCount() > 0" class="space-y-4 pt-2">
+                    <div class="space-y-1.5">
+                        <label class="font-label-caps text-[9px] text-secondary uppercase tracking-widest">📍 Dirección de Entrega o Barrio (Opcional)</label>
+                        <input type="text" [(ngModel)]="customerAddress"
+                               placeholder="Ej: Calle 15N #14-20, Barrio Laureles"
+                               class="w-full bg-surface-container-low border border-outline-variant focus:border-secondary p-3 font-hanken text-sm text-white outline-none">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="font-label-caps text-[9px] text-secondary uppercase tracking-widest">💳 Método de Pago</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button"
+                                    (click)="customerPayment = 'Efectivo'"
+                                    class="py-2.5 font-anton text-sm uppercase tracking-widest border transition-all cursor-pointer"
+                                    [ngClass]="customerPayment === 'Efectivo' ? 'border-secondary bg-secondary/15 text-secondary' : 'border-outline-variant text-stark-gray'">
+                                💵 EFECTIVO
+                            </button>
+                            <button type="button"
+                                    (click)="customerPayment = 'Nequi'"
+                                    class="py-2.5 font-anton text-sm uppercase tracking-widest border transition-all cursor-pointer"
+                                    [ngClass]="customerPayment === 'Nequi' ? 'border-secondary bg-secondary/15 text-secondary' : 'border-outline-variant text-stark-gray'">
+                                📱 NEQUI
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="font-label-caps text-[9px] text-secondary uppercase tracking-widest">📝 Notas para Cocina (Opcional)</label>
+                        <input type="text" [(ngModel)]="customerNotes"
+                               placeholder="Ej: Sin cebolla, portería torre 2..."
+                               class="w-full bg-surface-container-low border border-outline-variant focus:border-secondary p-3 font-hanken text-sm text-white outline-none">
+                    </div>
+                </div>
+
+                <div *ngIf="data.cartCount() === 0" class="h-full flex flex-col items-center justify-center opacity-40 py-16 text-center">
+                    <span class="material-symbols-outlined text-6xl mb-3">shopping_basket</span>
+                    <p class="font-label-caps text-xs tracking-widest uppercase">Tu carrito está vacío</p>
+                </div>
+            </div>
+
+            <!-- Cart Footer -->
+            <div class="p-6 bg-surface-container-low border-t border-outline-variant space-y-4">
+                <div class="flex justify-between items-end">
+                    <span class="font-label-caps text-xs text-stark-gray uppercase tracking-widest">SUBTOTAL PRODUCTOS</span>
+                    <span class="font-anton text-4xl text-secondary">${{ data.cartTotal().toLocaleString('es-CO') }}</span>
+                </div>
+                <button (click)="sendOrderToWhatsApp()"
+                        [disabled]="data.cartCount() === 0"
+                        class="w-full bg-emerald text-black font-anton py-5 text-xl uppercase tracking-widest shadow-brutal hover:brightness-110 active:scale-95 transition-all disabled:opacity-20 flex items-center justify-center gap-3 cursor-pointer">
+                    <span>💬 ENVIAR PEDIDO POR WHATSAPP</span>
+                </button>
+                <p class="text-center font-label-caps text-[8px] text-stark-gray opacity-50 uppercase tracking-widest">
+                    DOMICILIO EN ARMENIA: ${{ data.businessConfig().armeniaFee.toLocaleString('es-CO') }} · SE CONFIRMA AL INSTANTE EN WHATSAPP
+                </p>
+            </div>
+        </div>
+    </div>
 </div>

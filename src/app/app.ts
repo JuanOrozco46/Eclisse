@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from './components/navbar/navbar';
 import { FooterComponent } from './components/footer/footer';
 import { FloatingWA } from './components/floating-wa/floating-wa';
+import { NotificationService } from './services/notification.service';
 
 @Component({
   selector: 'app-root',
@@ -15,10 +16,11 @@ import { FloatingWA } from './components/floating-wa/floating-wa';
 export class App {
   protected readonly title = signal('Eclisse Pizza');
   private router = inject(Router);
+  notifications = inject(NotificationService);
 
   isSpecialRoute() {
     const url = this.router.url || '';
     return url.startsWith('/dashboard') || url === '/login';
   }
-
 }
+

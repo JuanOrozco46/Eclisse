@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { SupabaseService } from './supabase.service';
 
 export interface EvolutionInstance {
   instanceName: string;
@@ -14,20 +15,17 @@ export interface EvolutionInstance {
 })
 export class EvolutionService {
   private http = inject(HttpClient);
-  
-  private get baseUrl() {
-    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-      return '/api/evolution';
-    }
-    return 'https://elhornobotprueba1.onrender.com';
-  }
-  private readonly apiKey = 'secreto123';
+  private sb = inject(SupabaseService);
+
+  private readonly endpoint = '/api/evolution';
   private readonly defaultInstance = 'ECLISSE_WA_01';
 
-  private get headers() {
+  private async getAuthHeaders(): Promise<HttpHeaders> {
+    const { data: { session } } = await this.sb.client.auth.getSession();
+    const token = session?.access_token || '';
     return new HttpHeaders({
-      'apikey': this.apiKey,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     });
   }
 
@@ -40,11 +38,11 @@ export class EvolutionService {
     this.loading.set(true);
     this.error.set(null);
     try {
-      // Connect to Evolution API - Fetch instance state
+      const headers = await this.getAuthHeaders();
       const response: any = await firstValueFrom(
-        this.http.get(`${this.baseUrl}/instance/connectionState/${instanceName}`, { headers: this.headers })
+        this.http.get(`${this.endpoint}?action=status&instance=${encodeURIComponent(instanceName)}`, { headers })
       );
-      
+
       const status = response.instance?.state || 'disconnected';
       this.instanceStatus.set({
         instanceName,
@@ -66,29 +64,14 @@ export class EvolutionService {
     this.loading.set(true);
     this.error.set(null);
     try {
-      let response: any;
-      try {
-        response = await firstValueFrom(
-          this.http.get(`${this.baseUrl}/instance/connect/${instanceName}`, { headers: this.headers })
-        );
-      } catch (err: any) {
-        // If 404, the instance hasn't been created in Evolution API yet. Create it!
-        if (err.status === 404) {
-          response = await firstValueFrom(
-            this.http.post(`${this.baseUrl}/instance/create`, {
-              instanceName,
-              qrcode: true,
-              integration: 'WHATSAPP-BAILEYS'
-            }, { headers: this.headers })
-          );
-        } else {
-          throw err;
-        }
-      }
+      const headers = await this.getAuthHeaders();
+      const response: any = await firstValueFrom(
+        this.http.post(this.endpoint, { action: 'connect', instanceName }, { headers })
+      );
 
       // Extract QR base64 or code
       const rawQr = response?.base64 || response?.code || response?.qrcode?.base64 || response?.qrcode?.code;
-      
+
       let qrCodeFormatted = null;
       if (rawQr) {
         if (rawQr.startsWith('data:') || rawQr.startsWith('http')) {
@@ -105,30 +88,81 @@ export class EvolutionService {
       }
     } catch (err: any) {
       console.error('Error connecting instance:', err);
-      const msg = err.error?.message || err.message || 'No se pudo generar el QR de conexión';
+      const msg = err.error?.error || err.error?.message || err.message || 'No se pudo generar el QR de conexión';
       this.error.set(`Error de conexión: ${msg}`);
     } finally {
       this.loading.set(false);
     }
   }
 
-  // Delivery Group Configuration
-  deliveryGroupNumber = signal<string>(localStorage.getItem('delivery_group_number') || '');
+  // Delivery Group Configuration (persisted in Supabase + localStorage cache)
+  deliveryGroupNumber = signal<string>(
+    typeof localStorage !== 'undefined' ? (localStorage.getItem('delivery_group_number') || '') : ''
+  );
 
-  setDeliveryGroupNumber(num: string) {
-    this.deliveryGroupNumber.set(num);
-    localStorage.setItem('delivery_group_number', num);
+  constructor() {
+    this.loadDeliveryGroupFromDb();
+  }
+
+  async loadDeliveryGroupFromDb() {
+    try {
+      const { data } = await this.sb.client
+        .from('rappi_config')
+        .select('api_key')
+        .eq('id', 'bot_config')
+        .maybeSingle();
+      if (data?.api_key) {
+        const parsed = JSON.parse(data.api_key);
+        if (parsed.deliveryGroupNumber) {
+          this.deliveryGroupNumber.set(parsed.deliveryGroupNumber);
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('delivery_group_number', parsed.deliveryGroupNumber);
+          }
+        }
+      }
+    } catch {
+      // Fallback to localStorage if unauthenticated or offline
+    }
+  }
+
+  async setDeliveryGroupNumber(num: string) {
+    const clean = num.trim();
+    this.deliveryGroupNumber.set(clean);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('delivery_group_number', clean);
+    }
+    try {
+      const { data } = await this.sb.client
+        .from('rappi_config')
+        .select('api_key')
+        .eq('id', 'bot_config')
+        .maybeSingle();
+      let existing: Record<string, any> = {};
+      if (data?.api_key) {
+        try { existing = JSON.parse(data.api_key); } catch { existing = {}; }
+      }
+      const updated = { ...existing, deliveryGroupNumber: clean };
+      await this.sb.client.from('rappi_config').upsert({
+        id: 'bot_config',
+        connected: true,
+        api_key: JSON.stringify(updated),
+      });
+    } catch (err) {
+      console.error('Error saving deliveryGroupNumber to Supabase:', err);
+    }
   }
 
   async sendTextMessage(number: string, text: string, instanceName: string = this.defaultInstance): Promise<boolean> {
     try {
-      // If destination is a Group JID (contains @g.us), keep it as is, otherwise clean digits for phone numbers
+      const headers = await this.getAuthHeaders();
       const destination = number.includes('@g.us') ? number.trim() : number.replace(/\D/g, '');
       const response: any = await firstValueFrom(
-        this.http.post(`${this.baseUrl}/message/sendText/${instanceName}`, {
+        this.http.post(this.endpoint, {
+          action: 'send-message',
+          instanceName,
           number: destination,
-          text: text
-        }, { headers: this.headers })
+          text
+        }, { headers })
       );
       return !!response;
     } catch (err: any) {
@@ -139,8 +173,9 @@ export class EvolutionService {
 
   async fetchGroups(instanceName: string = this.defaultInstance): Promise<{ id: string; subject: string }[]> {
     try {
+      const headers = await this.getAuthHeaders();
       const response: any = await firstValueFrom(
-        this.http.get(`${this.baseUrl}/group/fetchAllGroups/${instanceName}?getParticipants=false`, { headers: this.headers })
+        this.http.get(`${this.endpoint}?action=groups&instance=${encodeURIComponent(instanceName)}`, { headers })
       );
       if (Array.isArray(response)) {
         return response.map((g: any) => ({ id: g.id, subject: g.subject || g.id }));
@@ -154,11 +189,12 @@ export class EvolutionService {
 
   async logoutInstance(instanceName: string = this.defaultInstance) {
     try {
+      const headers = await this.getAuthHeaders();
       await firstValueFrom(
-        this.http.delete(`${this.baseUrl}/instance/logout/${instanceName}`, { headers: this.headers })
+        this.http.post(this.endpoint, { action: 'logout', instanceName }, { headers })
       );
       await this.checkStatus(instanceName);
-    } catch (err) {
+    } catch {
       this.error.set('Failed to logout instance');
     }
   }

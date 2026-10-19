@@ -1,13 +1,27 @@
 import { Injectable, inject, signal, effect } from '@angular/core';
 import { DataService, SalesOrder } from './data.service';
+import { ToastService, ToastNotification } from './toast.service';
+
+export type { ToastNotification };
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private data = inject(DataService);
+  private toastService = inject(ToastService);
 
   // IDs de pedidos recién llegados (menos de 2 min desde que aparecieron)
   // El componente de cocina los lee para mostrar el badge "NUEVO"
   newOrderIds = signal<Set<string>>(new Set());
+
+  toasts = this.toastService.toasts;
+
+  showToast(message: string, type: 'error' | 'success' | 'info' = 'error', durationMs = 5000) {
+    this.toastService.show(message, type, durationMs);
+  }
+
+  dismissToast(id: string) {
+    this.toastService.dismiss(id);
+  }
 
   private audio: HTMLAudioElement | null = null;
   private audioReady = false;

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../services/data.service';
-import { AuthService, UserRole } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -40,8 +40,8 @@ import { AuthService, UserRole } from '../../services/auth.service';
             <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-secondary translate-x-[1px] translate-y-[1px]"></div>
             <form (ngSubmit)="login()" class="space-y-12">
               <div class="relative group">
-                <label class="block font-label-caps text-[10px] text-on-surface-variant mb-2 group-focus-within:text-secondary transition-colors tracking-widest" for="username">USERNAME / ID</label>
-                <input autocomplete="off" autofocus type="text" id="username" name="username" [(ngModel)]="username" class="w-full bg-transparent border-0 border-b border-outline text-on-surface font-label-caps text-sm px-0 py-3 focus:ring-0 focus:border-secondary transition-colors rounded-none placeholder:text-surface-variant uppercase" placeholder="ECL-XXXX" required>
+                <label class="block font-label-caps text-[10px] text-on-surface-variant mb-2 group-focus-within:text-secondary transition-colors tracking-widest" for="username">EMAIL / USUARIO</label>
+                <input autocomplete="off" autofocus type="email" id="username" name="username" [(ngModel)]="username" class="w-full bg-transparent border-0 border-b border-outline text-on-surface font-label-caps text-sm px-0 py-3 focus:ring-0 focus:border-secondary transition-colors rounded-none placeholder:text-surface-variant lowercase" placeholder="admin@eclisse.com" required>
               </div>
               <div class="relative group">
                 <label class="block font-label-caps text-[10px] text-on-surface-variant mb-2 group-focus-within:text-secondary transition-colors tracking-widest" for="password">PASSWORD</label>
@@ -78,24 +78,20 @@ export class LoginComponent {
   password = '';
   errorMsg = '';
 
-  login() {
+  async login() {
     this.errorMsg = '';
-    const user = this.username.toLowerCase();
+    const email = this.username.trim();
     const pass = this.password;
 
-    // Check staff from DataService
-    const staffMember = this.data.staff().find(s => s.username.toLowerCase() === user && s.password === pass);
+    if (!email || !pass) {
+      this.errorMsg = 'POR FAVOR INGRESA EMAIL Y CONTRASEÑA';
+      return;
+    }
 
-    if (staffMember) {
-      this.auth.login(staffMember.name, staffMember.role);
-    } else {
-      // Demo fallbacks ARE REMOVED for production readiness as per plan
-      // However, we keep a single secure master admin if no staff exists
-      if (this.data.staff().length === 0 && user === 'eclisse_admin' && pass === 'Eclisse2024!') {
-         this.auth.login('Administrador Master', 'ADMIN');
-      } else {
-        this.errorMsg = 'CREDENTIALS REJECTED. ACCESS DENIED.';
-      }
+    const res = await this.auth.login(email, pass);
+    if (res.error) {
+      this.errorMsg = `ACCESO DENEGADO: ${res.error.toUpperCase()}`;
     }
   }
 }
+

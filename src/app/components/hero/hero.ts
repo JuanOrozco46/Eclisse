@@ -1,6 +1,8 @@
-import { Component, HostListener, Input } from '@angular/core';
+import { Component, HostListener, Input, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { SiteSettingsService } from '../../services/site-settings.service';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-hero',
@@ -11,6 +13,15 @@ import { RouterModule } from '@angular/router';
 })
 export class HeroComponent {
   @Input() heroImage: string = '/assets/cocina_oculta.png';
+
+  siteSettings = inject(SiteSettingsService);
+  data = inject(DataService);
+
+  settings = this.siteSettings.sitePhotos;
+  waLink = computed(() => {
+    const phone = (this.data.businessConfig().whatsappOrderPhone || '573004057195').replace(/\D/g, '');
+    return `https://wa.me/${phone}`;
+  });
 
   logoScale = 1;
   logoOpacity = 1;
@@ -27,5 +38,13 @@ export class HeroComponent {
     this.logoOpacity = 1 - Math.pow(percentage, 2);
     this.bgScale = 1.1 + percentage * 0.15;
     this.bgTranslate = percentage * 60;
+  }
+
+  scrollToCarta(event: Event) {
+    event.preventDefault();
+    const el = document.getElementById('carta');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }

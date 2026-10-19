@@ -1,7 +1,7 @@
 import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService } from '../../services/data.service';
+import { DataService, getBogotaDateString } from '../../services/data.service';
 
 @Component({
   selector: 'app-dashboard-sales',
@@ -34,7 +34,7 @@ export class DashboardSales {
   todayExpenses = this.data.todayExpenses;
   todayNet = this.data.todayProfit;
   transactionCount = computed(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getBogotaDateString();
     return this.data.transactions().filter(t => t.date === today).length;
   });
 
@@ -57,7 +57,7 @@ export class DashboardSales {
     if (this.newTransaction.amount > 0 && this.newTransaction.description) {
       this.data.addTransaction({
         ...this.newTransaction,
-        date: new Date().toISOString().split('T')[0],
+        date: getBogotaDateString(),
       });
       this.newTransaction = { type: 'Venta', category: 'Pizza', amount: 0, method: 'Efectivo', description: '' };
     }
@@ -99,7 +99,7 @@ export class DashboardSales {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `eclisse_caja_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `eclisse_caja_${getBogotaDateString()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }

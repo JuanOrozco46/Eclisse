@@ -1,3 +1,20 @@
+/**
+ * fix-css-loading.js
+ *
+ * ¿Por qué existe este script?
+ * Angular (@angular/build:application) inyecta hojas de estilo críticas con la estrategia:
+ *   <link rel="stylesheet" href="styles-...css" media="print" onload="this.media='all'">
+ *
+ * El atributo `onload="..."` ejecuta JavaScript inline en el contexto del navegador.
+ * En un entorno con Content Security Policy (CSP) estricta sin `'unsafe-inline'`,
+ * los manejadores inline de eventos (inline event handlers) son bloqueados por el navegador,
+ * impidiendo que el CSS se aplique y disparando alertas de seguridad en consola.
+ *
+ * Este script de post-compilación reemplaza el patrón por una etiqueta estándar:
+ *   <link rel="stylesheet" href="styles-...css">
+ * garantizando compatibilidad total con CSP estricto y carga limpia de estilos.
+ */
+
 const fs = require('fs');
 const path = require('path');
 

@@ -1,9 +1,10 @@
-import { Component, signal, inject, computed, effect } from '@angular/core';
+import { Component, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService, SalesOrder, DeliveryStatus } from '../services/data.service';
+import { DataService, SalesOrder } from '../services/data.service';
 import { EvolutionService } from '../services/evolution.service';
 import { NotificationService } from '../services/notification.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard-kitchen',
@@ -25,7 +26,8 @@ import { NotificationService } from '../services/notification.service';
         </div>
 
         <div class="flex gap-6 flex-wrap items-center relative z-10">
-          <button (click)="showDeliveryGroupModal.set(true)"
+          <button *ngIf="auth.hasRole('ADMIN')"
+                  (click)="showDeliveryGroupModal.set(true)"
                   class="border border-emerald/40 hover:border-emerald bg-emerald/10 text-emerald font-anton px-4 py-3 text-xs tracking-widest uppercase transition-all flex items-center gap-2">
             <span class="material-symbols-outlined text-sm">groups</span>
             {{ evolution.deliveryGroupNumber() ? 'GRUPO DOMICILIOS: OK' : 'CONFIGURAR GRUPO DOMICILIOS' }}
@@ -39,13 +41,14 @@ import { NotificationService } from '../services/notification.service';
             <span class="font-label-caps text-[9px] text-secondary uppercase">PENDIENTES</span>
             <span class="font-anton text-4xl text-secondary">{{pendingOrdersCount()}}</span>
           </div>
-          <div class="flex flex-col items-center border border-[#FF6900]/40 px-6 py-3 bg-[#FF6900]/5">
-            <span class="font-label-caps text-[9px] text-[#FF6900] uppercase">RAPPI</span>
-            <span class="font-anton text-4xl text-[#FF6900]">{{rappiOrdersCount()}}</span>
-          </div>
           <div class="flex flex-col items-center border border-emerald/40 px-6 py-3 bg-emerald/5">
             <span class="font-label-caps text-[9px] text-emerald uppercase">DOMICILIOS WA</span>
             <span class="font-anton text-4xl text-emerald">{{waDeliveryOrdersCount()}}</span>
+          </div>
+          <div *ngIf="pendingPaymentCount() > 0"
+               class="flex flex-col items-center border-2 border-secondary px-6 py-3 bg-secondary/10 animate-pulse">
+            <span class="font-label-caps text-[9px] text-secondary uppercase">VERIFICAR NEQUI</span>
+            <span class="font-anton text-4xl text-secondary">{{pendingPaymentCount()}}</span>
           </div>
           <div *ngIf="priorityOrdersCount() > 0"
                class="flex flex-col items-center border-2 border-tomato px-6 py-3 bg-tomato/5">
@@ -54,6 +57,70 @@ import { NotificationService } from '../services/notification.service';
           </div>
         </div>
       </header>
+
+      <!-- Modal verificación de comprobante Nequi -->
+      <div *ngIf="selectedOrderForPayment() as paymentOrder"
+           class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+        <div class="bg-surface-container-low border-2 border-secondary p-8 max-w-xl w-full flex flex-col gap-6 relative max-h-[92vh] overflow-y-auto">
+          <div class="flex justify-between items-start border-b border-outline-variant pb-4">
+            <div>
+              <span class="font-label-caps text-[10px] text-secondary tracking-widest uppercase">COLA DE VERIFICACIÓN HUMANA</span>
+              <h2 class="font-anton text-3xl text-white uppercase tracking-tighter mt-1">
+                COMPROBANTE NEQUI · #{{paymentOrder.id.slice(-4)}}
+              </h2>
+            </div>
+            <button (click)="selectedOrderForPayment.set(null)"
+                    class="material-symbols-outlined text-stark-gray hover:text-white">close</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 bg-background border border-outline-variant p-4">
+            <div class="flex flex-col">
+              <span class="font-label-caps text-[9px] text-stark-gray opacity-50 uppercase">CLIENTE / DESTINO</span>
+              <span class="font-anton text-lg text-white">{{paymentOrder.customerName || paymentOrder.table}}</span>
+              <span class="font-mono text-xs text-emerald" *ngIf="paymentOrder.customerPhone">{{paymentOrder.customerPhone}}</span>
+            </div>
+            <div class="flex flex-col items-end">
+              <span class="font-label-caps text-[9px] text-stark-gray opacity-50 uppercase">TOTAL SERVIDOR A VERIFICAR</span>
+              <span class="font-anton text-3xl text-secondary">\${{paymentOrder.total.toLocaleString('es-CO')}} COP</span>
+            </div>
+          </div>
+
+          <div *ngIf="paymentOrder.receiptAiNotes"
+               class="border border-secondary/40 bg-secondary/5 p-4 flex flex-col gap-1">
+            <span class="font-label-caps text-[9px] text-secondary uppercase tracking-widest">PRE-FILTRO IA (GEMINI):</span>
+            <p class="font-hanken text-xs text-white leading-relaxed">{{paymentOrder.receiptAiNotes}}</p>
+          </div>
+
+          <div *ngIf="paymentOrder.receiptImage; else noReceiptYet"
+               class="border border-outline-variant bg-black p-3 flex flex-col items-center gap-2">
+            <img [src]="paymentOrder.receiptImage"
+                 alt="Comprobante Nequi"
+                 class="max-h-96 w-auto object-contain border border-outline-variant/40">
+            <span class="font-label-caps text-[8px] text-stark-gray opacity-50 uppercase tracking-widest">
+              MEDIA COMPLETO DESCARGADO VÍA EVOLUTION API v2
+            </span>
+          </div>
+          <ng-template #noReceiptYet>
+            <div class="border border-dashed border-outline-variant p-8 text-center flex flex-col items-center gap-2">
+              <span class="material-symbols-outlined text-4xl text-stark-gray opacity-30">receipt_long</span>
+              <span class="font-label-caps text-[10px] text-stark-gray opacity-60 uppercase tracking-widest">
+                EL CLIENTE ELIGIÓ NEQUI PERO AÚN NO HA ADJUNTADO IMAGEN DEL COMPROBANTE
+              </span>
+            </div>
+          </ng-template>
+
+          <div class="flex flex-wrap justify-end gap-4 pt-2 border-t border-outline-variant">
+            <button (click)="rejectOrderPayment(paymentOrder)"
+                    class="px-5 py-3 border border-tomato text-tomato font-anton text-xs tracking-widest uppercase hover:bg-tomato hover:text-white transition-all">
+              RECHAZAR COMPROBANTE ✕
+            </button>
+            <button (click)="confirmOrderPayment(paymentOrder)"
+                    class="px-6 py-3 bg-emerald text-black font-anton text-xs tracking-widest uppercase hover:brightness-110 transition-all">
+              CONFIRMAR PAGO NEQUI ✓
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Modal configuración grupo domicilios -->
       <div *ngIf="showDeliveryGroupModal()"
@@ -115,7 +182,6 @@ import { NotificationService } from '../services/notification.service';
                'border-outline-variant opacity-80':          order.status === 'PENDING',
                'border-secondary scale-105 z-10 -translate-y-2': order.status === 'PREPARING',
                'ring-4 ring-tomato ring-inset':              order.priority,
-               'border-[#FF6900]/60':                        order.source === 'RAPPI',
                'border-emerald/60':                          order.source === 'WHATSAPP' && order.deliveryStatus === 'ON_THE_WAY'
              }">
 
@@ -127,8 +193,6 @@ import { NotificationService } from '../services/notification.service';
 
           <!-- Badge de origen -->
           <div class="absolute top-3 left-3 z-20 flex gap-2">
-            <span *ngIf="order.source === 'RAPPI'"
-                  class="font-label-caps text-[8px] bg-[#FF6900] text-white px-2 py-1 tracking-widest uppercase">RAPPI</span>
             <span *ngIf="order.source === 'WHATSAPP'"
                   class="font-label-caps text-[8px] bg-emerald text-black px-2 py-1 tracking-widest uppercase">WHATSAPP</span>
             <span *ngIf="!order.source || order.source === 'POS'"
@@ -140,14 +204,15 @@ import { NotificationService } from '../services/notification.service';
                [ngClass]="{
                  'bg-tomato/20':                order.priority,
                  'bg-surface-container-low':    order.status === 'PREPARING',
-                 'bg-surface-container-lowest': order.status === 'PENDING',
-                 'bg-[#FF6900]/5':              order.source === 'RAPPI'
+                 'bg-surface-container-lowest': order.status === 'PENDING'
                }">
             <div class="flex flex-col">
               <span class="font-anton text-4xl text-white uppercase">
-                {{ order.source === 'RAPPI' ? 'RAPPI' : 'MESA' }} {{order.table}}
+                MESA {{order.table}}
               </span>
-              <span class="font-label-caps text-[9px] text-stark-gray tracking-widest uppercase">ID: {{order.id.slice(-4)}}</span>
+              <span class="font-label-caps text-[9px] text-stark-gray tracking-widest uppercase">
+                ID: {{order.id.slice(-4)}} · \${{order.total.toLocaleString('es-CO')}}
+              </span>
 
               <!-- Nombre del cliente (pushName) -->
               <span *ngIf="order.customerName && order.source === 'WHATSAPP'"
@@ -159,6 +224,21 @@ import { NotificationService } from '../services/notification.service';
                     class="font-label-caps text-[9px] text-emerald tracking-widest mt-1">
                 📱 {{order.customerPhone}}
               </span>
+
+              <!-- Estado de pago Nequi -->
+              <button *ngIf="order.paymentMethod === 'Nequi' || order.paymentStatus === 'PENDING_VERIFICATION' || order.receiptImage"
+                      (click)="selectedOrderForPayment.set(order)"
+                      class="font-label-caps text-[8px] px-2 py-1 mt-2 uppercase tracking-widest text-left border transition-all flex items-center gap-1"
+                      [ngClass]="{
+                        'text-secondary border-secondary bg-secondary/10 animate-pulse': order.paymentStatus === 'PENDING_VERIFICATION',
+                        'text-emerald border-emerald/40 bg-emerald/10': order.paymentStatus === 'VERIFIED',
+                        'text-tomato border-tomato/50 bg-tomato/10': order.paymentStatus === 'REJECTED'
+                      }">
+                <span class="material-symbols-outlined text-xs">receipt_long</span>
+                {{ order.paymentStatus === 'VERIFIED' ? 'PAGO NEQUI VERIFICADO ✓'
+                   : (order.paymentStatus === 'REJECTED' ? 'COMPROBANTE RECHAZADO ✕'
+                   : (order.receiptImage ? 'VER COMPROBANTE NEQUI ⏳' : 'NEQUI PENDIENTE DE PAGO')) }}
+              </button>
 
               <!-- Estado del domicilio -->
               <span *ngIf="order.source === 'WHATSAPP' && order.deliveryStatus === 'REQUESTED'"
@@ -198,19 +278,6 @@ import { NotificationService } from '../services/notification.service';
 
           <!-- Acciones -->
           <div class="w-full flex flex-col">
-
-            <!-- RAPPI -->
-            <ng-container *ngIf="order.source === 'RAPPI'">
-              <button *ngIf="order.status === 'PENDING'" (click)="acceptOrder(order)"
-                      class="w-full py-5 font-anton text-lg tracking-brutal uppercase bg-[#FF6900] text-white hover:brightness-110 transition-all flex items-center justify-center gap-3">
-                <span class="material-symbols-outlined text-xl">check_circle</span>
-                ACEPTAR PEDIDO RAPPI
-              </button>
-              <button *ngIf="order.status === 'PREPARING'" (click)="updateStatus(order, 'READY')"
-                      class="w-full py-5 font-anton text-lg tracking-brutal uppercase bg-secondary text-on-secondary hover:bg-emerald transition-all">
-                PEDIDO LISTO ✓
-              </button>
-            </ng-container>
 
             <!-- WHATSAPP -->
             <ng-container *ngIf="order.source === 'WHATSAPP'">
@@ -267,23 +334,53 @@ export class DashboardKitchen {
   data          = inject(DataService);
   evolution     = inject(EvolutionService);
   notifications = inject(NotificationService);
+  auth          = inject(AuthService);
 
   kitchenOrders = this.data.kitchenOrders;
 
-  showDeliveryGroupModal = signal<boolean>(false);
-  deliveryGroupInput     = this.evolution.deliveryGroupNumber();
-  availableGroups        = signal<{ id: string; subject: string }[]>([]);
-  loadingGroups          = signal<boolean>(false);
+  showDeliveryGroupModal  = signal<boolean>(false);
+  selectedOrderForPayment = signal<SalesOrder | null>(null);
+  deliveryGroupInput      = this.evolution.deliveryGroupNumber();
+  availableGroups         = signal<{ id: string; subject: string }[]>([]);
+  loadingGroups           = signal<boolean>(false);
 
   preparingOrdersCount  = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.status === 'PREPARING').length);
   pendingOrdersCount    = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.status === 'PENDING').length);
   priorityOrdersCount   = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.priority).length);
-  rappiOrdersCount      = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.source === 'RAPPI').length);
   waDeliveryOrdersCount = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.source === 'WHATSAPP').length);
+  pendingPaymentCount   = computed(() => this.kitchenOrders().filter((o: SalesOrder) => o.paymentStatus === 'PENDING_VERIFICATION').length);
 
   /** ¿Este pedido llegó hace menos de 2 minutos? */
   isNew(orderId: string): boolean {
     return this.notifications.newOrderIds().has(orderId);
+  }
+
+  /** Confirma el pago Nequi en la cola de verificación y avisa al cliente */
+  async confirmOrderPayment(order: SalesOrder) {
+    await this.data.verifyOrderPayment(order.id, true);
+    this.selectedOrderForPayment.set(null);
+
+    if (order.customerPhone) {
+      const name = order.customerName ? ` ${order.customerName.split(' ')[0]}` : '';
+      await this.notifyCustomer(
+        order.customerPhone,
+        `¡Hola${name}! ✅ Hemos verificado tu pago Nequi del pedido *#${order.id.slice(-4)}* por *$${order.total.toLocaleString('es-CO')} COP*. ¡Gracias!`
+      );
+    }
+  }
+
+  /** Rechaza el comprobante Nequi y solicita al cliente enviar uno válido */
+  async rejectOrderPayment(order: SalesOrder) {
+    await this.data.verifyOrderPayment(order.id, false);
+    this.selectedOrderForPayment.set(null);
+
+    if (order.customerPhone) {
+      const name = order.customerName ? ` ${order.customerName.split(' ')[0]}` : '';
+      await this.notifyCustomer(
+        order.customerPhone,
+        `¡Hola${name}! ⚠️ Revisamos el comprobante enviado para el pedido *#${order.id.slice(-4)}* y no pudimos confirmar el pago por *$${order.total.toLocaleString('es-CO')} COP*. ¿Podrías enviarnos nuevamente una captura clara del comprobante Nequi?`
+      );
+    }
   }
 
   /** Acepta un pedido: lo pasa a PREPARING y notifica al cliente de WhatsApp */
@@ -328,6 +425,12 @@ export class DashboardKitchen {
   }
 
   async dispatchOrder(order: SalesOrder) {
+    // Cola de verificación: si es Nequi y aún no está verificado por un humano, abrir el modal primero
+    if (order.paymentMethod === 'Nequi' && order.paymentStatus !== 'VERIFIED') {
+      this.selectedOrderForPayment.set(order);
+      return;
+    }
+
     this.data.updateDeliveryStatus(order.id, 'ON_THE_WAY');
     this.data.updateOrderStatus(order.id, 'READY');
 
@@ -352,15 +455,22 @@ export class DashboardKitchen {
 
   /**
    * Envía un mensaje al cliente pasando por /api/notify (backend seguro).
-   * Evita exponer el API key de Evolution en el frontend.
+   * Requiere JWT de Supabase del usuario autenticado.
    */
   private async notifyCustomer(phone: string, message: string): Promise<boolean> {
     try {
+      const session = this.auth.session();
+      const token = session?.access_token;
+      if (!token) {
+        console.error('notifyCustomer: Usuario no autenticado');
+        return false;
+      }
+
       const res = await fetch('/api/notify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': 'secreto123',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ phone, message }),
       });

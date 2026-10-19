@@ -1,4 +1,19 @@
-<section class="relative w-full min-h-screen flex items-center px-margin-mobile md:px-margin-desktop py-margin-desktop bg-background overflow-hidden">
+<section id="top" class="relative w-full min-h-[88vh] flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-16 md:py-24 bg-background overflow-hidden">
+    <!-- Promo Banner (Editable from CMS) -->
+    <div *ngIf="settings().promo_enabled && settings().promo_text"
+         class="relative z-30 mb-10 border border-secondary/40 bg-secondary/10 px-6 py-3 flex items-center justify-between gap-4 max-w-7xl mx-auto w-full">
+        <div class="flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-secondary animate-ping"></span>
+            <p class="font-label-caps text-[10px] md:text-xs text-white tracking-widest uppercase">
+                {{ settings().promo_text }}
+            </p>
+        </div>
+        <a (click)="scrollToCarta($event)" href="#carta"
+           class="hidden sm:inline-block font-anton text-xs text-secondary hover:text-white uppercase tracking-widest no-underline shrink-0">
+            IR A PEDIR ↓
+        </a>
+    </div>
+
     <!-- Subtle Grid Lines -->
     <div class="absolute inset-0 z-0 pointer-events-none opacity-[0.03]">
         <div class="h-full w-px bg-stark-gray absolute left-1/4"></div>
@@ -14,91 +29,82 @@
         </h1>
     </div>
 
-    <div class="broken-grid w-full h-full relative z-10 grid grid-cols-1 md:grid-cols-12 gap-8">
+    <div class="broken-grid w-full max-w-7xl mx-auto relative z-10 grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
         <!-- LEFT: Brand Statement -->
-        <div class="col-span-1 md:col-span-5 md:col-start-2 relative z-30 mt-12 md:mt-20 flex flex-col justify-center">
-            <div class="flex items-center gap-4 mb-8">
-                <span class="font-anton text-secondary text-xl">001</span>
-                <div class="h-px flex-1 bg-outline-variant"></div>
-            </div>
-
+        <div class="col-span-1 md:col-span-7 relative z-30 flex flex-col justify-center">
             <!-- Tagline: Cocina Oculta -->
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-2 h-2 bg-tomato rounded-full animate-pulse"></div>
-                <span class="font-label-caps text-[11px] text-tomato tracking-[0.3em] uppercase">COCINA OCULTA · ARMENIA, QUINDÍO</span>
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-2.5 h-2.5 bg-tomato rounded-full animate-pulse"></div>
+                <span class="font-label-caps text-[11px] text-tomato tracking-[0.3em] uppercase">
+                    {{ settings().hero_tag }}
+                </span>
             </div>
 
-            <h2 class="font-anton text-6xl md:text-[7rem] text-white mb-8 uppercase tracking-tighter leading-[0.85] animate-in fade-in slide-in-from-left-12 duration-1000">
-                PIZZA<br/>ARTESANAL<br/><span class="text-secondary">A FUEGO</span>
+            <h2 class="font-anton text-6xl sm:text-7xl md:text-[6.8rem] text-white mb-6 uppercase tracking-tighter leading-[0.88] animate-in fade-in slide-in-from-left-12 duration-700">
+                {{ settings().hero_title_1 }}<br/>
+                {{ settings().hero_title_2 }}<br/>
+                <span class="text-secondary">{{ settings().hero_title_accent }}</span>
             </h2>
-            <p class="font-hanken text-xl text-stark-gray mb-10 max-w-md leading-relaxed opacity-80 border-l-2 border-secondary pl-6">
-                Horno portátil de 12". Masa fermentada 48h. Sin local comercial, sin ruido. Solo el fuego, los ingredientes y la obsesión por la pizza perfecta.
+            <p class="font-hanken text-lg md:text-xl text-stark-gray mb-10 max-w-xl leading-relaxed opacity-85 border-l-2 border-secondary pl-6">
+                {{ settings().hero_subtitle }}
             </p>
 
             <div class="flex flex-wrap gap-4">
-                <a href="https://wa.me/573004057195" target="_blank"
-                   class="border-[2px] border-emerald text-emerald font-anton text-lg px-10 py-5 transition-all duration-300 uppercase hover:bg-emerald hover:text-on-secondary tracking-widest active:scale-95 shadow-brutal hover:shadow-none hover:translate-x-1 hover:translate-y-1 no-underline flex items-center gap-3">
-                    <span class="text-2xl">💬</span> HABLA CON LUISA
+                <a (click)="scrollToCarta($event)"
+                   href="#carta"
+                   class="bg-secondary text-on-secondary border-2 border-secondary font-anton text-xl px-10 py-5 transition-all duration-300 uppercase hover:bg-white hover:text-black hover:border-white tracking-widest active:scale-95 shadow-brutal-gold hover:shadow-none no-underline flex items-center gap-3 cursor-pointer">
+                    <span class="material-symbols-outlined text-2xl">local_pizza</span>
+                    VER CARTA Y PEDIR ↓
                 </a>
-                <a href="#carta"
-                   class="border-[2px] border-secondary text-secondary font-anton text-lg px-10 py-5 transition-all duration-300 uppercase hover:bg-secondary hover:text-on-secondary tracking-widest no-underline">
-                    VER CARTA ↓
+                <a [href]="waLink()" target="_blank"
+                   class="border-2 border-emerald text-emerald bg-emerald/5 font-anton text-lg px-8 py-5 transition-all duration-300 uppercase hover:bg-emerald hover:text-black tracking-widest active:scale-95 no-underline flex items-center gap-3">
+                    <span class="text-xl">💬</span> HABLAR CON LUISA
                 </a>
             </div>
 
             <!-- Quick Stats -->
-            <div class="flex gap-10 mt-16 pt-8 border-t border-outline-variant">
+            <div class="flex flex-wrap gap-10 mt-12 pt-8 border-t border-outline-variant">
                 <div class="flex flex-col">
-                    <span class="font-anton text-3xl text-white">12"</span>
-                    <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase">HORNO OONI</span>
+                    <span class="font-anton text-3xl text-white">{{ settings().stat_1_val }}</span>
+                    <span class="font-label-caps text-[9px] text-stark-gray opacity-50 tracking-widest uppercase">{{ settings().stat_1_label }}</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-anton text-3xl text-white">48H</span>
-                    <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase">FERMENTACIÓN</span>
+                    <span class="font-anton text-3xl text-white">{{ settings().stat_2_val }}</span>
+                    <span class="font-label-caps text-[9px] text-stark-gray opacity-50 tracking-widest uppercase">{{ settings().stat_2_label }}</span>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-anton text-3xl text-secondary">$25K</span>
-                    <span class="font-label-caps text-[9px] text-stark-gray opacity-40 tracking-widest uppercase">PRECIO ÚNICO</span>
+                    <span class="font-anton text-3xl text-secondary">{{ settings().stat_3_val }}</span>
+                    <span class="font-label-caps text-[9px] text-stark-gray opacity-50 tracking-widest uppercase">{{ settings().stat_3_label }}</span>
                 </div>
             </div>
         </div>
 
         <!-- RIGHT: Hero Image -->
-        <div class="col-span-1 md:col-span-5 md:col-start-8 relative z-20 mt-12 md:mt-0"
-             [style.transform]="'translateY(' + (bgTranslate * 0.2) + 'px)'">
+        <div class="col-span-1 md:col-span-5 relative z-20"
+             [style.transform]="'translateY(' + (bgTranslate * 0.15) + 'px)'">
             <div class="relative border-2 border-outline-variant p-4 bg-surface-container-low shadow-brutal transition-transform hover:-rotate-1 duration-500">
                 <img alt="Cocina oculta Eclisse - Horno artesanal" 
-                     class="w-full h-auto object-cover hover:scale-[1.02] transition-all duration-1000 rotate-90" 
+                     class="w-full max-h-[520px] object-cover hover:scale-[1.02] transition-all duration-1000" 
+                     [class.rotate-90]="heroImage === '/assets/cocina_oculta.png'"
                      [src]="heroImage"/>
 
-                
                 <!-- Badge -->
-                <div class="absolute bottom-10 left-[-40px] bg-background text-white px-8 py-6 font-anton border-2 border-outline-variant border-l-[12px] border-l-secondary shadow-2xl -rotate-2 group">
-                    <div class="flex space-x-3 mb-3">
-                        <div class="w-3 h-3 rounded-full bg-emerald"></div>
-                        <div class="w-3 h-3 rounded-full bg-white"></div>
-                        <div class="w-3 h-3 rounded-full bg-tomato"></div>
+                <div class="absolute bottom-6 left-4 md:left-[-24px] bg-background/95 text-white px-6 py-4 font-anton border-2 border-outline-variant border-l-[10px] border-l-secondary shadow-2xl -rotate-2">
+                    <div class="flex space-x-2 mb-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-emerald"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-tomato"></div>
                     </div>
-                    <span class="text-xs tracking-brutal font-bold text-stark-gray block mb-1">DARK KITCHEN</span>
-                    <span class="text-2xl tracking-tighter text-secondary uppercase">ECLISSE</span>
+                    <span class="text-[10px] tracking-brutal font-bold text-stark-gray block">DARK KITCHEN</span>
+                    <span class="text-xl tracking-tighter text-secondary uppercase">ECLISSE</span>
                 </div>
 
                 <!-- Size badge -->
-                <div class="absolute top-10 right-10 bg-secondary text-on-secondary px-6 py-3 font-anton text-xl tracking-widest rotate-3">
-                    EST. 2024
+                <div *ngIf="settings().hero_badge"
+                     class="absolute top-6 right-6 bg-secondary text-on-secondary px-5 py-2 font-anton text-lg tracking-widest rotate-3">
+                    {{ settings().hero_badge }}
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Vertical Text -->
-    <div class="hidden lg:block absolute right-16 top-1/2 -translate-y-1/2 writing-vertical font-label-caps text-stark-gray opacity-20 tracking-brutal text-[10px] uppercase">
-        COCINA OCULTA // HORNO 12" // MASA 48H // ARMENIA Q.
-    </div>
-
-    <!-- Scroll Indicator -->
-    <div class="absolute bottom-16 left-margin-desktop z-20 flex items-center gap-10 animate-pulse">
-        <span class="font-label-caps text-[9px] tracking-brutal text-stark-gray uppercase rotate-90 origin-left">SCROLL</span>
-        <div class="w-[2px] h-24 bg-gradient-to-b from-secondary to-transparent"></div>
     </div>
 </section>

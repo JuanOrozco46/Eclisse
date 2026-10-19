@@ -47,14 +47,14 @@ import { DataService, StaffMember } from '../services/data.service';
               </div>
               
               <div class="space-y-2">
-                <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">User ID</label>
-                <input type="text" name="username" [(ngModel)]="newMember.username" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border" placeholder="Ej: jperez">
+                <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Correo Electrónico (Acceso)</label>
+                <input type="email" name="email" [(ngModel)]="newMember.email" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border lowercase" placeholder="Ej: jperez@eclisse.com">
               </div>
 
               <div class="space-y-2">
-                <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Contraseña</label>
+                <label class="font-label-caps text-[10px] text-stark-gray uppercase tracking-widest">Contraseña Temporal</label>
                 <div class="relative">
-                  <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="newMember.password" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border pr-12" placeholder="Mínimo 4 caracteres">
+                  <input [type]="showPassword() ? 'text' : 'password'" name="password" [(ngModel)]="newMember.password" class="w-full bg-background border-outline-variant text-white p-4 font-hanken text-sm focus:border-secondary outline-none transition-colors border pr-12" placeholder="Mínimo 6 caracteres">
                   <button type="button" (click)="showPassword.set(!showPassword())" class="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-stark-gray hover:text-white transition-colors text-xl">
                     {{showPassword() ? 'visibility_off' : 'visibility'}}
                   </button>
@@ -72,9 +72,9 @@ import { DataService, StaffMember } from '../services/data.service';
 
               <div class="pt-6">
                 <button type="submit" class="w-full py-6 bg-secondary text-on-secondary font-anton text-xl tracking-brutal uppercase hover:bg-white hover:text-black transition-all shadow-brutal-gold active:translate-y-1"
-                        [disabled]="!newMember.name || !newMember.username || !newMember.password || newMember.password.length < 4"
-                        [ngClass]="{'opacity-30 cursor-not-allowed': !newMember.name || !newMember.username || !newMember.password || newMember.password.length < 4}">
-                  AUTORIZAR ACCESO
+                        [disabled]="submitting() || !newMember.name || !newMember.email || !newMember.password || newMember.password.length < 6"
+                        [ngClass]="{'opacity-30 cursor-not-allowed': submitting() || !newMember.name || !newMember.email || !newMember.password || newMember.password.length < 6}">
+                  {{ submitting() ? 'REGISTRANDO...' : 'AUTORIZAR ACCESO' }}
                 </button>
               </div>
 
@@ -90,7 +90,7 @@ import { DataService, StaffMember } from '../services/data.service';
         <div class="lg:col-span-8 flex flex-col gap-10">
            <div class="flex justify-between items-end border-b border-outline-variant pb-4">
               <h2 class="font-anton text-4xl text-white uppercase tracking-tighter">LISTADO DE PERSONAL</h2>
-              <span class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest">SISTEMA ECLISSE v3.0</span>
+              <span class="font-label-caps text-[10px] text-stark-gray opacity-40 uppercase tracking-widest">SUPABASE AUTH + PROFILES</span>
            </div>
 
            <!-- Empty State -->
@@ -109,7 +109,7 @@ import { DataService, StaffMember } from '../services/data.service';
                    </div>
                    <div class="flex flex-col">
                       <span class="font-anton text-2xl text-white uppercase group-hover:text-secondary transition-all">{{member.name}}</span>
-                      <span class="font-label-caps text-[10px] text-stark-gray tracking-widest uppercase">{{member.username}}</span>
+                      <span class="font-label-caps text-[10px] text-stark-gray tracking-widest lowercase">{{member.email}}</span>
                    </div>
                 </div>
 
@@ -144,49 +144,62 @@ import { DataService, StaffMember } from '../services/data.service';
 export class DashboardUsers {
   data = inject(DataService);
   showPassword = signal(false);
+  submitting = signal(false);
   formError = signal('');
 
   activeCount = () => this.data.staff().filter((m: StaffMember) => m.status === 'ACTIVE').length;
 
-  newMember: any = {
+  newMember: { name: string; email: string; password: string; role: StaffMember['role'] } = {
     name: '',
-    username: '',
+    email: '',
     password: '',
     role: 'WAITER'
   };
 
-  addMember() {
+  async addMember() {
     this.formError.set('');
-    
-    if (!this.newMember.name || !this.newMember.username) {
-      this.formError.set('Nombre y User ID son obligatorios.');
+
+    if (!this.newMember.name.trim() || !this.newMember.email.trim()) {
+      this.formError.set('Nombre y Correo Electrónico son obligatorios.');
       return;
     }
-    if (!this.newMember.password || this.newMember.password.length < 4) {
-      this.formError.set('La contraseña debe tener al menos 4 caracteres.');
+    if (!this.newMember.password || this.newMember.password.length < 6) {
+      this.formError.set('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
-    // Check duplicate username
-    const exists = this.data.staff().find((m: StaffMember) => m.username === this.newMember.username);
+    const exists = this.data.staff().find(
+      (m: StaffMember) => m.email.toLowerCase() === this.newMember.email.trim().toLowerCase()
+    );
     if (exists) {
-      this.formError.set('Ya existe un miembro con este User ID.');
+      this.formError.set('Ya existe un miembro con este correo electrónico.');
       return;
     }
 
-    this.data.addStaff({
-      name: this.newMember.name,
-      username: this.newMember.username,
+    this.submitting.set(true);
+    const res = await this.data.addStaff({
+      name: this.newMember.name.trim(),
+      email: this.newMember.email.trim().toLowerCase(),
       password: this.newMember.password,
       role: this.newMember.role,
-      status: 'ACTIVE'
     });
-    this.newMember = { name: '', username: '', password: '', role: 'WAITER' };
+    this.submitting.set(false);
+
+    if (res.error) {
+      this.formError.set(res.error);
+      return;
+    }
+
+    this.newMember = { name: '', email: '', password: '', role: 'WAITER' };
   }
 
-  removeMember(member: StaffMember) {
+  async removeMember(member: StaffMember) {
     if (confirm(`¿Deseas eliminar a ${member.name} del sistema?`)) {
-      this.data.removeStaff(member.id);
+      this.formError.set('');
+      const res = await this.data.removeStaff(member.id);
+      if (res.error) {
+        this.formError.set(res.error);
+      }
     }
   }
 
